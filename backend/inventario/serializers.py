@@ -1,23 +1,25 @@
 from inventario.models import Activos
 from rest_framework import serializers
 
-class ActivoSerializer(serializers.Serializer): 
+class ActivoSerializer(serializers.Serializer):
 
-    no_identificacion = serializers.CharField(max_length=150)
+    id_registro = serializers.CharField(max_length = 150, required = False) 
+    asiento = serializers.IntegerField(required = False)
+    no_identificacion = serializers.CharField(max_length=150, required = False) 
     descripcion = serializers.CharField(max_length=150)
-    ubicacion = serializers.CharField(max_length=255)
-    modo_adquisicion = serializers.CharField(max_length=255)
-
-    # Campos opcionales
-    marca = serializers.CharField(max_length=150, required=False, allow_blank=True, allow_null=True)
-    modelo = serializers.CharField(max_length=150, required=False, allow_blank=True, allow_null=True)
-    serie = serializers.CharField(max_length=150, required=False, allow_blank=True, allow_null=True)
+    marca = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    modelo = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    serie = serializers.CharField(max_length=150, required=False, allow_blank=True)
     estado = serializers.ChoiceField(choices=[
         ("BUENO", "BUENO"),
         ("MALO", "MALO"),
         ("REGULAR", "REGULAR")
-    ], required=False, allow_blank=True, allow_null=True)
-    precio = serializers.DecimalField(max_digits=10, decimal_places=2, required=False, allow_null=True)
+    ], required=False, allow_blank=True)
+      
+    ubicacion = serializers.CharField(max_length=255)
+    modo_adquisicion = serializers.CharField(max_length=255)
+    precio = serializers.DecimalField(max_digits=10, decimal_places=2, required=False, allow_null=True)   
+    creado_el = serializers.DateTimeField(required = False)
     def create(self, validated_data):
         print(validated_data)
         return Activos.objects.create(**validated_data)
@@ -37,3 +39,9 @@ class ActivoSerializer(serializers.Serializer):
         instance.creado_el = validated_data.get('creado_el', instance.creado_el)
         instance.save()
         return instance
+    
+class ReadActivoSerializer(serializers.Serializer):
+    id_registro = serializers.CharField(max_length = 150, required = False) 
+    no_identificacion = serializers.CharField(max_length=150, required = False) 
+    descripcion = serializers.CharField(max_length=150, required = False)
+    ubicacion = serializers.CharField(max_length=255, required = False)

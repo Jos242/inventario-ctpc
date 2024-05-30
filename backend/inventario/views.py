@@ -9,8 +9,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 #----------------------------------------------
 from .models import Activos
-from .serializers import ActivoSerializer
+from .serializers import ActivoSerializer, ReadActivoSerializer
 from datetime import datetime
+from .utils import get_remaining_fields, all_activos, activos_filter_column
 #----------------------------------------------
 
 """
@@ -33,20 +34,20 @@ class ActivosView(APIView):
         nosotros generamos la respuesta necesaria en base 
         al request
         """
-        return Response("Hola mundo", status = status.HTTP_200_OK)
-    
+        path = request.path
+        if path == "/todos-los-activos/": 
+            return all_activos()
+        if path == "/activos-filtrados-columna/":
+            return activos_filter_column()
+        return Response({"data": "Did not match an endpoint for an HTTP GET Method"}, status= status.HTTP_404_NOT_FOUND)
     def post(self, request):
-        REMAINING_FIELDS = {
-            "id_registro": "200,04",
-            "asiento": 4
-        } 
+        remaining_fields = get_remaining_fields()
+        print(f"The new entry: {remaining_fields}")
         serializer = ActivoSerializer(data = request.data)
-        ultimo = Activos.objects.order_by('-id').values_list('id_registro', flat=True).first()
         if serializer.is_valid():
-            valid_activo = serializer.data | REMAINING_FIELDS
+            valid_activo = serializer.data | remaining_fields
             activo = Activos(**valid_activo)
             activo.save()
-            
-
-    
+ 
         return Response("Esto es para responder a lo request de el HTTP Post Method", status = status.HTTP_200_OK)
+      

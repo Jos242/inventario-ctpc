@@ -33,8 +33,11 @@ LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (id_registro, asiento, no_identificacion, descripcion, marca, modelo, serie, estado, ubicacion, modo_adquisicion, precio);
 
-UPDATE activos SET precio = NULL WHERE precio = 0.00
+UPDATE activos SET precio = NULL WHERE precio = 0.00;
 UPDATE activos SET estado = 'BUENO' WHERE estado = 'BEENO';
-ALTER TABLE activos MODIFY estado ENUM("BUENO", "MALO", "REGULAR", "N/I")
+UPDATE activos SET estado = 'REGULAR' WHERE estado = 'N/I';
+UPDATE activos set marca  = NULL WHERE marca = 'N/I';
+UPDATE activos set modelo = NULL WHERE modelo = 'N/I';
+ALTER TABLE activos MODIFY estado ENUM("BUENO", "MALO", "REGULAR", "N/I");
 
 --SHOW VARIABLES LIKE "secure_file_priv";
