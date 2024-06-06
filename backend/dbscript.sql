@@ -20,24 +20,45 @@ CREATE TABLE activos(
     ubicacion VARCHAR(255) NOT NULL, 
     modo_adquisicion VARCHAR(255) NOT NULL,
     precio DECIMAL(10, 2),
-    creado_el  DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
+    creado_el  DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    observacion TEXT
+    
 )ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4;
 
+DROP TABLE IF EXISTS observaciones;
+CREATE TABLE  observaciones(
+    id INT PRIMARY KEY AUTO_INCREMENT, 
+    id_registro VARCHAR(150) UNIQUE NOT NULL,
+    asiento INT NOT NULL,
+    descripcion TEXT NOT NULL,
+    activo_id VARCHAR(150) NOT NULL,
+    FOREIGN KEY (activo_id) REFERENCES activos(id_registro) 
+) ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
 
-LOAD DATA INFILE '/var/lib/mysql-files/activos_sin_observaciones_CSV.csv'
+LOAD DATA INFILE '/var/lib/mysql-files/test.csv'
 INTO TABLE activos 
 FIELDS TERMINATED BY ';' 
 ENCLOSED BY ''
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(id_registro, asiento, no_identificacion, descripcion, marca, modelo, serie, estado, ubicacion, modo_adquisicion, precio);
+(id_registro, asiento, no_identificacion, descripcion, marca, modelo, serie, estado, 
+ubicacion, modo_adquisicion, precio, observacion);
+
+LOAD DATA INFILE '/var/lib/mysql-files/WORKING_observaciones_part1.csv'
+INTO TABLE observaciones 
+FIELDS TERMINATED BY ';' 
+ENCLOSED BY ''
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(id_registro, asiento, descripcion, activo_id);
 
 UPDATE activos SET precio = NULL WHERE precio = 0.00;
 UPDATE activos SET estado = 'BUENO' WHERE estado = 'BEENO';
-UPDATE activos SET estado = 'REGULAR' WHERE estado = 'N/I';
-UPDATE activos set marca  = NULL WHERE marca = 'N/I';
-UPDATE activos set modelo = NULL WHERE modelo = 'N/I';
+-- UPDATE activos SET estado = 'REGULAR' WHERE estado = 'N/I';
+-- UPDATE activos set marca  = NULL WHERE marca = 'N/I';
+-- UPDATE activos set modelo = NULL WHERE modelo = 'N/I';
 ALTER TABLE activos MODIFY estado ENUM("BUENO", "MALO", "REGULAR", "N/I");
 
 --SHOW VARIABLES LIKE "secure_file_priv";

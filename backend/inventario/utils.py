@@ -21,7 +21,7 @@ def get_remaining_fields():
     if int(split_registro[2]) == MAX_NUMBER:
         next_id_registro = int(f"{split_registro[0]}{split_registro[1]}")+1
         formatted_number = "{:,}".format(next_id_registro)
-        REMAINING_FIELDS["asiento"] = 1
+        REMAINING_FIELDS["asiento"] = 2
         REMAINING_FIELDS["id_registro"] = f"{formatted_number},0{REMAINING_FIELDS.get('asiento')}"
         return REMAINING_FIELDS
     next_asiento = int(split_registro[2])+1  
