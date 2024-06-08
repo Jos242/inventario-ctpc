@@ -16,10 +16,10 @@ CREATE TABLE activos(
     marca VARCHAR(150),
     modelo VARCHAR(150),
     serie VARCHAR(150),
-    estado ENUM("BUENO", "MALO", "REGULAR", "BEENO", "N/I"),
+    estado ENUM("BUENO", "MALO", "REGULAR", "BEENO", "N/I", "TESTING") NULL,
     ubicacion VARCHAR(255) NOT NULL, 
     modo_adquisicion VARCHAR(255) NOT NULL,
-    precio DECIMAL(10, 2),
+    precio VARCHAR(255),
     creado_el  DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
     observacion TEXT
     
@@ -37,7 +37,7 @@ CREATE TABLE  observaciones(
 ) ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4;
 
-LOAD DATA INFILE '/var/lib/mysql-files/test.csv'
+LOAD DATA INFILE '/var/lib/mysql-files/all_activos.csv'
 INTO TABLE activos 
 FIELDS TERMINATED BY ';' 
 ENCLOSED BY ''
@@ -46,7 +46,7 @@ IGNORE 1 LINES
 (id_registro, asiento, no_identificacion, descripcion, marca, modelo, serie, estado, 
 ubicacion, modo_adquisicion, precio, observacion);
 
-LOAD DATA INFILE '/var/lib/mysql-files/WORKING_observaciones_part1.csv'
+LOAD DATA INFILE '/var/lib/mysql-files/observaciones_part1.csv'
 INTO TABLE observaciones 
 FIELDS TERMINATED BY ';' 
 ENCLOSED BY ''
@@ -54,11 +54,20 @@ LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (id_registro, asiento, descripcion, activo_id);
 
-UPDATE activos SET precio = NULL WHERE precio = 0.00;
+LOAD DATA INFILE '/var/lib/mysql-files/observaciones_part2.csv'
+INTO TABLE observaciones 
+FIELDS TERMINATED BY ';' 
+ENCLOSED BY ''
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(id_registro, asiento, descripcion, activo_id);
+
+-- UPDATE activos SET precio = NULL WHERE precio = 0.00;
 UPDATE activos SET estado = 'BUENO' WHERE estado = 'BEENO';
+UPDATE activos SET estado = NULL WHERE estado = 'TESTING';
 -- UPDATE activos SET estado = 'REGULAR' WHERE estado = 'N/I';
 -- UPDATE activos set marca  = NULL WHERE marca = 'N/I';
 -- UPDATE activos set modelo = NULL WHERE modelo = 'N/I';
-ALTER TABLE activos MODIFY estado ENUM("BUENO", "MALO", "REGULAR", "N/I");
+ALTER TABLE activos MODIFY estado ENUM("BUENO", "MALO", "REGULAR");
 
 --SHOW VARIABLES LIKE "secure_file_priv";

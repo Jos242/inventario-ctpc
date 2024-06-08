@@ -1,5 +1,5 @@
-test;
-1,098,41;41;El activo con placa N°6105-2866, el cual corresponde a un Monitor, y que consta en el Folio 072 y;1,073,27
+id_registro;asiento;descripcion;id_activo
+1,098,41;41;El activo con placa N°6105-2866, el cual corresponde a un Monitor, y que consta en el Folio 072 y ;1,073,27
 1,099,01;1;asiento 27, del tomo 1 del Libro de Inventario, fue trasladado del Laboratorio Institucional N°2 a;1,073,27
 1,099,02;2;la Especialidad de Electrónica Industrial, a partir del 18 de febrero del 2022.;1,073,27
 1,099,03;3;El activo con placa N°6105-2867, el cual corresponde a un Monitor, y que consta en el Folio 072 y;1,073,28
@@ -17,7 +17,7 @@ test;
 1,099,15;15;El activo con placa N°6105-2871, el cual corresponde a un Monitor, y que consta en el Folio 072 y;1,073,32
 1,099,16;16;asiento 32, del tomo 1 del Libro de Inventario, fue trasladado del Laboratorio Institucional N°2 a la;1,073,32
 1,099,17;17;Especialidad de Electrónica Industrial, a partir del 18 de febrero del 2022.;1,073,32
-1,099,18;18;El activo con placa N°6105-2872, el cual corresponde a un Monitor, y que consta en el Folio 072 y;1,073,33
+1,099,18;18;El activo con placa N°6105-2872, el cual corresponde a un Monitor, y que consta en el Folio 072 y asiento 33, del tomo 1 del Libro de Inventario, fue trasladado del Laboratorio Institucional N°2 a la Especialidad de Electrónica Industrial, a partir del 18 de febrero del 2022.;1,073,33
 1,099,19;19;asiento 33, del tomo 1 del Libro de Inventario, fue trasladado del Laboratorio Institucional N°2 a la;1,073,33
 1,099,20;20;Especialidad de Electrónica Industrial, a partir del 18 de febrero del 2022.;1,073,33
 1,099,21;21;El activo con placa N°6105-2873, el cual corresponde a un Monitor, y que consta en el Folio 072 y;1,073,34
