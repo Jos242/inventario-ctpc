@@ -9,9 +9,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 #----------------------------------------------
 from .models import Activos
-from .serializers import ActivoSerializer, ReadActivoSerializer
+from .serializers import ActivoSerializer
 from datetime import datetime
-from .utils import get_remaining_fields, all_activos, activos_filter_column
+from .utils import (get_remaining_fields, all_activos, all_observaciones, 
+                    activos_filter_column, add_activo)
 #----------------------------------------------
 
 """
@@ -39,15 +40,18 @@ class ActivosView(APIView):
             return all_activos()
         if path == "/activos-filtrados-columna/":
             return activos_filter_column()
-        return Response({"data": "Did not match an endpoint for an HTTP GET Method"}, status= status.HTTP_404_NOT_FOUND)
+        return Response({"data": "Did not match an endpoint for a HTTP GET Method"}, status= status.HTTP_404_NOT_FOUND)
     def post(self, request):
-        remaining_fields = get_remaining_fields()
-        print(f"The new entry: {remaining_fields}")
-        serializer = ActivoSerializer(data = request.data)
-        if serializer.is_valid():
-            valid_activo = serializer.data | remaining_fields
-            activo = Activos(**valid_activo)
-            activo.save()
- 
-        return Response("Esto es para responder a lo request de el HTTP Post Method", status = status.HTTP_200_OK)
-      
+        path = request.path
+        if path == "/agregar-activo/":
+            resp = add_activo(request)
+            return resp
+        return Response({"data": "Did not match an endpoint for a HTTP POST Method"}, status = status.HTTP_404_NOT_FOUND)
+
+class ObservacionesView(APIView):
+    parser_classes = (FormParser, MultiPartParser, JSONParser)
+    
+    def get(self, request):
+        path = request.path
+        if path == "/todas-las-observaciones/":
+            return all_observaciones()

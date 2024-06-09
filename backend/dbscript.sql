@@ -16,7 +16,7 @@ CREATE TABLE activos(
     marca VARCHAR(150),
     modelo VARCHAR(150),
     serie VARCHAR(150),
-    estado ENUM("BUENO", "MALO", "REGULAR", "BEENO", "N/I", "TESTING") NULL,
+    estado ENUM("Bueno", "Malo", "Regular", "BEENO", "N/I", "TESTING") NULL,
     ubicacion VARCHAR(255) NOT NULL, 
     modo_adquisicion VARCHAR(255) NOT NULL,
     precio VARCHAR(255),
@@ -63,11 +63,12 @@ IGNORE 1 LINES
 (id_registro, asiento, descripcion, activo_id);
 
 -- UPDATE activos SET precio = NULL WHERE precio = 0.00;
-UPDATE activos SET estado = 'BUENO' WHERE estado = 'BEENO';
+UPDATE activos SET estado = 'Bueno' WHERE estado = 'BEENO';
 UPDATE activos SET estado = NULL WHERE estado = 'TESTING';
+update activos SET precio = NULL WHERE precio = 'N/A';
+update activos SET precio = NULL WHERE precio = '';
 -- UPDATE activos SET estado = 'REGULAR' WHERE estado = 'N/I';
 -- UPDATE activos set marca  = NULL WHERE marca = 'N/I';
 -- UPDATE activos set modelo = NULL WHERE modelo = 'N/I';
-ALTER TABLE activos MODIFY estado ENUM("BUENO", "MALO", "REGULAR");
-
+ALTER TABLE activos MODIFY precio Decimal(10,2);
 --SHOW VARIABLES LIKE "secure_file_priv";
