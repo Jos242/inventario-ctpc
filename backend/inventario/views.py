@@ -12,7 +12,8 @@ from .models import Activos
 from .serializers import ActivoSerializer
 from datetime import datetime
 from .utils import (get_remaining_fields, all_activos, all_observaciones, 
-                    activos_filter_column, add_activo)
+                    activos_filter_column, add_activo, get_activo_by_id,
+                    get_observacion_by_id_registro)
 #----------------------------------------------
 
 """
@@ -27,7 +28,7 @@ class ActivosView(APIView):
     al cual queramos responder.
     """
     parser_classes = (FormParser, MultiPartParser, JSONParser)
-    def get(self, request):
+    def get(self, request, pk = None):
         """
         Los metodos HTTP llevan como param el request,
         que en pocas palabras es el HTTP Header que el 
@@ -36,10 +37,14 @@ class ActivosView(APIView):
         al request
         """
         path = request.path
+        print(path)
+
         if path == "/todos-los-activos/": 
             return all_activos()
         if path == "/activos-filtrados-columna/":
             return activos_filter_column()
+        if path == f"/activo/{pk}/":
+            return get_activo_by_id(pk)
         return Response({"data": "Did not match an endpoint for a HTTP GET Method"}, status= status.HTTP_404_NOT_FOUND)
     def post(self, request):
         path = request.path
@@ -51,7 +56,10 @@ class ActivosView(APIView):
 class ObservacionesView(APIView):
     parser_classes = (FormParser, MultiPartParser, JSONParser)
     
-    def get(self, request):
+    def get(self, request, id_registro = None):
         path = request.path
+        print(path)
         if path == "/todas-las-observaciones/":
             return all_observaciones()
+        if path == f"/observacion/{id_registro}/":
+            return get_observacion_by_id_registro(id_registro) 

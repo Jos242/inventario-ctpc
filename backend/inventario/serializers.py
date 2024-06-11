@@ -2,7 +2,7 @@ from inventario.models import Activos
 from rest_framework import serializers
 
 class ActivoSerializer(serializers.Serializer):
-
+    id = serializers.IntegerField(required = False)
     id_registro = serializers.CharField(max_length = 150, required = False) 
     asiento = serializers.IntegerField(required = False)
     no_identificacion = serializers.CharField(max_length=150, required = False) 
@@ -42,6 +42,7 @@ class ActivoSerializer(serializers.Serializer):
         return instance
     
 class ReadActivoSerializer(serializers.Serializer):
+    id = serializers.IntegerField(required = False)
     id_registro = serializers.CharField(max_length = 150, required = False) 
     no_identificacion = serializers.CharField(max_length=150, required = False) 
     descripcion = serializers.CharField(max_length=150, required = False)

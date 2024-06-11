@@ -48,12 +48,12 @@ def calculate_no_identificacion(no_identificacion: str):
     return new_no_identificacion
 
 def all_activos():
-   activos = ReadActivos.objects.all()
+   activos = ReadActivos.objects.all().order_by('-id')
    serializer = ActivoSerializer(instance = activos, many = True)
    return Response(serializer.data, status = status.HTTP_200_OK)
 
 def activos_filter_column():
-    filter_all_activos = Activos.objects.values('id_registro', 'no_identificacion', 'descripcion', 'ubicacion')
+    filter_all_activos = Activos.objects.values('id', 'id_registro', 'no_identificacion', 'descripcion', 'ubicacion').order_by('-id')
     serializer = ReadActivoSerializer(instance = filter_all_activos, many = True)
     return Response(serializer.data, status = status.HTTP_200_OK)
 
@@ -68,8 +68,23 @@ def add_activo(request):
         activo.save()
         return Response("I think that im working", status= status.HTTP_200_OK)
     return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+def get_activo_by_id(pk):
+    try:
+        activo = Activos.objects.get(pk = pk)
+    except Activos.DoesNotExist:
+        return Response({"error": "Activo no existe"}, status= status.HTTP_404_NOT_FOUND)
+    serializer = ActivoSerializer(instance = activo)
+    return Response(serializer.data, status = status.HTTP_200_OK)
 #---------------------------------------------------------------
 def all_observaciones():
     observacion = Observaciones.objects.all()
     serializer = ObservacionesSerializer(instance = observacion, many = True)
     return Response(serializer.data, status = status.HTTP_200_OK)
+
+def get_observacion_by_id_registro(id_registro:str):
+    try:
+        observacion = Observaciones.objects.get(id_registro = id_registro)
+    except Observaciones.DoesNotExist:
+        return Response({"error": "Observacion does not exist"}, status = status.HTTP_404_NOT_FOUND)
+    serializer = ObservacionesSerializer(instance = observacion)
+    return Response(serializer.data, status= status.HTTP_200_OK)
