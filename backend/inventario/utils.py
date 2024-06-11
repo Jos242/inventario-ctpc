@@ -81,10 +81,10 @@ def all_observaciones():
     serializer = ObservacionesSerializer(instance = observacion, many = True)
     return Response(serializer.data, status = status.HTTP_200_OK)
 
-def get_observacion_by_id_registro(id_registro:str):
+def get_observacion_by_id_registro(activo:str):
     try:
-        observacion = Observaciones.objects.get(id_registro = id_registro)
+        observacion = Observaciones.objects.filter(activo=activo)
     except Observaciones.DoesNotExist:
         return Response({"error": "Observacion does not exist"}, status = status.HTTP_404_NOT_FOUND)
-    serializer = ObservacionesSerializer(instance = observacion)
+    serializer = ObservacionesSerializer(instance = observacion, many=True)
     return Response(serializer.data, status= status.HTTP_200_OK)

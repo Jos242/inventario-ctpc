@@ -26,7 +26,7 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { MatTooltip } from '@angular/material/tooltip';
 
 export interface ActivoData {
-  // id:number;
+  id:number;
   id_registro: string;
   no_identificacion: string;
   descripcion: string;
@@ -85,7 +85,7 @@ export class ActivoIndexComponent implements AfterViewInit {
         .subscribe((data:any)=>{
           this.datos = data;
           this.dataSource.data = data;
-          console.log(this.dataSource);
+          console.log(data);
           this.isLoadingResults = false; // Stop loading
         });
     }
@@ -100,6 +100,6 @@ export class ActivoIndexComponent implements AfterViewInit {
     }
 
     verDetalles(id: string): void {
-      this.router.navigate(['activo/', id]);
+      this.router.navigate(['activos/', id]);
     }
 }
