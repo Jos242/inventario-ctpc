@@ -82,10 +82,10 @@ export class ActivoCreateComponent {
       .subscribe((data:any)=>{
         console.log(data);
 
-
+        this.myForm.reset();
       });
 
-  
+      
     }
   }
 }

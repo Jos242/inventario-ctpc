@@ -5,11 +5,14 @@ import { ActivoIndexComponent } from './activo/activo-index/activo-index.compone
 import { HomeIndexComponent } from './home/home-index/home-index.component';
 import { ActivoDetailComponent } from './activo/activo-detail/activo-detail.component';
 import { ActivoCreateComponent } from './activo/activo-create/activo-create.component';
+import { ActaIndexComponent } from './acta/acta-index/acta-index.component';
 
 
 export const routes: Routes = [
     { path:'activos', component: ActivoIndexComponent},
     { path:'index', component: HomeIndexComponent},
+
+    { path:'actas', component: ActaIndexComponent},
     
     { path:'activos/crear', component: ActivoCreateComponent},
     { path:'activos/:id', component: ActivoDetailComponent },
