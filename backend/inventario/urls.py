@@ -8,7 +8,7 @@ urlpatterns = [
     path("activos-filtrados-columna/", views.ActivosView.as_view()),
     path("activo/<int:pk>/", views.ActivosView.as_view()), 
     path("todas-las-observaciones/", views.ObservacionesView.as_view()),
-    path("observacion/<str:id_registro>/", views.ObservacionesView.as_view())
+    path("observacion/<str:activo>/", views.ObservacionesView.as_view())
    
     # path("obtener-un-activo/")
 

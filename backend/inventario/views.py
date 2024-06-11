@@ -56,10 +56,10 @@ class ActivosView(APIView):
 class ObservacionesView(APIView):
     parser_classes = (FormParser, MultiPartParser, JSONParser)
     
-    def get(self, request, id_registro = None):
+    def get(self, request, activo = None):
         path = request.path
         print(path)
         if path == "/todas-las-observaciones/":
             return all_observaciones()
-        if path == f"/observacion/{id_registro}/":
-            return get_observacion_by_id_registro(id_registro) 
+        if path == f"/observacion/{activo}/":
+            return get_observacion_by_id_registro(activo) 
