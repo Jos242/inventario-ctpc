@@ -60,7 +60,8 @@ class Observaciones(models.Model):
     id_registro = models.CharField(unique=True, max_length=150)
     asiento = models.IntegerField()
     descripcion = models.TextField()
-    activo = models.ForeignKey(Activos, models.DO_NOTHING, to_field='id_registro')
+    activo = models.ForeignKey(Activos, to_field='id_registro', on_delete = models.CASCADE)
+      
     class Meta:
         managed = False
         db_table = 'observaciones'

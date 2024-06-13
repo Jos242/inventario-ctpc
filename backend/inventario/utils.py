@@ -76,15 +76,33 @@ def get_activo_by_id(pk):
     serializer = ActivoSerializer(instance = activo)
     return Response(serializer.data, status = status.HTTP_200_OK)
 #---------------------------------------------------------------
-def all_observaciones():
+def all_observaciones() -> Response:
+
     observacion = Observaciones.objects.all()
     serializer = ObservacionesSerializer(instance = observacion, many = True)
     return Response(serializer.data, status = status.HTTP_200_OK)
 
-def get_observacion_by_id_registro(activo:str):
+def get_observacion_by_id_registro(activo:str) -> Response: 
+
     try:
-        observacion = Observaciones.objects.filter(activo=activo)
+        observacion = Observaciones.objects.filter(activo = activo) 
     except Observaciones.DoesNotExist:
         return Response({"error": "Observacion does not exist"}, status = status.HTTP_404_NOT_FOUND)
     serializer = ObservacionesSerializer(instance = observacion, many=True)
     return Response(serializer.data, status= status.HTTP_200_OK)
+
+def add_new_observacion(request) -> Response:
+    remaining_fields:dict = get_remaining_fields()
+    remaining_fields.pop('no_identificacion')
+    serializer = ObservacionesSerializer(data = request.data)
+    if serializer.is_valid():
+        print(f"Vengo de aqui\n{serializer}")
+        serializer.validated_data.update(remaining_fields)
+        try:
+            observacion = serializer.create(serializer.validated_data)
+            observacion.save()
+        except ValueError as e:
+            print(f"Error: {e}")
+            return Response({"error": "Not able to create new Observacion"})
+        return Response(serializer.data, status = status.HTTP_200_OK)
+    return Response(serializer.errors, status = status.HTTP_200_OK)

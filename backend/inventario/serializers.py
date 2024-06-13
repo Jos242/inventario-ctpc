@@ -1,4 +1,4 @@
-from inventario.models import Activos
+from inventario.models import Activos, Observaciones
 from rest_framework import serializers
 
 class ActivoSerializer(serializers.Serializer):
@@ -47,26 +47,27 @@ class ReadActivoSerializer(serializers.Serializer):
     no_identificacion = serializers.CharField(max_length=150, required = False) 
     descripcion = serializers.CharField(max_length=150, required = False)
     ubicacion = serializers.CharField(max_length=255, required = False)
-
+# class ObservacionesSerializer():
+#     descripcion = serializers.CharField()
+#     activo = serializers.CharField(source='activo.id_registro')
+    
+#     def update(self, instance, validated_data):
+#         """
+#         Update and return an existing `Observaciones` instance, given the validated data.
+#         """
+#         instance.descripcion = validated_data.get('descripcion', instance.descripcion)
+#         instance.activo_id = validated_data.get('activo')['id_registro']
+#         instance.save()
+#         return instance
+ 
 class ObservacionesSerializer(serializers.Serializer):
-    id_registro = serializers.CharField(max_length=150)
-    asiento = serializers.IntegerField()
-    descripcion = serializers.CharField()
-    activo = serializers.CharField(source='activo.id_registro')
-
-    # def create(self, validated_data):
-    #     """
-    #     Create and return a new `Observaciones` instance, given the validated data.
-    #     """
-    #     return Observaciones.objects.create(**validated_data)
-
-    # def update(self, instance, validated_data):
-    #     """
-    #     Update and return an existing `Observaciones` instance, given the validated data.
-    #     """
-    #     instance.id_registro = validated_data.get('id_registro', instance.id_registro)
-    #     instance.asiento = validated_data.get('asiento', instance.asiento)
-    #     instance.descripcion = validated_data.get('descripcion', instance.descripcion)
-    #     instance.activo_id = validated_data.get('activo')['id_registro']
-    #     instance.save()
-    #     return instance
+    id_registro = serializers.CharField(max_length=150, read_only=True, required=False)
+    asiento = serializers.IntegerField(read_only=True, required = False)
+    descripcion = serializers.CharField(style={'base_template': 'textarea.html'})
+    activo = serializers.SlugRelatedField(queryset=Activos.objects.all(), slug_field='id_registro')
+    class Meta:
+        model = Observaciones
+    def create(self, validated_data):
+        return Observaciones.objects.create(**validated_data)
+     
+  

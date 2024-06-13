@@ -13,7 +13,7 @@ from .serializers import ActivoSerializer
 from datetime import datetime
 from .utils import (get_remaining_fields, all_activos, all_observaciones, 
                     activos_filter_column, add_activo, get_activo_by_id,
-                    get_observacion_by_id_registro)
+                    get_observacion_by_id_registro, add_new_observacion)
 #----------------------------------------------
 
 """
@@ -57,9 +57,16 @@ class ObservacionesView(APIView):
     parser_classes = (FormParser, MultiPartParser, JSONParser)
     
     def get(self, request, activo = None):
+        
         path = request.path
         print(path)
         if path == "/todas-las-observaciones/":
             return all_observaciones()
         if path == f"/observacion/{activo}/":
-            return get_observacion_by_id_registro(activo) 
+            return get_observacion_by_id_registro(activo)
+        
+    def post(self, request):
+        
+        path = request.path
+        if path == "/nueva-observacion/":
+            return add_new_observacion(request)
