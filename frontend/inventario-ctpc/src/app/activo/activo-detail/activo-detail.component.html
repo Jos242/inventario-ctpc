@@ -52,17 +52,27 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <form class="example-form">         
-                <mat-form-field class="example-full-width">
-                  <mat-label>Descripcion</mat-label>
-                  <textarea matInput placeholder="Ej. El activo con placa 1234-1234 ha..."></textarea>
-                </mat-form-field>
-              </form>
+              <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">
+                <div class="container">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="inputsForm">
+                            <mat-label>Descripcion</mat-label>
+                            <textarea matInput formControlName="descripcion" placeholder="Ej. El activo con placa 1234-1234 ha..."></textarea>
+                        </mat-form-field>
+                    </div>
+                    <div class="row">
+                        <button mat-flat-button color="primary" type="submit" [disabled]="!myForm.valid">Agregar Anotacion</button>
+                    </div>
+
+                </div>
+
+              
+            </form>
               
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button mat-flat-button color="primary">Agregar</button>
+          <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button mat-flat-button color="primary">Agregar</button> -->
         </div>
       </div>
     </div>

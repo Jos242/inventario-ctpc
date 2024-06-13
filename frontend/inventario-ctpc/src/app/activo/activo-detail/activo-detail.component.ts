@@ -11,7 +11,7 @@ import {MatSliderModule} from '@angular/material/slider';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatMenuModule} from '@angular/material/menu';
 import { RouterLink } from '@angular/router';
-import { Subject, filter, takeUntil } from 'rxjs';
+import { Subject, filter, takeUntil, forkJoin, from, concatMap } from 'rxjs';
 import { GenericService } from '../../share/generic.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient} from '@angular/common/http';
@@ -24,7 +24,7 @@ import {MatSort, MatSortModule} from '@angular/material/sort';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { MatTooltip } from '@angular/material/tooltip';
-
+import { FormGroup, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 
 
 @Component({
@@ -35,7 +35,7 @@ import { MatTooltip } from '@angular/material/tooltip';
     MatSliderModule,
     MatMenuModule,
     RouterLink, 
-    CommonModule,
+    CommonModule,ReactiveFormsModule,
     MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, MatTooltip
   ],
   templateUrl: './activo-detail.component.html',
@@ -47,19 +47,33 @@ export class ActivoDetailComponent implements OnInit{
   destroy$:Subject<boolean>=new Subject<boolean>();
   baseUrl: string = environment.apiURL;
   activoId: any;
+  activoIdRegistro: any;
+  myForm: FormGroup;
+
+  variable={
+    "descripcion": "juan juan juan juan juan juan.", 
+    "activo": "1,137,11" };
 
   constructor(private gService:GenericService,
     private router:Router,
     private route:ActivatedRoute,
     private httpClient:HttpClient,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private formBuilder: FormBuilder,
     ){
       
     }
 
     ngOnInit(): void {
-      const activoId = this.route.snapshot.paramMap.get('id');
-      this.loadActivosDetails(activoId);
+      this.activoId = this.route.snapshot.paramMap.get('id');
+      this.loadActivosDetails(this.activoId);
+
+      
+      this.myForm = this.formBuilder.group({
+        descripcion: ['', Validators.required],
+      });
+      
+    
     }
 
 
@@ -69,6 +83,7 @@ export class ActivoDetailComponent implements OnInit{
         .subscribe((data:any)=>{
           this.datos = data;
           console.log(this.datos);
+          this.activoIdRegistro=this.datos.id_registro;
           this.loadDetails();
         });
 
@@ -89,6 +104,115 @@ export class ActivoDetailComponent implements OnInit{
           
         });
     }
+
+    // onSubmit() {
+    //   if (this.myForm.valid) {
+    //     // this.myForm.value.pimgspath=this.logo;
+    //     const formData = new FormData();
+    //     // const formData = this.myForm.value;
+    //     formData.append('descripcion', this.myForm.value.descripcion);
+    //     formData.append('activo', this.activoIdRegistro);
+        
+        
+  
+  
+    
+    //     console.log(formData);
+    //     // const formData = this.myForm.value;
+    //     this.gService.create('nueva-observacion/', formData)
+    //     .pipe(takeUntil(this.destroy$))
+    //     .subscribe((data:any)=>{
+    //       console.log(data);
+  
+    //       this.myForm.reset();
+    //     });
+  
+        
+    //   }
+
+      
+    // }
+
+   
+onSubmit() {
+  if (this.myForm.valid) {
+    let descripcion = this.myForm.value.descripcion;
+    const activo = this.activoIdRegistro;
+
+    // Check if the last character is a period, if not, add one
+    if (descripcion.charAt(descripcion.length - 1) !== '.') {
+      descripcion += '.';
+    }
+
+    // Function to split descripcion into chunks of up to 98 characters without breaking words
+    const splitDescripcion = (text: string, chunkSize: number) => {
+      const chunks = [];
+      let start = 0;
+
+      while (start < text.length) {
+        let end = start + chunkSize;
+        
+        // Check for word length exceeding chunk size
+        let nextSpace = text.indexOf(' ', start);
+        if (nextSpace === -1) nextSpace = text.length;
+
+        if (nextSpace - start > chunkSize) {
+          console.error('Error: A single word exceeds the maximum chunk size of 98 characters.');
+          // Optional: handle the error as needed, e.g., skip the word or truncate it
+          return [];
+        }
+        
+        if (end >= text.length) {
+          chunks.push(text.slice(start));
+          break;
+        }
+        
+        if (text.charAt(end) !== ' ' && text.charAt(end) !== '.') {
+          let spaceIndex = text.lastIndexOf(' ', end);
+          if (spaceIndex > start) {
+            end = spaceIndex;
+          }
+        }
+
+        chunks.push(text.slice(start, end));
+        start = end + 1;
+      }
+
+      return chunks;
+    };
+
+
+     // Split descripcion into chunks of up to 98 characters
+     const chunks = splitDescripcion(descripcion, 98);
+
+    // Convert the chunks array into an observable sequence
+    from(chunks)
+      .pipe(
+        concatMap(chunk => {
+          const formData = new FormData();
+          formData.append('descripcion', chunk);
+          formData.append('activo', activo);
+          return this.gService.create('nueva-observacion/', formData);
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(
+        (data: any) => {
+          console.log(data);
+        }
+  
+          
+        
+      );
+      this.myForm.reset();
+  }
+}
+
+    
+
+    
+
+
 
     // loadActivosDetails(activoId: string): void {
     //   this.gService.list(`activo/${activoId}/`)

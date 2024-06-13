@@ -44,7 +44,6 @@ export class ActivoCreateComponent {
   }
 
   ngOnInit(){
-
     this.myForm = this.formBuilder.group({
       descripcion: ['', Validators.required],
       ubicacion: ['', Validators.required],
@@ -55,9 +54,6 @@ export class ActivoCreateComponent {
       estado:['', Validators.required ],
       precio:['', ],
     });
-
-
-    
   }
 
   onSubmit() {
@@ -68,7 +64,8 @@ export class ActivoCreateComponent {
       formData.append('descripcion', this.myForm.value.descripcion);
       formData.append('ubicacion', this.myForm.value.ubicacion);
       formData.append('modo_adquisicion', this.myForm.value.modo_adquisicion);
-      formData.append('marca', this.myForm.value.modelo);
+      formData.append('marca', this.myForm.value.marca);
+      formData.append('modelo', this.myForm.value.modelo);
       formData.append('serie', this.myForm.value.serie);
       formData.append('estado', this.myForm.value.estado);
       formData.append('precio', this.myForm.value.precio);
