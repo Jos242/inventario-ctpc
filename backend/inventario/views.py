@@ -13,7 +13,8 @@ from .serializers import ActivoSerializer
 from datetime import datetime
 from .utils import (get_remaining_fields, all_activos, all_observaciones, 
                     activos_filter_column, add_activo, get_activo_by_id,
-                    get_observacion_by_id_registro, add_new_observacion)
+                    get_observacion_by_id_registro, add_new_observacion, 
+                    new_usuario, sign_up)
 #----------------------------------------------
 
 """
@@ -70,3 +71,14 @@ class ObservacionesView(APIView):
         path = request.path
         if path == "/nueva-observacion/":
             return add_new_observacion(request)
+        
+
+class UserView(APIView):
+    
+    def post(self, request):
+
+        path = request.path
+        if path == "/crear-usuario/": 
+            return new_usuario(request)
+        if path == "/iniciar-sesion/":
+            return sign_up(request)

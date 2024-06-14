@@ -60,6 +60,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny' 
     ]
 }
+AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
 
 CORS_ALLOW_ALL_ORIGINS = True
 ROOT_URLCONF = 'sgica.urls'

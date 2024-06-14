@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from inventario.models import Activos, Observaciones
 from rest_framework import serializers
 
@@ -70,4 +71,21 @@ class ObservacionesSerializer(serializers.Serializer):
     def create(self, validated_data):
         return Observaciones.objects.create(**validated_data)
      
-  
+class UserSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(max_length=150)
+    last_name = serializers.CharField(max_length=150) 
+    class Meta:
+        model  = User
+        fields = ['username', 'first_name', 'last_name', 'password'] 
+
+class ReadUserSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150, required = False)
+    first_name = serializers.CharField(max_length=150, required = False, read_only = True)
+    last_name = serializers.CharField(max_length=150, required = False, read_only = True)
+    password = serializers.CharField(max_length=128, required = False)
+    class Meta:
+        model = User
+
+
+ 
+     

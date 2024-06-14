@@ -1,6 +1,9 @@
 from django.urls import path
 from . import views
 urlpatterns = [
+    path("crear-usuario/", views.UserView.as_view()),
+    path("iniciar-sesion/", views.UserView.as_view()), 
+
     path("agregar-activo/", views.ActivosView.as_view()),
     # path("eliminar-activo/")
     # path("editar-activo/")
@@ -9,7 +12,8 @@ urlpatterns = [
     path("activo/<int:pk>/", views.ActivosView.as_view()), 
     path("todas-las-observaciones/", views.ObservacionesView.as_view()),
     path("observacion/<str:activo>/", views.ObservacionesView.as_view()),
-    path("nueva-observacion/", views.ObservacionesView.as_view())
+    path("nueva-observacion/", views.ObservacionesView.as_view()),
+   
 
    
     # path("obtener-un-activo/")

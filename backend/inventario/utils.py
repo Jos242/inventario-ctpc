@@ -1,9 +1,14 @@
 #----------------------------------------------
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from django.shortcuts import get_object_or_404
+#----------------------------------------------
 from rest_framework             import status
 from rest_framework.response    import Response
 #----------------------------------------------
 from .models import Activos, ReadActivos, Observaciones
-from .serializers import ActivoSerializer, ReadActivoSerializer, ObservacionesSerializer
+from .serializers import (ActivoSerializer, ReadActivoSerializer, ObservacionesSerializer, 
+                          UserSerializer, ReadUserSerializer)
 from datetime import datetime
 #----------------------------------------------
 
@@ -106,3 +111,36 @@ def add_new_observacion(request) -> Response:
             return Response({"error": "Not able to create new Observacion"})
         return Response(serializer.data, status = status.HTTP_200_OK)
     return Response(serializer.errors, status = status.HTTP_200_OK)
+
+
+
+#----------------------------------------------------------
+def new_usuario(request) -> Response:
+
+    serializer:UserSerializer = UserSerializer(data = request.data)
+    if serializer.is_valid():
+        user:User = serializer.create(serializer.validated_data)
+        user.set_password(serializer.validated_data.get('password'))
+        user.save()
+        print(serializer) 
+        return Response(serializer.validated_data, status = status.HTTP_200_OK) 
+   
+    return Response(serializer.errors, status = status.HTTP_200_OK)
+
+def sign_up(request) -> Response:
+    required_keys = ["username", "password"]
+    for key in required_keys:
+        if key not in request.data:
+            return Response({"error": "Required keys to authenticate 'username' and 'password'"})
+
+    serializer:ReadUserSerializer = ReadUserSerializer(data = request.data) 
+    if serializer.is_valid():
+        username = serializer.validated_data.get("username")
+        password = serializer.validated_data.get("password")
+        print(f"Username: {username}")
+        print(f"Password: {password}")
+        user:User = authenticate(username = username, password = password)
+        serializer_1:UserSerializer = UserSerializer(instance = user)
+        return Response(serializer_1.data, status = status.HTTP_200_OK)   
+    return Response(serializer.errors, status= status.HTTP_200_OK)
+    
