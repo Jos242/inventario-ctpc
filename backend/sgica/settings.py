@@ -55,6 +55,10 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware'
 ]
 
+#----cookie related config----
+SESSION_COOKIE_AGE = 7200
+SESSION_COOKIE_HTTPONLY = True
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny' 
@@ -123,7 +127,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Costa_Rica'
 
 USE_I18N = True
 

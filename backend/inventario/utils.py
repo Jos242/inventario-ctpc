@@ -1,7 +1,9 @@
 #----------------------------------------------
+from django.contrib.auth import logout, login
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
+from django.contrib.sessions.backends.signed_cookies import SessionStore
 #----------------------------------------------
 from rest_framework             import status
 from rest_framework.response    import Response
@@ -128,7 +130,9 @@ def new_usuario(request) -> Response:
     return Response(serializer.errors, status = status.HTTP_200_OK)
 
 def sign_up(request) -> Response:
-    required_keys = ["username", "password"]
+    session:SessionStore = request.session
+    print(f"Session information:\n {session.keys()}")
+    required_keys:tuple = ("username", "password")
     for key in required_keys:
         if key not in request.data:
             return Response({"error": "Required keys to authenticate 'username' and 'password'"})
@@ -140,7 +144,13 @@ def sign_up(request) -> Response:
         print(f"Username: {username}")
         print(f"Password: {password}")
         user:User = authenticate(username = username, password = password)
+        if user is None:
+            return Response({"error": "could not authenticate the user"})
+        login(request, user) 
         serializer_1:UserSerializer = UserSerializer(instance = user)
         return Response(serializer_1.data, status = status.HTTP_200_OK)   
-    return Response(serializer.errors, status= status.HTTP_200_OK)
-    
+    return Response(serializer.errors, status= status.HTTP_400_BAD_REQUEST)
+
+def log_out(request) -> Response:
+    logout(request)
+    return Response({"info": "you are logged out"}, status = status.HTTP_200_OK) 

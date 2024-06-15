@@ -2,7 +2,8 @@ from django.urls import path
 from . import views
 urlpatterns = [
     path("crear-usuario/", views.UserView.as_view()),
-    path("iniciar-sesion/", views.UserView.as_view()), 
+    path("iniciar-sesion/", views.UserView.as_view()),
+    path("salir/", views.UserView.as_view()), 
 
     path("agregar-activo/", views.ActivosView.as_view()),
     # path("eliminar-activo/")

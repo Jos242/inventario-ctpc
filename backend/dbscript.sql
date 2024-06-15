@@ -71,4 +71,4 @@ update activos SET precio = NULL WHERE precio = '';
 -- UPDATE activos set marca  = NULL WHERE marca = 'N/I';
 -- UPDATE activos set modelo = NULL WHERE modelo = 'N/I';
 ALTER TABLE activos MODIFY precio Decimal(10,2);
---SHOW VARIABLES LIKE "secure_file_priv";
+-- SHOW VARIABLES LIKE "secure_file_priv";
