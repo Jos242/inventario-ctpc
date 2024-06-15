@@ -50,10 +50,6 @@ export class ActivoDetailComponent implements OnInit{
   activoIdRegistro: any;
   myForm: FormGroup;
 
-  variable={
-    "descripcion": "juan juan juan juan juan juan.", 
-    "activo": "1,137,11" };
-
   constructor(private gService:GenericService,
     private router:Router,
     private route:ActivatedRoute,

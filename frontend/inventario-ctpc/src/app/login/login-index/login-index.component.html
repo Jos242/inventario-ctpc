@@ -1,0 +1,26 @@
+<div>
+    <mat-card>
+        <mat-card-header>
+            <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">
+                <div class="container">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="inputsForm">
+                            <mat-label>Descripcion</mat-label>
+                            <textarea matInput formControlName="descripcion" placeholder="Ej. El activo con placa 1234-1234 ha..."></textarea>
+                        </mat-form-field>
+                    </div>
+                    <div class="row">
+                        <button mat-flat-button color="primary" type="submit" [disabled]="!myForm.valid">Agregar Anotacion</button>
+                    </div>
+
+                </div>
+
+              
+            </form>
+        </mat-card-header>
+        <mat-card-actions align="end">
+          <button mat-button>LIKE</button>
+          <button mat-button>SHARE</button>
+        </mat-card-actions>
+      </mat-card>
+</div>
