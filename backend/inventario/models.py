@@ -67,4 +67,20 @@ class Observaciones(models.Model):
         db_table = 'observaciones'
 
 
- 
+class Docs(models.Model):
+    DOCS_TYPE = {
+        "PDF": "PDF",
+        "EXCEL": "EXCEL"
+    }
+    id = models.AutoField(primary_key = True)
+    titulo = models.CharField(max_length = 200)
+    tipo = models.CharField(max_length = 5, choices = DOCS_TYPE)
+    ruta = models.CharField(max_length = 250)
+    creado_el = models.DateTimeField(db_default = Now())
+
+    class Meta:
+        managed = False
+        db_table = "docs"
+
+    def __str__(self):
+        return f"Title: {self.titulo}, Path: {self.ruta}" 

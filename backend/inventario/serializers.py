@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from inventario.models import Activos, Observaciones
+from inventario.models import Activos, Observaciones, Docs
 from rest_framework import serializers
 
 class ActivoSerializer(serializers.Serializer):
@@ -80,12 +80,24 @@ class UserSerializer(serializers.ModelSerializer):
 
 class ReadUserSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150, required = False)
-    first_name = serializers.CharField(max_length=150, required = False, read_only = True)
-    last_name = serializers.CharField(max_length=150, required = False, read_only = True)
+    first_name = serializers.CharField(max_length=150, required = False, 
+                                       read_only = True)
+    last_name = serializers.CharField(max_length=150, required = False, 
+                                      read_only = True)
     password = serializers.CharField(max_length=128, required = False)
     class Meta:
         model = User
 
-
  
-     
+class DocSerializer(serializers.ModelSerializer):
+
+    ruta = serializers.CharField(max_length = 250, required = False)
+    creado_el = serializers.DateTimeField(required = False)
+
+    class Meta:
+
+        model  = Docs
+        fields = ['titulo', 'tipo', 'ruta', 'creado_el']
+
+
+

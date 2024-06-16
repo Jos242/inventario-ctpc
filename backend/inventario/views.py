@@ -14,7 +14,8 @@ from datetime import datetime
 from .utils import (get_remaining_fields, all_activos, all_observaciones, 
                     activos_filter_column, add_activo, get_activo_by_id,
                     get_observacion_by_id_registro, add_new_observacion, 
-                    new_usuario, sign_up, log_out)
+                    new_usuario, sign_up, log_out, create_doc, get_all_docs,
+                    get_doc_by_id)
 #----------------------------------------------
 
 """
@@ -87,3 +88,23 @@ class UserView(APIView):
             return sign_up(request)
         if path == "/salir/":
             return log_out(request)
+
+class DocsView(APIView):
+
+    def get(self, request, pk:int = None):
+        path = request.path
+        if path == "/obtener-documentos/": 
+            return get_all_docs()
+        if path == f"/obtener-documento/{pk}/":
+            return get_doc_by_id(pk)
+
+        return Response({"error": "not a valid get request"},
+                        status = status.HTTP_400_BAD_REQUEST)
+
+    def post(self, request):
+        path = request.path
+        if path == "/crear-documento/":
+            return create_doc(request)
+
+        return Response({"error": "not a valid post request"},
+                        status = status.HTTP_400_BAD_REQUEST)

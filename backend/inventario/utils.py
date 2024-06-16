@@ -8,9 +8,10 @@ from django.contrib.sessions.backends.signed_cookies import SessionStore
 from rest_framework             import status
 from rest_framework.response    import Response
 #----------------------------------------------
-from .models import Activos, ReadActivos, Observaciones
-from .serializers import (ActivoSerializer, ReadActivoSerializer, ObservacionesSerializer, 
-                          UserSerializer, ReadUserSerializer)
+from .models import Activos, ReadActivos, Observaciones, Docs
+from .serializers import (ActivoSerializer, ReadActivoSerializer,
+                          ObservacionesSerializer, UserSerializer, 
+                          ReadUserSerializer, DocSerializer)
 from datetime import datetime
 #----------------------------------------------
 
@@ -20,7 +21,7 @@ def get_remaining_fields():
             "id_registro": None,
             "asiento": None,
             "no_identificacion": None
-    } 
+    }
     latest_activo_entry = Activos.objects.values("id", "id_registro", "no_identificacion").latest("id") 
     latest_observacion_entry = Observaciones.objects.values("id", "id_registro").latest("id")
     activo_registro = int(latest_activo_entry.get("id_registro").replace(",", ""))
@@ -45,6 +46,7 @@ def get_remaining_fields():
     next_id_registro = (f"{split_registro[0]},{split_registro[1]},{next_asiento}")
     REMAINING_FIELDS["id_registro"] = next_id_registro
     return REMAINING_FIELDS
+
 #Activos related methods-----------------------------------
 def calculate_no_identificacion(no_identificacion: str):
     input_str = no_identificacion
@@ -117,6 +119,8 @@ def add_new_observacion(request) -> Response:
 
 
 #----------------------------------------------------------
+#User related methods
+
 def new_usuario(request) -> Response:
 
     serializer:UserSerializer = UserSerializer(data = request.data)
@@ -154,3 +158,42 @@ def sign_up(request) -> Response:
 def log_out(request) -> Response:
     logout(request)
     return Response({"info": "you are logged out"}, status = status.HTTP_200_OK) 
+
+#Docs related methods-------------------------------------------
+def create_doc(request) -> Response:
+
+    serializer:DocSerializer = DocSerializer(data = request.data)
+    if serializer.is_valid():
+        doc = serializer.create(serializer.validated_data)
+        doc = Docs.objects.get(pk = doc.id)
+        serializer = DocSerializer(instance = doc)
+        
+        return Response(serializer.data, 
+                        status = status.HTTP_200_OK)
+
+    return Response(serializer.errors, 
+                    status = status.HTTP_400_BAD_REQUEST)
+    
+def get_all_docs() -> Response:
+
+    docs:Docs = Docs.objects.all()
+    serializer:DocsSerialiazer = DocSerializer(instance = docs,
+                                               many = True)  
+    return Response(serializer.data,
+                    status = status.HTTP_200_OK)
+
+def get_doc_by_id(pk:int = None) -> Response:
+
+    try:
+
+        doc:Docs = Docs.objects.get(pk = pk)
+        serializer:DocSerializer = DocSerializer(instance = doc)
+
+    except Docs.DoesNotExist as ddne:
+
+        return Response({"error": "document does not exist"},
+                        status = status.HTTP_404_NOT_FOUND)
+
+    return Response(serializer.data, 
+                    status = status.HTTP_200_OK)
+

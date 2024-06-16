@@ -37,6 +37,17 @@ CREATE TABLE  observaciones(
 ) ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4;
 
+DROP TABLE IF EXISTS docs;
+CREATE TABLE docs(
+    id INT PRIMARY KEY AUTO_INCREMENT, 
+    titulo VARCHAR(200) NOT NULL,
+    tipo ENUM("PDF", "EXCEL") NOT NULL,
+    ruta VARCHAR(250) NOT NULL, 
+    creado_el  DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
+) ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+
 LOAD DATA INFILE '/var/lib/mysql-files/all_activos.csv'
 INTO TABLE activos 
 FIELDS TERMINATED BY ';' 
@@ -71,4 +82,4 @@ update activos SET precio = NULL WHERE precio = '';
 -- UPDATE activos set marca  = NULL WHERE marca = 'N/I';
 -- UPDATE activos set modelo = NULL WHERE modelo = 'N/I';
 ALTER TABLE activos MODIFY precio Decimal(10,2);
--- SHOW VARIABLES LIKE "secure_file_priv";
+-- SHOW VARIABLES LIKE "sec{ure_file_priv";
