@@ -99,5 +99,9 @@ class DocSerializer(serializers.ModelSerializer):
         model  = Docs
         fields = ['titulo', 'tipo', 'archivo', 'creado_el']
 
+class ReadDocSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Docs
+        fields = ['id', 'titulo', 'tipo', 'ruta', 'creado_el']
 
 

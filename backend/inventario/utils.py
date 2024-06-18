@@ -1,3 +1,4 @@
+import os
 #----------------------------------------------
 from django.contrib.auth import logout, login
 from django.contrib.auth.models import User
@@ -10,9 +11,7 @@ from rest_framework             import status
 from rest_framework.response    import Response
 #----------------------------------------------
 from .models import Activos, ReadActivos, Observaciones, Docs
-from .serializers import (ActivoSerializer, ReadActivoSerializer,
-                          ObservacionesSerializer, UserSerializer, 
-                          ReadUserSerializer, DocSerializer)
+from .serializers import *
 from datetime import datetime
 
 
@@ -26,7 +25,7 @@ def handle_file_directories() -> list:
     relative_path:str = f"uploads/actas/"
         
     if os.path.exists(absolute_path):
-        return "Files exists"
+        return [relative_path, absolute_path]
 
     os.makedirs(absolute_path)
     return [relative_path, absolute_path]
@@ -38,20 +37,19 @@ def handle_uploaded_file(files: list) -> str:
         This method is just for saving the file following this structure:
         uploads/{model pk}/{file_name.ext}
     """
-
-    print(type(files))
-    return "Hola" 
+    
     paths_list = handle_file_directories()
     absolute_path = paths_list[1] 
     relative_path = paths_list[0]
-    print(f"This are the files: {files}")
-    print(f'This is the relative path -> {relative_path}')
+    
     for file in files:
-        print(f"Este es el supuesto file {file}")
-        with open(f'{absolute_path}/{str(file)}', 'wb') as destination: 
+        relative_path = os.path.join(relative_path, str(file))
+        path_to_write = os.path.join(absolute_path, str(file)) 
+        with open(path_to_write, 'wb') as destination: 
             for chunk in file.chunks():
                 destination.write(chunk)
-    return relative_path
+    
+    return relative_path 
 
 #----------------------------------------------
 
@@ -208,21 +206,24 @@ def save_acta(request) -> Response:
     serializer:DocSerializer = DocSerializer(data = request.data)  
     if serializer.is_valid():
         files:list = request.FILES.getlist('archivo')
+        ruta:str = handle_uploaded_file(files)
 
-        print(handle_uploaded_file(files))
+        modified_data_serializer:dict = dict(serializer.data)
+        del modified_data_serializer['archivo']
+        modified_data_serializer['ruta'] = ruta 
+        titulo:str = modified_data_serializer.get('titulo')
+        tipo:str = modified_data_serializer.get('tipo')
+        
+        doc = Docs(titulo = titulo,
+                   tipo = tipo,
+                   ruta = ruta)  
+        doc.save()
         return Response(serializer.data, 
                         status = status.HTTP_200_OK)
-     
+    
+    
     return Response(serializer.errors, 
                     status = status.HTTP_400_BAD_REQUEST)
-
-
-
-
-
-
-
-
 
 
 
@@ -243,7 +244,7 @@ def save_acta(request) -> Response:
 def get_all_docs() -> Response:
 
     docs:Docs = Docs.objects.all()
-    serializer:DocsSerialiazer = DocSerializer(instance = docs,
+    serializer:ReadDocSerialiazer = ReadDocSerializer(instance = docs,
                                                many = True)  
     return Response(serializer.data,
                     status = status.HTTP_200_OK)
@@ -253,7 +254,7 @@ def get_doc_by_id(pk:int = None) -> Response:
     try:
 
         doc:Docs = Docs.objects.get(pk = pk)
-        serializer:DocSerializer = DocSerializer(instance = doc)
+        serializer:ReadDocSerializer = ReadDocSerializer(instance = doc)
 
     except Docs.DoesNotExist as ddne:
 
