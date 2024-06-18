@@ -31,8 +31,8 @@ class ActivosView(APIView):
     """
 
     parser_classes = (FormParser, MultiPartParser, JSONParser)
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    # permission_classes = [IsAuthenticated]
+    # authentication_classes = [SessionAuthentication, BasicAuthentication]
 
     def get(self, request, pk = None):
         """

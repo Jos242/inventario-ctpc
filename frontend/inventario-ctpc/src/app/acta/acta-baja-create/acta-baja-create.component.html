@@ -1,1 +1,37 @@
-<p>acta-baja-create works!</p>
+xd
+<button (click)="pdf()">hola</button>
+
+<br>
+<br>
+xd
+<br>
+
+
+<button color="primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Agregar Anotacion</button>  
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Agregar Anotacion</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div #contentToConvert> 
+                <h1>un titulo xd</h1>
+                <h1>un subtitulo xd</h1>
+                <h3>juanito peretz</h3>
+                <img src="assets/images/logocole.png" alt="" style="">
+            </div>
+              
+        </div>
+        <div class="modal-footer">
+          <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button mat-flat-button color="primary">Agregar</button> -->
+          <button (click)="generatePdf(contentToConvert)">Generate PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>

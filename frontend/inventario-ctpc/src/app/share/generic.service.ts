@@ -20,11 +20,13 @@ export class GenericService {
 
   //GET lista 
   list(endopoint: string): Observable<any> {
-    return this.http.get<any>(this.urlAPI + endopoint);
+    return this.http.get<any>(this.urlAPI + endopoint, { withCredentials: true });
   }
 
   //POST crear objeto
-   create(endopoint: string, objCreate: any | any): Observable<any | any[]> {
-    return this.http.post<any | any[]>(this.urlAPI + endopoint, objCreate);
-  }
+   create(endopoint: string, objCreate: any | any): Observable<any | any[]> {    
+    
+    return this.http.post<any | any[]>(this.urlAPI + endopoint, objCreate, { withCredentials: true });
+  } 
+
 }

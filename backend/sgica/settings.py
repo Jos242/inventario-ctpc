@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-0vvt2)ivpj(!xh_=q49o^phhf92sw#u!^q(_u&uwm!=ok311$r
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -56,15 +56,15 @@ MIDDLEWARE = [
 ]
 
 #----cookie related config----
-SESSION_COOKIE_AGE = 7200
-SESSION_COOKIE_HTTPONLY = True
+# SESSION_COOKIE_AGE = 7200
+# SESSION_COOKIE_HTTPONLY = True
 
-SESSION_COOKIE_SAMESITE = 'None' #yo en serio siento que esto deberia ser strict pero al parecer eso solo sirve si ambos trabajn en el mismo dominio?
-SESSION_COOKIE_SECURE = True
+# SESSION_COOKIE_SAMESITE = 'None' #yo en serio siento que esto deberia ser strict pero al parecer eso solo sirve si ambos trabajn en el mismo dominio?
+# SESSION_COOKIE_SECURE = True
 
-CSRF_COOKIE_SAMESITE = 'None'
-CSRF_COOKIE_SECURE = True
-CSRF_COOKIE_HTTPONLY = True
+# CSRF_COOKIE_SAMESITE = 'None'
+# CSRF_COOKIE_SECURE = True
+# CSRF_COOKIE_HTTPONLY = True
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
@@ -75,9 +75,13 @@ AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-# CORS_ALLOWED_ORIGINS = [    
-#    "http://localhost:4200",
-#]
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:4200'
+]
+
+# CSRF_COOKIE_NAME = 'csrftoken' 
+CORS_ORIGIN_WHITELIST = ['http://localhost:4200/']
+# CSRF_TRUSTED_ORIGINS = ['http://localhost:4200', 'http://127.0.0.1:8000']
 
 CORS_ALLOW_CREDENTIALS = True
 

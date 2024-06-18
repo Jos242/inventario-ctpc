@@ -6,15 +6,21 @@ import { HomeIndexComponent } from './home/home-index/home-index.component';
 import { ActivoDetailComponent } from './activo/activo-detail/activo-detail.component';
 import { ActivoCreateComponent } from './activo/activo-create/activo-create.component';
 import { ActaIndexComponent } from './acta/acta-index/acta-index.component';
+import { LoginIndexComponent } from './login/login-index/login-index.component';
+import { ActaBajaCreateComponent } from './acta/acta-baja-create/acta-baja-create.component';
+import { ActaMoverCreateComponent } from './acta/acta-mover-create/acta-mover-create.component';
 
 
 export const routes: Routes = [
-    { path:'activos', component: ActivoIndexComponent},
-    { path:'index', component: HomeIndexComponent},
+    { path:'activos', component: ActivoIndexComponent, canActivate: [authGuard] },
+    { path:'index', component: HomeIndexComponent, canActivate: [authGuard] },
+    { path: 'login', component: LoginIndexComponent },
 
-    { path:'actas', component: ActaIndexComponent},
+    { path:'actas', component: ActaIndexComponent, canActivate: [authGuard]},
+    { path:'actas/baja', component: ActaBajaCreateComponent, canActivate: [authGuard]},
+    { path:'actas/traslado', component: ActaMoverCreateComponent, canActivate: [authGuard]},
     
-    { path:'activos/crear', component: ActivoCreateComponent},
+    { path:'activos/crear', component: ActivoCreateComponent, canActivate: [authGuard]},
     { path:'activos/:id', component: ActivoDetailComponent },
 
     //en caso de que el link no tenga nada, se redirige a /home
