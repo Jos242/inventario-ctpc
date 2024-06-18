@@ -59,6 +59,13 @@ MIDDLEWARE = [
 SESSION_COOKIE_AGE = 7200
 SESSION_COOKIE_HTTPONLY = True
 
+SESSION_COOKIE_SAMESITE = 'None' #yo en serio siento que esto deberia ser strict pero al parecer eso solo sirve si ambos trabajn en el mismo dominio?
+SESSION_COOKIE_SECURE = True
+
+CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = True
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny' 
@@ -66,7 +73,14 @@ REST_FRAMEWORK = {
 }
 AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:4200",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
 ROOT_URLCONF = 'sgica.urls'
 
 TEMPLATES = [
