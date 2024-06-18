@@ -15,7 +15,7 @@ urlpatterns = [
     path("observacion/<str:activo>/", views.ObservacionesView.as_view()),
     path("nueva-observacion/", views.ObservacionesView.as_view()),
     
-    path("crear-documento/", views.DocsView.as_view()), 
+    path("guardar-acta/", views.DocsView.as_view()), 
     path("obtener-documentos/", views.DocsView.as_view()),
     path("obtener-documento/<int:pk>/", views.DocsView.as_view()),
 

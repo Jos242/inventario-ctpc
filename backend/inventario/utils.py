@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
 from django.contrib.sessions.backends.signed_cookies import SessionStore
+from sgica.settings import MEDIA_ROOT
 #----------------------------------------------
 from rest_framework             import status
 from rest_framework.response    import Response
@@ -13,6 +14,45 @@ from .serializers import (ActivoSerializer, ReadActivoSerializer,
                           ObservacionesSerializer, UserSerializer, 
                           ReadUserSerializer, DocSerializer)
 from datetime import datetime
+
+
+def handle_file_directories() -> list:
+    """
+        It creates a directory for the file in case that is a new product otherwise
+        it returns the path for the specified product
+    """
+
+    absolute_path:str = f"{MEDIA_ROOT}/uploads/actas/"
+    relative_path:str = f"uploads/actas/"
+        
+    if os.path.exists(absolute_path):
+        return "Files exists"
+
+    os.makedirs(absolute_path)
+    return [relative_path, absolute_path]
+
+
+
+def handle_uploaded_file(files: list) -> str:
+    """
+        This method is just for saving the file following this structure:
+        uploads/{model pk}/{file_name.ext}
+    """
+
+    print(type(files))
+    return "Hola" 
+    paths_list = handle_file_directories()
+    absolute_path = paths_list[1] 
+    relative_path = paths_list[0]
+    print(f"This are the files: {files}")
+    print(f'This is the relative path -> {relative_path}')
+    for file in files:
+        print(f"Este es el supuesto file {file}")
+        with open(f'{absolute_path}/{str(file)}', 'wb') as destination: 
+            for chunk in file.chunks():
+                destination.write(chunk)
+    return relative_path
+
 #----------------------------------------------
 
 def get_remaining_fields():
@@ -160,7 +200,33 @@ def log_out(request) -> Response:
     return Response({"info": "you are logged out"}, status = status.HTTP_200_OK) 
 
 #Docs related methods-------------------------------------------
-def create_doc(request) -> Response:
+
+def save_acta(request) -> Response:
+
+    #Required fields -> Titulo, Tipo, archivo
+    print(request.data)
+    serializer:DocSerializer = DocSerializer(data = request.data)  
+    if serializer.is_valid():
+        files:list = request.FILES.getlist('archivo')
+
+        print(handle_uploaded_file(files))
+        return Response(serializer.data, 
+                        status = status.HTTP_200_OK)
+     
+    return Response(serializer.errors, 
+                    status = status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+
+
+
+
+
+
 
     serializer:DocSerializer = DocSerializer(data = request.data)
     if serializer.is_valid():

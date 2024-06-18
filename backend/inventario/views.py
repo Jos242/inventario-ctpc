@@ -14,7 +14,7 @@ from datetime import datetime
 from .utils import (get_remaining_fields, all_activos, all_observaciones, 
                     activos_filter_column, add_activo, get_activo_by_id,
                     get_observacion_by_id_registro, add_new_observacion, 
-                    new_usuario, sign_up, log_out, create_doc, get_all_docs,
+                    new_usuario, sign_up, log_out, save_acta, get_all_docs,
                     get_doc_by_id)
 #----------------------------------------------
 
@@ -90,7 +90,8 @@ class UserView(APIView):
             return log_out(request)
 
 class DocsView(APIView):
-
+    parser_classes   = (MultiPartParser, FormParser, JSONParser)
+    
     def get(self, request, pk:int = None):
         path = request.path
         if path == "/obtener-documentos/": 
@@ -103,8 +104,8 @@ class DocsView(APIView):
 
     def post(self, request):
         path = request.path
-        if path == "/crear-documento/":
-            return create_doc(request)
+        if path == "/guardar-acta/":
+            return save_acta(request)
 
         return Response({"error": "not a valid post request"},
                         status = status.HTTP_400_BAD_REQUEST)

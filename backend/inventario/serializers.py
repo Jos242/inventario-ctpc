@@ -91,13 +91,13 @@ class ReadUserSerializer(serializers.Serializer):
  
 class DocSerializer(serializers.ModelSerializer):
 
-    ruta = serializers.CharField(max_length = 250, required = False)
+    archivo = serializers.FileField()
     creado_el = serializers.DateTimeField(required = False)
 
     class Meta:
 
         model  = Docs
-        fields = ['titulo', 'tipo', 'ruta', 'creado_el']
+        fields = ['titulo', 'tipo', 'archivo', 'creado_el']
 
 
 
