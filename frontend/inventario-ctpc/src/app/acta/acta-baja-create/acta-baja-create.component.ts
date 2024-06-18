@@ -1,4 +1,9 @@
 import { Component } from '@angular/core';
+import { GenericService } from '../../share/generic.service';
+import { HttpClient } from '@angular/common/http';
+import { Subject, takeUntil } from 'rxjs';
+
+
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 
@@ -16,6 +21,9 @@ pdfMake.vfs = pdfFonts.pdfMake.vfs;
 })
 export class ActaBajaCreateComponent {
   userInput: string = 'xdxdxdxdx';
+  destroy$:Subject<boolean>=new Subject<boolean>();
+
+  constructor(private http: HttpClient, private gService:GenericService,) {}
 
   generatePdf(data) {
     html2canvas(data, { scale: 2, allowTaint: true }).then(canvas => {
@@ -35,7 +43,27 @@ export class ActaBajaCreateComponent {
        pdf.addPage([PDF_Width, PDF_Height], 'p');
        pdf.addImage(imgData, 'jpg', top_left_margin, -(PDF_Height * i) + (top_left_margin * 4), canvas_image_width, canvas_image_height);
      }
+
       pdf.save("HTML-Document.pdf");
+      // Convert PDF to Blob
+      const pdfBlob = pdf.output('blob');
+
+      // Create FormData and append fields
+      const formData = new FormData();
+      formData.append('titulo', 'pdf-one');
+      formData.append('tipo', 'PDF');
+      formData.append('archivo', pdfBlob, 'document.pdf');
+
+      console.log(formData);
+      // const formData = this.myForm.value;
+      this.gService.create('guardar-acta/', formData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data:any)=>{
+        console.log(data);
+
+      });
+
+      
    });
  }
 
