@@ -1,27 +1,100 @@
-xd
-<button (click)="pdf()">hola</button>
+<div>
+    <div class="titulo d-flex justify-content-center">
+        <h1>Crear Nueva Acta de Baja</h1>
+    </div>
+    <div class="formAgregar">
+        <mat-card>
+            <mat-card-content>
+                <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">
+                    <div class="container">
+                        <div class="row">
+                            <mat-form-field appearance="outline" class="inputsForm">
+                                <mat-label>Descripcion</mat-label>
+                                <input matInput formControlName="descripcion" placeholder="Se estaran dando a una empresa que manejara los desechos de manera adecuada">
+                                <mat-hint>Descripcion de lo que se hara con el activo</mat-hint>
+                            </mat-form-field>
+                            <br>
+                            <mat-form-field appearance="outline" class="inputsForm">
+                                <mat-label>Activo</mat-label>
+                                <input matInput formControlName="activo" placeholder="6015-1112">
+                                <mat-hint>Activo que se estara dando de baja</mat-hint>
+                            </mat-form-field>
+                            <br>
+                            <mat-form-field appearance="outline" class="inputsForm">
+                                <mat-label>Razon de Baja</mat-label>
+                                <input matInput formControlName="razon" placeholder="Obsolencia">
+                                <mat-hint>Razon por la cual se estara dando de baja el activo</mat-hint>
+                            </mat-form-field>
+                        </div>
+                       
+                        <div class="row">
+                            <button mat-flat-button color="primary" type="submit" [disabled]="!myForm.valid">Agregar Informacion</button>
+                        </div>
+
+                    </div>
+
+                  
+                </form>
+        
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>
+
 
 <br>
+<button mat-flat-button color="primary" (click)="generatePdf(contentToConvert)">Guardar y Descargar PDF</button>
 <br>
-xd
+<div class="titulo d-flex justify-content-center">
+    <h1>Previsualizacion del Acta</h1>
+</div>
 <br>
-<button (click)="generatePdf(contentToConvert)">Generate PDF</button>
 <div #contentToConvert class="cont"> 
-    <h1>un titulo xd</h1>
-    <h1>un subtitulo xd</h1>
-    <h3>juanito peretz</h3>
-    <img src="assets/images/logocole.png" alt="" style="position: absolute; top: 5px;  right: 5px;">
-    <img src="assets/images/logocole.png" alt="" style="">
-    <img src="assets/images/logocole.png" alt="" style="">
-    <img src="assets/images/logocole.png" alt="" style="">
-    <img src="assets/images/logocole.png" alt="" style="">
-    <img src="assets/images/logocole.png" alt="" style="">
-    <img src="assets/images/logocole.png" alt="" style="">
-    <img src="assets/images/logocole.png" alt="" style="">
-    <img src="assets/images/logocole.png" alt="" style="">
-    <img src="assets/images/logocole.png" alt="" style="">
-    <img src="assets/images/logocole.png" alt="" style="">
+    <h1 class="centered">Ministerio de Educacion Publica</h1>
+    <h1 class="centered">Direccion Regional Educacion de Alajuela</h1>
+    <h3 class="centered">Colegio Tecnico Profesional de Carrizal</h3>
+    <br>
+    <br>
+    <h4 class="centered">Info Contacto</h4>
+    <h4 class="centered">Info Contacto</h4>
+    <h1 class="centered" style="margin-top: 25px;">ACTA DE BAJA DE BIENES N {{numActa}}</h1>
+    <h1 class="centered">Fecha del Acta: {{fechaActa}}</h1>
+    <img src="assets/images/logocole.png" alt="" class="absolute-img">
+    <br>
+    <table class="tabla">
+        <tr>
+          <th colspan="2"><b>Colegio Tecnico Profesional:</b> Carrizal</th>
+        </tr>
+        <tr>
+          <td class="half-width"><b>Fecha de baja del bien:</b> {{fechaActa}}</td>
+          <td class="half-width"><b>Curso Lectivo:</b> {{ahno}}</td>
+        </tr>
+        <tr>
+          <td colspan="2"><b>Empresa a la cual se va a entregar para su reciclaje o destruccion. O bien, el metodo que se va a utilizar para desecharlo: </b> {{descActa}}</td>
+        </tr>
+    </table> 
 
+    <table class="tabla2">
+        <tr>
+            <th ><b>Numero de identificacion del bien</b></th>
+            <th ><b>Descripcion del bien</b></th>
+            <th ><b>Marca</b></th>
+            <th ><b>Modelo</b></th>
+            <th ><b>Serie</b></th>
+            <th ><b>Obsolescencia</b></th>
+            <th ><b>Inservibilidad</b></th>
+        </tr>
+        <tr>
+            <td>{{id}}</td>
+            <td>{{desc}}</td>
+            <td>{{marca}}</td>
+            <td>{{modelo}}</td>
+            <td>{{serie}}</td>
+            <td>{{obs}}</td>
+            <td>{{ins}}</td>
+        </tr>
+
+    </table>
 </div>
 
 
