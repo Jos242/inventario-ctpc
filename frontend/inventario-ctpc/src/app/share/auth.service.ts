@@ -21,7 +21,7 @@ export class AuthService {
 
   login(credentials: { username: string; password: string }): Observable<any> {
     // return this.http.post(`${this.baseURL}iniciar-sesion/`, credentials, { withCredentials: true })
-    return this.http.post(`${this.baseURL}iniciar-sesion/`, credentials, { withCredentials: true })
+    return this.http.post(`${this.baseURL}iniciar-sesion/`, credentials)
       .pipe(
         tap(response => {
 
@@ -37,7 +37,7 @@ export class AuthService {
   }
 
   logout(): void {
-    this.http.post(`${this.baseURL}salir/`, {}, { withCredentials: true })
+    this.http.post(`${this.baseURL}salir/`, {})
       .subscribe(
         () => {
           console.log("logout1")

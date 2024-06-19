@@ -59,6 +59,14 @@ export class ActaBajaCreateComponent {
   obs: any;
   ins: any;
 
+ 
+  dataSource = new MatTableDataSource<any>();
+  displayedColumns: string[] = ['no_identificacion', 'descripcion', 'marca', 'modelo', 'serie', 'estado'];
+
+
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatSort) sort: MatSort;
+
   destroy$:Subject<boolean>=new Subject<boolean>();
   
 
@@ -79,11 +87,30 @@ export class ActaBajaCreateComponent {
       descripcion: ['', Validators.required],
       activo: ['', Validators.required],
       razon: ['', Validators.required],
+      search: [''] 
 
     });
 
+    
+
     this.listaDocs();
     this.listaActivos();
+
+    this.myForm.get('search')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(value => {
+        this.applyFilter(value);
+      });
+
+    
+  }
+
+  applyFilter(filterValue: string): void {
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+  }
+
+  selectActivo(activo: any): void {
+    this.myForm.patchValue({ activo: activo.no_identificacion });
   }
 
   listaDocs(){
@@ -112,7 +139,11 @@ export class ActaBajaCreateComponent {
       .pipe(takeUntil(this.destroy$))
       .subscribe((data:any)=>{
         this.datosActivos = data;
+        this.dataSource.data = data;
         // this.dataSource.data = data;
+
+        this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
         console.log(this.datosActivos);
         // this.isLoadingResults = false; // Stop loading
       });
