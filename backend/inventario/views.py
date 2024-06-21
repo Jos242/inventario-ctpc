@@ -6,11 +6,8 @@ from rest_framework.response    import Response
 from rest_framework.views       import APIView
 from rest_framework.parsers     import FormParser, MultiPartParser, JSONParser 
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 #----------------------------------------------
-from .models import Activos
-from .serializers import ActivoSerializer
-from datetime import datetime
 from .utils import (get_remaining_fields, all_activos, all_observaciones, 
                     activos_filter_column, add_activo, get_activo_by_id,
                     get_observacion_by_id_registro, add_new_observacion, 
@@ -31,8 +28,8 @@ class ActivosView(APIView):
     """
 
     parser_classes = (FormParser, MultiPartParser, JSONParser)
-    # permission_classes = [IsAuthenticated]
-    # authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    authentication_classes = [JWTAuthentication]
 
     def get(self, request, pk = None):
         """
@@ -61,7 +58,8 @@ class ActivosView(APIView):
 
 class ObservacionesView(APIView):
     parser_classes = (FormParser, MultiPartParser, JSONParser)
-    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly] 
     def get(self, request, activo = None):
         
         path = request.path
@@ -79,7 +77,8 @@ class ObservacionesView(APIView):
         
 
 class UserView(APIView):
-    
+    authentication_classes = []
+    permission_classes = [] 
     def post(self, request):
         path = request.path
         if path == "/crear-usuario/": 
@@ -91,7 +90,9 @@ class UserView(APIView):
 
 class DocsView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
-    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated] 
+        
     def get(self, request, pk:int = None):
         path = request.path
         if path == "/obtener-documentos/": 

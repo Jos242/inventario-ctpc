@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
     'corsheaders',
     'inventario',
 
@@ -55,23 +55,14 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware'
 ]
 
-#----cookie related config----
-# SESSION_COOKIE_AGE = 7200
-# SESSION_COOKIE_HTTPONLY = True
-
-# SESSION_COOKIE_SAMESITE = 'None' #yo en serio siento que esto deberia ser strict pero al parecer eso solo sirve si ambos trabajn en el mismo dominio?
-# SESSION_COOKIE_SECURE = True
-
-# CSRF_COOKIE_SAMESITE = 'None'
-# CSRF_COOKIE_SECURE = True
-# CSRF_COOKIE_HTTPONLY = True
-
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny' 
+        'rest_framework.permissions.IsAuthenticated', 
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication'
     ]
 }
-AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
 
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -79,11 +70,6 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:4200'
 ]
 
-# CSRF_COOKIE_NAME = 'csrftoken' 
-CORS_ORIGIN_WHITELIST = ['http://localhost:4200/']
-# CSRF_TRUSTED_ORIGINS = ['http://localhost:4200', 'http://127.0.0.1:8000']
-
-CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'sgica.urls'
 
