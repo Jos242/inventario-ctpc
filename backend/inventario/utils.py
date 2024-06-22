@@ -15,6 +15,7 @@ from .serializers import *
 from datetime import datetime
 
 
+
 def handle_file_directories() -> list:
     """
         It creates a directory for the file in case that is a new product otherwise
@@ -51,6 +52,8 @@ def handle_uploaded_file(files: list) -> str:
     
     return relative_path 
 
+
+
 #----------------------------------------------
 
 def get_remaining_fields():
@@ -85,7 +88,6 @@ def get_remaining_fields():
     REMAINING_FIELDS["id_registro"] = next_id_registro
     return REMAINING_FIELDS
 
-#Activos related methods-----------------------------------
 def calculate_no_identificacion(no_identificacion: str):
     input_str = no_identificacion
     cleaned_str = input_str.replace('-', '')
@@ -94,34 +96,9 @@ def calculate_no_identificacion(no_identificacion: str):
     new_no_identificacion = number_str[:4] + '-' + number_str[4:]
     return new_no_identificacion
 
-def all_activos():
-   activos = ReadActivos.objects.all().order_by('-id')
-   serializer = ActivoSerializer(instance = activos, many = True)
-   return Response(serializer.data, status = status.HTTP_200_OK)
-
-def activos_filter_column():
-    filter_all_activos = Activos.objects.values('id', 'id_registro', 'no_identificacion', 'descripcion', 'ubicacion').order_by('-id')
-    serializer = ReadActivoSerializer(instance = filter_all_activos, many = True)
-    return Response(serializer.data, status = status.HTTP_200_OK)
 
 
-def add_activo(request):
-    remaining_fields = get_remaining_fields()
-    print(f"remaining_fields-------\n{remaining_fields}")
-    serializer = ActivoSerializer(data = request.data)
-    if serializer.is_valid():
-        valid_activo = serializer.data | remaining_fields
-        activo = Activos(**valid_activo)
-        activo.save()
-        return Response("I think that im working", status= status.HTTP_200_OK)
-    return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
-def get_activo_by_id(pk):
-    try:
-        activo = Activos.objects.get(pk = pk)
-    except Activos.DoesNotExist:
-        return Response({"error": "Activo no existe"}, status= status.HTTP_404_NOT_FOUND)
-    serializer = ActivoSerializer(instance = activo)
-    return Response(serializer.data, status = status.HTTP_200_OK)
+
 #---------------------------------------------------------------
 def all_observaciones() -> Response:
 
