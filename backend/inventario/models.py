@@ -22,6 +22,7 @@ class Activos(models.Model):
     precio = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True) 
     creado_el = models.DateTimeField(db_default = Now())
     observacion = models.TextField(blank = True) 
+    impreso = models.IntegerField(default = False)
     class Meta:
         managed = False
         db_table = 'activos'
@@ -46,13 +47,15 @@ class ReadActivos(models.Model):
     ubicacion = models.CharField(max_length=255)
     modo_adquisicion = models.CharField(max_length=255)
     precio = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    creado_el = models.DateTimeField() 
+    creado_el = models.DateTimeField()
+    impreso = models.BooleanField(default = False) 
     class Meta:
         managed = False
         db_table = 'activos'
 
     def __str__(self):
-        return str({"id_registro": self.id_registro, "no_identificacion": self.no_identificacion})
+        return str({"id_registro": self.id_registro, 
+                    "no_identificacion": self.no_identificacion})
     
 
 class Observaciones(models.Model):
@@ -61,7 +64,7 @@ class Observaciones(models.Model):
     asiento = models.IntegerField()
     descripcion = models.TextField()
     activo = models.ForeignKey(Activos, to_field='id_registro', on_delete = models.CASCADE)
-      
+    impreso = models.BooleanField(default = False) 
     class Meta:
         managed = False
         db_table = 'observaciones'

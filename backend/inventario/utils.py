@@ -1,21 +1,24 @@
+#Python clases incorporadas and others---------
 import os
+import xlsxwriter
 #----------------------------------------------
+
+#Django herramientas---------------------------
 from django.contrib.auth import logout, login
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
-from django.shortcuts import get_object_or_404
-from django.contrib.sessions.backends.signed_cookies import SessionStore
 from sgica.settings import MEDIA_ROOT
 #----------------------------------------------
-from rest_framework             import status
-from rest_framework.response    import Response
+
+#Django rest frameworks herramientas-----------
+from rest_framework import status
+from rest_framework.response import Response
 #----------------------------------------------
-from .models import Activos, ReadActivos, Observaciones, Docs
-from .serializers import *
-from datetime import datetime
 
+from .models import * 
+from .serializers import * 
 
-
+#Metodos globales-----------------------------------------------
 def handle_file_directories() -> list:
     """
         It creates a directory for the file in case that is a new product otherwise
@@ -30,8 +33,6 @@ def handle_file_directories() -> list:
 
     os.makedirs(absolute_path)
     return [relative_path, absolute_path]
-
-
 
 def handle_uploaded_file(files: list) -> str:
     """
@@ -52,9 +53,13 @@ def handle_uploaded_file(files: list) -> str:
     
     return relative_path 
 
-
-
-#----------------------------------------------
+def calculate_no_identificacion(no_identificacion: str):
+    input_str = no_identificacion
+    cleaned_str = input_str.replace('-', '')
+    number = int(cleaned_str) + 1
+    number_str = str(number)
+    new_no_identificacion = number_str[:4] + '-' + number_str[4:]
+    return new_no_identificacion
 
 def get_remaining_fields():
     MAX_NUMBER = 41
@@ -87,157 +92,270 @@ def get_remaining_fields():
     next_id_registro = (f"{split_registro[0]},{split_registro[1]},{next_asiento}")
     REMAINING_FIELDS["id_registro"] = next_id_registro
     return REMAINING_FIELDS
+#--------------------------------------------------------------
 
-def calculate_no_identificacion(no_identificacion: str):
-    input_str = no_identificacion
-    cleaned_str = input_str.replace('-', '')
-    number = int(cleaned_str) + 1
-    number_str = str(number)
-    new_no_identificacion = number_str[:4] + '-' + number_str[4:]
-    return new_no_identificacion
+class ActivosActions:
 
+    def __init__(self) -> None:
+        pass
 
-
-
-#---------------------------------------------------------------
-def all_observaciones() -> Response:
-
-    observacion = Observaciones.objects.all()
-    serializer = ObservacionesSerializer(instance = observacion, many = True)
-    return Response(serializer.data, status = status.HTTP_200_OK)
-
-def get_observacion_by_id_registro(activo:str) -> Response: 
-
-    try:
-        observacion = Observaciones.objects.filter(activo = activo) 
-    except Observaciones.DoesNotExist:
-        return Response({"error": "Observacion does not exist"}, status = status.HTTP_404_NOT_FOUND)
-    serializer = ObservacionesSerializer(instance = observacion, many=True)
-    return Response(serializer.data, status= status.HTTP_200_OK)
-
-def add_new_observacion(request) -> Response:
-    remaining_fields:dict = get_remaining_fields()
-    remaining_fields.pop('no_identificacion')
-    serializer = ObservacionesSerializer(data = request.data)
-    if serializer.is_valid():
-        print(f"Vengo de aqui\n{serializer}")
-        serializer.validated_data.update(remaining_fields)
-        try:
-            observacion = serializer.create(serializer.validated_data)
-            observacion.save()
-        except ValueError as e:
-            print(f"Error: {e}")
-            return Response({"error": "Not able to create new Observacion"})
+#Metodos para el HTTP GET-------------------------------
+    def all_activos(self) -> Response: #Working
+        activos:ReadActivos = ReadActivos.objects.all().order_by('-id')
+        serializer:ActivoSerializer = ActivoSerializer(instance = activos, many = True)
         return Response(serializer.data, status = status.HTTP_200_OK)
-    return Response(serializer.errors, status = status.HTTP_200_OK)
+
+    def activos_filter_column(self) -> Response: #Working
+        filter_all_activos = Activos.objects.values('id', 'id_registro', 'no_identificacion',
+                                                    'descripcion', 'ubicacion').order_by('-id')
+        serializer = ReadActivoSerializer(instance = filter_all_activos, many = True)
+        return Response(serializer.data, status = status.HTTP_200_OK)
 
 
+    def get_activo_by_id(self, pk:int) -> Response: #Working
+        try:
+            activo:Activos = Activos.objects.get(pk = pk)
+        except Activos.DoesNotExist:
+            return Response({"error": "activo does not exist"}, 
+                            status = status.HTTP_404_NOT_FOUND)
+        serializer:ActivoSerializer = ActivoSerializer(instance = activo)
+        return Response(serializer.data,
+                        status = status.HTTP_400_BAD_REQUEST)
+#--------------------------------------------------------
+    
+#Metodos para el HTTP POST-------------------------------
+    def add_activo(self, request) -> Response: #Working
+        remaining_fields = get_remaining_fields()
+        print(f"remaining_fields-------\n{remaining_fields}")
+        serializer = ActivoSerializer(data = request.data)
+        if serializer.is_valid():
+            valid_activo = serializer.data | remaining_fields
+            activo = Activos(**valid_activo)
+            activo.save()
+            
+            return Response(ReadActivoSerializer(instance = activo).data,
+                            status= status.HTTP_200_OK)
+        return Response(serializer.errors,
+                        status = status.HTTP_400_BAD_REQUEST)
+#--------------------------------------------------------
 
+class ObservacionesActivos():
+    
+    def __init__(self) -> None:
+        pass
+#Metodos para el HTTP GET--------------------------------
+    def all_observaciones() -> Response:
+
+        observacion = Observaciones.objects.all()
+        serializer = ObservacionesSerializer(instance = observacion, many = True)
+        return Response(serializer.data, status = status.HTTP_200_OK)
+
+    def get_observacion_by_id_registro(activo:str) -> Response: 
+        try:
+            observacion = Observaciones.objects.filter(activo = activo) 
+        except Observaciones.DoesNotExist:
+            return Response({"error": "Observacion does not exist"}, status = status.HTTP_404_NOT_FOUND)
+        serializer = ObservacionesSerializer(instance = observacion, many=True)
+        return Response(serializer.data, status= status.HTTP_200_OK)
 #----------------------------------------------------------
-#User related methods
 
-def new_usuario(request) -> Response:
 
-    serializer:UserSerializer = UserSerializer(data = request.data)
-    if serializer.is_valid():
-        user:User = serializer.create(serializer.validated_data)
-        user.set_password(serializer.validated_data.get('password'))
-        user.save()
-        print(serializer) 
-        return Response(serializer.validated_data, status = status.HTTP_200_OK) 
+#Metodos para el HTTP POST-------------------------------
+
+    def add_new_observacion(request) -> Response:
+        remaining_fields:dict = get_remaining_fields()
+        remaining_fields.pop('no_identificacion')
+        serializer = ObservacionesSerializer(data = request.data)
+        
+        if serializer.is_valid():
+            print(f"Vengo de aqui\n{serializer}")
+            serializer.validated_data.update(remaining_fields)
+            
+            try:
+                observacion = serializer.create(serializer.validated_data)
+                observacion.save()
+            except ValueError as e:
+                print(f"Error: {e}")
+            
+                return Response({"error": "not able to create new observacion"})
+            
+            return Response(serializer.data, status = status.HTTP_200_OK)
+ 
+        return Response(serializer.errors, status = status.HTTP_200_OK)
+#----------------------------------------------------------
+      
+class UserActions:
+     
+    def __init__(self) -> None:
+        pass
+
+#Metodos para el HTTP POST-------------------------------
+    def new_usuario(self, request) -> Response:
+        serializer:UserSerializer = UserSerializer(data = request.data)
+        
+        if serializer.is_valid():
+            user:User = serializer.create(serializer.validated_data)
+            user.set_password(serializer.validated_data.get('password'))
+            user.save()
+            print(serializer) 
+            return Response(serializer.validated_data, status = status.HTTP_200_OK) 
    
-    return Response(serializer.errors, status = status.HTTP_200_OK)
-
-def sign_up(request) -> Response:
-    session:SessionStore = request.session
-    print(f"Session information:\n {session.keys()}")
-    required_keys:tuple = ("username", "password")
-    for key in required_keys:
-        if key not in request.data:
-            return Response({"error": "Required keys to authenticate 'username' and 'password'"})
-
-    serializer:ReadUserSerializer = ReadUserSerializer(data = request.data) 
-    if serializer.is_valid():
-        username = serializer.validated_data.get("username")
-        password = serializer.validated_data.get("password")
-        print(f"Username: {username}")
-        print(f"Password: {password}")
-        user:User = authenticate(username = username, password = password)
-        if user is None:
-            return Response({"error": "could not authenticate the user"})
-        login(request, user) 
-        serializer_1:UserSerializer = UserSerializer(instance = user)
-        return Response(serializer_1.data, status = status.HTTP_200_OK)   
-    return Response(serializer.errors, status= status.HTTP_400_BAD_REQUEST)
-
-def log_out(request) -> Response:
-    logout(request)
-    return Response({"info": "you are logged out"}, status = status.HTTP_200_OK) 
-
-#Docs related methods-------------------------------------------
-
-def save_acta(request) -> Response:
-
-    #Required fields -> Titulo, Tipo, archivo
-    print(request.data)
-    serializer:DocSerializer = DocSerializer(data = request.data)  
-    if serializer.is_valid():
-        files:list = request.FILES.getlist('archivo')
-        ruta:str = handle_uploaded_file(files)
-
-        modified_data_serializer:dict = dict(serializer.data)
-        del modified_data_serializer['archivo']
-        modified_data_serializer['ruta'] = ruta 
-        titulo:str = modified_data_serializer.get('titulo')
-        tipo:str = modified_data_serializer.get('tipo')
+        return Response(serializer.errors, status = status.HTTP_200_OK)
+  
+    def sign_up(self, request) -> Response:
+        required_keys:tuple = ("username", "password")
         
-        doc = Docs(titulo = titulo,
-                   tipo = tipo,
-                   ruta = ruta)  
-        doc.save()
-        return Response(serializer.data, 
-                        status = status.HTTP_200_OK)
-    
-    
-    return Response(serializer.errors, 
-                    status = status.HTTP_400_BAD_REQUEST)
+        for key in required_keys:
+            if key not in request.data:
+                return Response({"error": "required keys to authenticate 'username' and 'password'"})
 
-
-
-
-
-    serializer:DocSerializer = DocSerializer(data = request.data)
-    if serializer.is_valid():
-        doc = serializer.create(serializer.validated_data)
-        doc = Docs.objects.get(pk = doc.id)
-        serializer = DocSerializer(instance = doc)
+        serializer:ReadUserSerializer = ReadUserSerializer(data = request.data) 
         
-        return Response(serializer.data, 
-                        status = status.HTTP_200_OK)
+        if serializer.is_valid():
+            username = serializer.validated_data.get("username")
+            password = serializer.validated_data.get("password")
+            print(f"Username: {username}")
+            print(f"Password: {password}")
+            user:User = authenticate(username = username, password = password)
+            
+            if user is None:
+                return Response({"error": "could not authenticate the user"})
 
-    return Response(serializer.errors, 
-                    status = status.HTTP_400_BAD_REQUEST)
-    
-def get_all_docs() -> Response:
+            login(request, user) 
+            serializer_1:UserSerializer = UserSerializer(instance = user)
+            return Response(serializer_1.data, status = status.HTTP_200_OK)   
+        
+        return Response(serializer.errors, status= status.HTTP_400_BAD_REQUEST)
 
-    docs:Docs = Docs.objects.all()
-    serializer:ReadDocSerialiazer = ReadDocSerializer(instance = docs,
+    def log_out(self, request) -> Response:
+        logout(request)
+        return Response({"info": "you are logged out"}, status = status.HTTP_200_OK)  
+#-------------------------------------------------------------
+
+class DocsActions:
+
+    def __init__(self) -> None:
+        pass
+
+#Metodos para el HTTP GET------------------------------- 
+    def get_all_docs(self) -> Response:
+        docs:Docs = Docs.objects.all()
+        serializer:ReadDocSerializer= ReadDocSerializer(instance = docs,
                                                many = True)  
-    return Response(serializer.data,
+        return Response(serializer.data,
                     status = status.HTTP_200_OK)
 
-def get_doc_by_id(pk:int = None) -> Response:
+    def get_doc_by_id(self, pk:int = None) -> Response:
 
-    try:
+        try:
+            doc:Docs = Docs.objects.get(pk = pk)
+            serializer:ReadDocSerializer = ReadDocSerializer(instance = doc)
 
-        doc:Docs = Docs.objects.get(pk = pk)
-        serializer:ReadDocSerializer = ReadDocSerializer(instance = doc)
+        except Docs.DoesNotExist:
+            return Response({"error": "document does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
 
-    except Docs.DoesNotExist as ddne:
+        return Response(serializer.data, 
+                        status = status.HTTP_200_OK)
 
-        return Response({"error": "document does not exist"},
-                        status = status.HTTP_404_NOT_FOUND)
 
-    return Response(serializer.data, 
-                    status = status.HTTP_200_OK)
+#Metodos para el HTTP POST-------------------------------
+    def save_acta(self, request) -> Response:
+        serializer:DocSerializer = DocSerializer(data = request.data)  
+        
+        if serializer.is_valid():
+            files:list = request.FILES.getlist('archivo')
+            ruta:str = handle_uploaded_file(files)
 
+            modified_data_serializer:dict = dict(serializer.data)
+            del modified_data_serializer['archivo']
+            modified_data_serializer['ruta'] = ruta 
+            titulo:str = modified_data_serializer.get('titulo')
+            tipo:str = modified_data_serializer.get('tipo')
+        
+            doc = Docs(titulo = titulo,
+                       tipo = tipo,
+                       ruta = ruta)  
+            doc.save()
+            return Response(serializer.data, 
+                        status = status.HTTP_200_OK)
+     
+        return Response(serializer.errors, 
+                    status = status.HTTP_400_BAD_REQUEST)
+
+    def create_print_doc(self, request) -> Response:
+        # activos = Activos.objects.filter(impreso = False).values('id_registro', 'creado_el', 'impreso')
+        # activos_list = list(activos) 
+
+        # #Situacion donde todos son activos
+        # if activos == len(activos_list)
+        # activos_list = list(activos)
+        # print(len(activos))
+        serializer = WhatTheExcelTypeIs(data = request.data)
+
+        if serializer.is_valid():
+            print_type = serializer.validated_data['type']
+            if print_type == "SoloActivos":
+                activos = Activos.objects.filter(impreso = False).values('id_registro', 'asiento', 'no_identificacion', 
+                                                                         'descripcion', 'marca', 'modelo', 'serie')
+                activos_list = list(activos)
+                print(activos_list)
+                workbook = xlsxwriter.Workbook('demo.xlsx')
+                worksheet = workbook.add_worksheet()
+                #Para aumentar el ancho de la columna-------------------------------------
+                worksheet.set_column('A:A', 14.57) 
+                worksheet.set_column('B:B', 2.29) 
+                worksheet.set_column('C:C', 16.86) 
+                worksheet.set_column('D:D', 20.29) 
+                worksheet.set_column('E:E', 11.86) 
+                worksheet.set_column('F:F', 17.57)
+                worksheet.set_column('G:G', 19.71)
+    
+                #Crea un objeto 'Format' para dar formato al texto------------------------
+                bold = workbook.add_format({'bold': True})
+                counter = 1
+                for activo in activos_list:
+                    if counter == 1:
+                        worksheet.write(f'A1', "Registrado en", bold)
+                        worksheet.write(f'B1', "1", bold)
+                        worksheet.write(f'C1', "No. Identificacion", bold)
+                        worksheet.write(f'D1', "Descripción", bold)
+                        worksheet.write(f'E1', "Marca", bold)
+                        worksheet.write(f'F1', "Modelo", bold)
+                        worksheet.write(f'G1', "Serie", bold)
+                        counter += 1
+                        continue
+
+                    worksheet.write(f'A{counter}', activo['id_registro'])
+                    worksheet.write(f'B{counter}', activo['asiento'])
+                    worksheet.write(f'C{counter}', activo['no_identificacion'])
+                    worksheet.write(f'D{counter}', activo['descripcion'])
+                    worksheet.write(f'E{counter}', activo['marca'])
+                    worksheet.write(f'F{counter}', activo['modelo'])
+                    worksheet.write(f'G{counter}', activo['serie'])
+
+                    counter += 1
+                workbook.close()
+
+                return Response("un poco xD",
+                                status = status.HTTP_200_OK)
+
+            if print_type == "SoloObservaciones":
+                #Para aumentar el ancho de la columna-------------------------------------
+                worksheet.set_column('A:A', 14.57) 
+                worksheet.set_column('B:B', 2.29) 
+                worksheet.set_column('C:C', 86.29) 
+                worksheet.set_column('D:D', 20.29) 
+                worksheet.set_column('E:E', 11.86) 
+                worksheet.set_column('F:F', 17.57)
+                worksheet.set_column('G:G', 19.71)
+    
+
+            return Response(serializer.data, 
+                            status = status.HTTP_200_OK) 
+
+        return Response(serializer.errors,
+                        status = status.HTTP_200_OK)
+#--------------------------------------------------------    
+    
+#--------------------------------------------------------    

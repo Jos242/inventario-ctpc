@@ -9,12 +9,7 @@ from rest_framework.parsers     import FormParser, MultiPartParser, JSONParser
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.authentication import JWTAuthentication
 #----------------------------------------------
-from .utils import (get_remaining_fields, all_observaciones, 
-                    get_observacion_by_id_registro, add_new_observacion, 
-                    new_usuario, sign_up, log_out, save_acta, get_all_docs,
-                    get_doc_by_id)
-
-from .utils_v2 import *
+from .utils import *
 #----------------------------------------------
 
 """
@@ -31,8 +26,10 @@ class ActivosView(APIView):
     """
 
     parser_classes = (FormParser, MultiPartParser, JSONParser)
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticatedOrReadOnly]
+    # authentication_classes = [JWTAuthentication]
+    permission_classes = []
+    authentication_classes = []
     activos_do:ActivosActions = None
 
     def __init__(self, **kwargs: Any) -> None:
@@ -72,20 +69,26 @@ class ObservacionesView(APIView):
     parser_classes = (FormParser, MultiPartParser, JSONParser)
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly] 
-    def get(self, request, activo = None):
-        
+    observaciones_do:ObservacionesActivos = None
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.observaciones_do = ObservacionesActivos()    
+    
+    def get(self, request, activo = None): 
         path = request.path
-        print(path)
+
         if path == "/todas-las-observaciones/":
-            return all_observaciones()
+            return self.observaciones_do.all_observaciones() 
+        
         if path == f"/observacion/{activo}/":
-            return get_observacion_by_id_registro(activo)
+            return self.observaciones_do.get_observacion_by_id_registro(activo)
         
-    def post(self, request):
-        
+    def post(self, request): 
         path = request.path
+        
         if path == "/nueva-observacion/":
-            return add_new_observacion(request)
+            return self.observaciones_do.add_new_observacion(request)
         
 
 class UserView(APIView):
@@ -109,23 +112,34 @@ class UserView(APIView):
 
 class DocsView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated] 
-        
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated] 
+    authentication_classes = []
+    permission_classes = []
+    docs_do:DocsActions = None
+    
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.docs_do = DocsActions()
+
     def get(self, request, pk:int = None):
         path = request.path
-        if path == "/obtener-documentos/": 
-            return get_all_docs()
-        if path == f"/obtener-documento/{pk}/":
-            return get_doc_by_id(pk)
+        if path == "/obtener-documentos/":  
+            return self.docs_do.get_all_docs()
 
+        if path == f"/obtener-documento/{pk}/":
+            return self.docs_do.get_doc_by_id(pk)
+        
         return Response({"error": "not a valid get request"},
                         status = status.HTTP_400_BAD_REQUEST)
 
     def post(self, request):
         path = request.path
         if path == "/guardar-acta/":
-            return save_acta(request)
+            return self.docs_do.save_acta() 
+
+        if path == f"/crear-excel/impresiones/":
+            return self.docs_do.create_print_doc(request = request)
 
         return Response({"error": "not a valid post request"},
                         status = status.HTTP_400_BAD_REQUEST)

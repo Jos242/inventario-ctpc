@@ -76,10 +76,16 @@ IGNORE 1 LINES
 -- UPDATE activos SET precio = NULL WHERE precio = 0.00;
 UPDATE activos SET estado = 'Bueno' WHERE estado = 'BEENO';
 UPDATE activos SET estado = NULL WHERE estado = 'TESTING';
-update activos SET precio = NULL WHERE precio = 'N/A';
-update activos SET precio = NULL WHERE precio = '';
+UPDATE activos SET precio = NULL WHERE precio = 'N/A';
+UPDATE activos SET precio = NULL WHERE precio = '';
 -- UPDATE activos SET estado = 'REGULAR' WHERE estado = 'N/I';
 -- UPDATE activos set marca  = NULL WHERE marca = 'N/I';
 -- UPDATE activos set modelo = NULL WHERE modelo = 'N/I';
 ALTER TABLE activos MODIFY precio Decimal(10,2);
+ALTER TABLE activos ADD impreso BOOLEAN DEFAULT 0;
+ALTER TABLE observaciones ADD impreso BOOLEAn DEFAULT 0;
+UPDATE activos SET impreso = 1 WHERE impreso = 0;
+UPDATE observaciones SET impreso = 1 WHERE impreso = 0; 
+
+
 -- SHOW VARIABLES LIKE "sec{ure_file_priv";
