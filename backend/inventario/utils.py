@@ -284,23 +284,27 @@ class DocsActions:
                     status = status.HTTP_400_BAD_REQUEST)
 
     def create_print_doc(self, request) -> Response:
-        # activos = Activos.objects.filter(impreso = False).values('id_registro', 'creado_el', 'impreso')
-        # activos_list = list(activos) 
-
-        # #Situacion donde todos son activos
-        # if activos == len(activos_list)
-        # activos_list = list(activos)
-        # print(len(activos))
         serializer = WhatTheExcelTypeIs(data = request.data)
 
         if serializer.is_valid():
-            print_type = serializer.validated_data['type']
+            file_name:str = serializer.validated_data.get("file_name")
+            
+            if '.xlsx' not in file_name:
+                return Response({"error": "add file extension '.xlsx' to the 'file_name' value"},
+                                status = status.HTTP_400_BAD_REQUEST)
+
+            print_type = serializer.validated_data.get('type')
+            path_to_save = os.path.join(MEDIA_ROOT, 'documentos_de_impresion' ,file_name)
+            bold_param = {'bold': True}
+            center_text_param = {'align': 'center'}
+            font_type = {'font_name': 'Arial'}
+            font_size = {'font_size': 11}
+
             if print_type == "SoloActivos":
                 activos = Activos.objects.filter(impreso = False).values('id_registro', 'asiento', 'no_identificacion', 
                                                                          'descripcion', 'marca', 'modelo', 'serie')
-                activos_list = list(activos)
-                print(activos_list)
-                workbook = xlsxwriter.Workbook('demo.xlsx')
+                activos_list = list(activos) 
+                workbook = xlsxwriter.Workbook(path_to_save)
                 worksheet = workbook.add_worksheet()
                 #Para aumentar el ancho de la columna-------------------------------------
                 worksheet.set_column('A:A', 14.57) 
@@ -309,16 +313,21 @@ class DocsActions:
                 worksheet.set_column('D:D', 20.29) 
                 worksheet.set_column('E:E', 11.86) 
                 worksheet.set_column('F:F', 17.57)
-                worksheet.set_column('G:G', 19.71)
-    
+                worksheet.set_column('G:G', 19.71) 
                 #Crea un objeto 'Format' para dar formato al texto------------------------
                 bold = workbook.add_format({'bold': True})
                 counter = 1
+
                 for activo in activos_list:
                     if counter == 1:
-                        worksheet.write(f'A1', "Registrado en", bold)
-                        worksheet.write(f'B1', "1", bold)
-                        worksheet.write(f'C1', "No. Identificacion", bold)
+                        worksheet.write(f'A1', "Registrado en",
+                                        workbook.add_format(bold_param | center_text_param |
+                                                            font_type | font_size))
+                        worksheet.write(f'B1', "1", 
+                                        workbook.add_format(bold_param | center_text_param))
+                                        
+                        worksheet.write(f'C1', "No. Identificacion", 
+                                        workbook.add_format(bold_param | center_text_param))
                         worksheet.write(f'D1', "Descripción", bold)
                         worksheet.write(f'E1', "Marca", bold)
                         worksheet.write(f'F1', "Modelo", bold)
@@ -326,34 +335,41 @@ class DocsActions:
                         counter += 1
                         continue
 
-                    worksheet.write(f'A{counter}', activo['id_registro'])
-                    worksheet.write(f'B{counter}', activo['asiento'])
-                    worksheet.write(f'C{counter}', activo['no_identificacion'])
+                    worksheet.write(f'A{counter}', activo['id_registro'], 
+                                    workbook.add_format(center_text_param | font_type | font_size))
+                    worksheet.write(f'B{counter}', activo['asiento'],
+                                    workbook.add_format(bold_param | center_text_param))
+                    worksheet.write(f'C{counter}', activo['no_identificacion'],
+                                    workbook.add_format(center_text_param))
                     worksheet.write(f'D{counter}', activo['descripcion'])
                     worksheet.write(f'E{counter}', activo['marca'])
                     worksheet.write(f'F{counter}', activo['modelo'])
                     worksheet.write(f'G{counter}', activo['serie'])
-
                     counter += 1
-                workbook.close()
 
-                return Response("un poco xD",
+                workbook.close()
+                Activos.objects.filter(impreso = False).update(impreso = True)  
+                return Response({"success": f"go to '/media/documentos_de_impresion/{file_name}/' to download the file"},
                                 status = status.HTTP_200_OK)
 
             if print_type == "SoloObservaciones":
-                #Para aumentar el ancho de la columna-------------------------------------
-                worksheet.set_column('A:A', 14.57) 
-                worksheet.set_column('B:B', 2.29) 
-                worksheet.set_column('C:C', 86.29) 
-                worksheet.set_column('D:D', 20.29) 
-                worksheet.set_column('E:E', 11.86) 
-                worksheet.set_column('F:F', 17.57)
-                worksheet.set_column('G:G', 19.71)
+                # workbook = xlsxwriter.Workbook(path_to_save) 
+                # worksheet = workbook.add_worksheet()
+                # #Para aumentar el ancho de la columna-------------------------------------
+                # worksheet.set_column('A:A', 14.57) 
+                # worksheet.set_column('B:B', 2.29) 
+                # worksheet.set_column('C:C', 86.29) 
+                # worksheet.set_column('D:D', 20.29) 
+                # worksheet.set_column('E:E', 11.86) 
+                # worksheet.set_column('F:F', 17.57)
+                # worksheet.set_column('G:G', 19.71)
+                return Response({"testing": "SoloObservaciones"},
+                                status = status.HTTP_200_OK)
+
+            if print_type == "ObservacionesYActivos":
+                return Response({"testing": "ObservacionesYActivos"}, 
+                                status = status.HTTP_200_OK)
     
-
-            return Response(serializer.data, 
-                            status = status.HTTP_200_OK) 
-
         return Response(serializer.errors,
                         status = status.HTTP_200_OK)
 #--------------------------------------------------------    
