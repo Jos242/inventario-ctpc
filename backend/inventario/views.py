@@ -1,3 +1,4 @@
+from typing import Any
 from django.shortcuts import render
 #----------------------------------------------
 from rest_framework.parsers     import JSONParser
@@ -8,11 +9,12 @@ from rest_framework.parsers     import FormParser, MultiPartParser, JSONParser
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.authentication import JWTAuthentication
 #----------------------------------------------
-from .utils import (get_remaining_fields, all_activos, all_observaciones, 
-                    activos_filter_column, add_activo, get_activo_by_id,
+from .utils import (get_remaining_fields, all_observaciones, 
                     get_observacion_by_id_registro, add_new_observacion, 
                     new_usuario, sign_up, log_out, save_acta, get_all_docs,
                     get_doc_by_id)
+
+from .utils_v2 import *
 #----------------------------------------------
 
 """
@@ -21,6 +23,7 @@ que se llame views.py, se encargan de generar la
 accion a realizar (POST, GET, PUT...) que solicite
 el cliente.
 """
+
 class ActivosView(APIView):
     """
     Los metodos llevan el nombre de el metodo HTTP
@@ -30,8 +33,13 @@ class ActivosView(APIView):
     parser_classes = (FormParser, MultiPartParser, JSONParser)
     permission_classes = [IsAuthenticatedOrReadOnly]
     authentication_classes = [JWTAuthentication]
+    activos_do:ActivosActions = None
 
-    def get(self, request, pk = None):
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.activos_do = ActivosActions()     
+
+    def get(self, request, pk:int = None):
         """
         Los metodos HTTP llevan como param el request,
         que en pocas palabras es el HTTP Header que el 
@@ -39,20 +47,24 @@ class ActivosView(APIView):
         nosotros generamos la respuesta necesaria en base 
         al request
         """
-
         path = request.path
-        if path == "/todos-los-activos/": 
-            return all_activos()
+
+        if path == "/todos-los-activos/":
+            return self.activos_do.all_activos()
+        
         if path == "/activos-filtrados-columna/":
-            return activos_filter_column()
+            return self.activos_do.activos_filter_column()   
+        
         if path == f"/activo/{pk}/":
-            return get_activo_by_id(pk)
+            return self.activos_do.get_activo_by_id(pk)
+ 
         return Response({"data": "did not match an endpoint for a HTTP GET Method"}, status= status.HTTP_404_NOT_FOUND)
 
     def post(self, request):
         path = request.path
+
         if path == "/agregar-activo/":
-            resp = add_activo(request)
+            resp = self.activos_do.add_activo(request)  
             return resp
         return Response({"data": "did not match an endpoint for a HTTP POST Method"}, status = status.HTTP_404_NOT_FOUND)
 
@@ -77,16 +89,23 @@ class ObservacionesView(APIView):
         
 
 class UserView(APIView):
+
     authentication_classes = []
     permission_classes = [] 
+    user_do:UserActions = None
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.user_do = UserActions()
+
     def post(self, request):
         path = request.path
         if path == "/crear-usuario/": 
-            return new_usuario(request)
+            
+            return self.user_do.new_usuario(request)
         if path == "/iniciar-sesion/":
-            return sign_up(request)
+            return self.user_do.sign_up(request)
         if path == "/salir/":
-            return log_out(request)
+            return self.user_do.log_out(request)
 
 class DocsView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
