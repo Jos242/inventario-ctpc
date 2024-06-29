@@ -36,7 +36,7 @@ class ActivosView(APIView):
         super().__init__(**kwargs)
         self.activos_do = ActivosActions()     
 
-    def get(self, request, pk:int = None):
+    def get(self, request, pk:int = None, no_identificacion:str = None):
         """
         Los metodos HTTP llevan como param el request,
         que en pocas palabras es el HTTP Header que el 
@@ -54,7 +54,12 @@ class ActivosView(APIView):
         
         if path == f"/activo/{pk}/":
             return self.activos_do.get_activo_by_id(pk)
- 
+
+        if path == f"/activo/{no_identificacion}/":
+            print(f"Hello macaco {no_identificacion}")
+            rp:Response = self.activos_do.get_activo_by_no_identificacion(no_identificacion)
+            return rp
+
         return Response({"data": "did not match an endpoint for a HTTP GET Method"}, status= status.HTTP_404_NOT_FOUND)
 
     def post(self, request):

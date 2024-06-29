@@ -121,6 +121,17 @@ class ActivosActions:
         serializer:ActivoSerializer = ActivoSerializer(instance = activo)
         return Response(serializer.data,
                         status = status.HTTP_400_BAD_REQUEST)
+    
+    def get_activo_by_no_identificacion(self, no_identificacion:str) -> Response:
+        try:
+            activo:Response = Activos.objects.get(no_identificacion = no_identificacion)
+            serializer:ActivoSerializer = ActivoSerializer(instance = activo) 
+        except Activos.DoesNotExist:
+            return Response({"error": "activos does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+
+        return Response(serializer.data,
+                        status = status.HTTP_200_OK) 
 #--------------------------------------------------------
     
 #Metodos para el HTTP POST-------------------------------
@@ -367,6 +378,7 @@ class DocsActions:
                                 status = status.HTTP_200_OK)
 
             if print_type == "ObservacionesYActivos":
+                 
                 return Response({"testing": "ObservacionesYActivos"}, 
                                 status = status.HTTP_200_OK)
     
