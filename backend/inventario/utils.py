@@ -126,12 +126,14 @@ class ActivosActions:
         try:
             activo:Response = Activos.objects.get(no_identificacion = no_identificacion)
             serializer:ActivoSerializer = ActivoSerializer(instance = activo) 
+            return Response(serializer.data,
+                            status = status.HTTP_200_OK) 
+
         except Activos.DoesNotExist:
-            return Response({"error": "activos does not exist"},
+            return Response({"error": "activo does not exist"},
                             status = status.HTTP_404_NOT_FOUND)
 
-        return Response(serializer.data,
-                        status = status.HTTP_200_OK) 
+        
 #--------------------------------------------------------
     
 #Metodos para el HTTP POST-------------------------------
@@ -173,7 +175,7 @@ class ObservacionesActivos():
 
 #Metodos para el HTTP POST-------------------------------
 
-    def add_new_observacion(request) -> Response:
+    def add_new_observacion(self, request) -> Response:
         remaining_fields:dict = get_remaining_fields()
         remaining_fields.pop('no_identificacion')
         serializer = ObservacionesSerializer(data = request.data)
@@ -364,16 +366,53 @@ class DocsActions:
                                 status = status.HTTP_200_OK)
 
             if print_type == "SoloObservaciones":
-                # workbook = xlsxwriter.Workbook(path_to_save) 
-                # worksheet = workbook.add_worksheet()
-                # #Para aumentar el ancho de la columna-------------------------------------
-                # worksheet.set_column('A:A', 14.57) 
-                # worksheet.set_column('B:B', 2.29) 
-                # worksheet.set_column('C:C', 86.29) 
-                # worksheet.set_column('D:D', 20.29) 
-                # worksheet.set_column('E:E', 11.86) 
-                # worksheet.set_column('F:F', 17.57)
-                # worksheet.set_column('G:G', 19.71)
+                workbook = xlsxwriter.Workbook(path_to_save) 
+                worksheet = workbook.add_worksheet()
+                observaciones:Observaciones = Observaciones.objects.filter(impreso = False).values('id_registro', 'asiento', 'descripcion')
+                observaciones_list:list = list(observaciones)
+                #Para aumentar el ancho de la columna-------------------------------------
+                worksheet.set_column('A:A', 14.57) 
+                worksheet.set_column('B:B', 2.29) 
+                worksheet.set_column('C:C', 86.29) 
+                worksheet.set_column('D:D', 20.29) 
+                worksheet.set_column('E:E', 11.86) 
+                worksheet.set_column('F:F', 17.57)
+                worksheet.set_column('G:G', 19.71)
+                counter = 1
+                last_id_registro_checked = None 
+                for observacion in observaciones_list:
+                    obs:Observaciones = Observaciones.objects.get(id_registro = observacion['id_registro']) 
+                    worksheet.write(f'A{counter}', observacion['id_registro'],
+                                    workbook.add_format(center_text_param | font_type | font_size))
+                    print(observacion)
+                    if int(observacion['asiento']) == 2 and counter > 30:
+                        print("Entre aqui")
+                        print(observacion['asiento'])
+                        print(observacion['id_registro'])
+                        print(counter)
+                        worksheet.write(f'B{counter}', "41",
+                                        workbook.add_format(bold_param | center_text_param))
+                        worksheet.write(f'C{counter}', observacion['descripcion'])
+                        obs.asiento = 41 
+                        obs.save()
+                        break 
+
+                    worksheet.write(f'B{counter}', int(observacion['asiento']) -1,
+                                    workbook.add_format(bold_param | center_text_param))
+                    obs.asiento = int(observacion['asiento'])-1
+                    obs.save()
+                    worksheet.write(f'C{counter}', observacion['descripcion'])
+
+                    
+                    #observacion:Observaciones = Observaciones.objects.get(id_registro = observacion['id_registro'])
+                    # observacion.asiento = int(observacion['asiento']) - 1
+                    # observacion.save()
+                    
+                    if counter == 42:
+                        break
+                    counter += 1 
+                    pass 
+                workbook.close()
                 return Response({"testing": "SoloObservaciones"},
                                 status = status.HTTP_200_OK)
 

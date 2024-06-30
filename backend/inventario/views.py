@@ -72,8 +72,10 @@ class ActivosView(APIView):
 
 class ObservacionesView(APIView):
     parser_classes = (FormParser, MultiPartParser, JSONParser)
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticatedOrReadOnly] 
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticatedOrReadOnly] 
+    authentication_classes = []
+    permission_classes = []
     observaciones_do:ObservacionesActivos = None
 
     def __init__(self, **kwargs: Any) -> None:
