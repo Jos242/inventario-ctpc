@@ -8,6 +8,9 @@ from django.contrib.auth import logout, login
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from sgica.settings import MEDIA_ROOT
+from django.db.models import F, Value, CharField
+from django.db.models.functions import Cast
+
 #----------------------------------------------
 
 #Django rest frameworks herramientas-----------
@@ -92,6 +95,50 @@ def get_remaining_fields():
     next_id_registro = (f"{split_registro[0]},{split_registro[1]},{next_asiento}")
     REMAINING_FIELDS["id_registro"] = next_id_registro
     return REMAINING_FIELDS
+
+def restar_uno(id_registro:str) -> str:
+    """
+    Este metodo toma como param el id_registro y le resta uno,
+    esto haciendo que el output sea un str valido para escribirlo
+    en el excel de impresiones.
+    """
+    nums = id_registro.split(',')
+    nums[2] = f"0{int(nums[2]) - 1}" if int(nums[2])-1 < 10 else f"{int(nums[2])-1}"
+    return ",".join(nums)
+
+def update_id_registro_and_asiento(id_registro:str) -> dict:
+    """
+    Este metodo toma como el param el id_registro y le resta uno,
+    esto haciendo que el output sea un nuevo value valido para escri
+    birlo en la base de datos.
+    """
+    nums = id_registro.split(",")
+
+    if int(nums[2]) -1 < 10 and int(nums[2]) > 2:
+        nums[2] = f"0{int(nums[2]) - 1}"
+        return {
+            "id_registro": ",".join(nums),
+            "asiento": nums[2]
+        }
+    
+    if int(nums[2]) == 2:
+        nums[1] = str(int(nums[1]) -1)
+        nums[2] = "41"
+        return {
+            "id_registro": ",".join(nums),
+            "asiento": nums[2]
+        }
+
+    
+    if int(nums[2]) -1 >= 10: 
+        nums[2] = f"{int(nums[2]) - 1}"
+        return {
+            "id_registro": ",".join(nums),
+            "asiento": nums[2]
+        }
+ 
+
+
 #--------------------------------------------------------------
 
 class ActivosActions:
@@ -297,7 +344,58 @@ class DocsActions:
                     status = status.HTTP_400_BAD_REQUEST)
 
     def create_print_doc(self, request) -> Response:
-        serializer = WhatTheExcelTypeIs(data = request.data)
+        serializer = WhatTheExcelNameIs(data = request.data)
+        # resultados = (Activos.objects.filter(impreso=0)
+        #       .annotate(origen=Value('activos', output_field=CharField())) 
+        #       .values('id_registro', 'asiento', 'origen')
+        #       .union(
+        #           Observaciones.objects.filter(impreso=0)
+        #           .annotate(origen=Value('observaciones', output_field=CharField())) 
+        #           .values('id_registro', 'asiento', 'origen')
+        #       )
+        #       .order_by('id_registro'))
+        
+
+        query_activos = Activos.objects.filter(impreso=0) \
+                               .annotate(origen=Value('activos', output_field=CharField())) \
+                               .values('id_registro', 'asiento', 'origen', 'descripcion')
+
+        # Query for Observaciones
+        query_observaciones = Observaciones.objects.filter(impreso=0) \
+                                                .annotate(origen=Value('observaciones', output_field=CharField())) \
+                                                .values('id_registro', 'asiento', 'origen', 'descripcion')
+
+        # Combine both queries using union
+        resultados = query_activos.union(query_observaciones).order_by('id_registro')
+        
+        only_activos = 1
+        only_observaciones = 2
+        list_decide = []
+
+        for result in list(resultados[:41]):
+            if result['origen'] == 'observaciones':
+                list_decide.append(only_observaciones)
+            if result['origen'] == 'activos':
+                list_decide.append(only_activos)
+
+        
+        if(x == 1 for x in list_decide):
+            print_type = "SoloActivos"
+        
+        if(x == 2 for x in list_decide):
+            print_type = "SoloObservaciones"
+
+        count_1 =  list_decide.count(1)
+        count_2 =  list_decide.count(2)
+
+        if count_1 > 0 and count_2 > 0:
+            print_type = "ObservacionesYActivos"
+
+        print(print_type)      
+        print(list_decide) 
+        to_print_values = list(resultados[:41])
+
+
 
         if serializer.is_valid():
             file_name:str = serializer.validated_data.get("file_name")
@@ -305,8 +403,7 @@ class DocsActions:
             if '.xlsx' not in file_name:
                 return Response({"error": "add file extension '.xlsx' to the 'file_name' value"},
                                 status = status.HTTP_400_BAD_REQUEST)
-
-            print_type = serializer.validated_data.get('type')
+ 
             path_to_save = os.path.join(MEDIA_ROOT, 'documentos_de_impresion' ,file_name)
             bold_param = {'bold': True}
             center_text_param = {'align': 'center'}
@@ -367,9 +464,14 @@ class DocsActions:
 
             if print_type == "SoloObservaciones":
                 workbook = xlsxwriter.Workbook(path_to_save) 
-                worksheet = workbook.add_worksheet()
-                observaciones:Observaciones = Observaciones.objects.filter(impreso = False).values('id_registro', 'asiento', 'descripcion')
-                observaciones_list:list = list(observaciones)
+                worksheet = workbook.add_worksheet() 
+                observaciones_list:list = to_print_values 
+                
+                if len(observaciones_list) < 41:
+                    return Response({"error": "not enough entries to create 'tabla de impresiones'"},
+                                    status = status.HTTP_400_BAD_REQUEST)
+                print(observaciones_list) 
+
                 #Para aumentar el ancho de la columna-------------------------------------
                 worksheet.set_column('A:A', 14.57) 
                 worksheet.set_column('B:B', 2.29) 
@@ -378,46 +480,83 @@ class DocsActions:
                 worksheet.set_column('E:E', 11.86) 
                 worksheet.set_column('F:F', 17.57)
                 worksheet.set_column('G:G', 19.71)
-                counter = 1
-                last_id_registro_checked = None 
+                counter:int = 1
+                
                 for observacion in observaciones_list:
                     obs:Observaciones = Observaciones.objects.get(id_registro = observacion['id_registro']) 
-                    worksheet.write(f'A{counter}', observacion['id_registro'],
-                                    workbook.add_format(center_text_param | font_type | font_size))
-                    print(observacion)
+                    new_id_registro = restar_uno(observacion['id_registro'])
+                    new_asiento = int(observacion['asiento'] -1) 
+         
                     if int(observacion['asiento']) == 2 and counter > 30:
-                        print("Entre aqui")
-                        print(observacion['asiento'])
+                        nums = observacion['id_registro'].split(',') 
+                        nums[2] = "41"
+                        nums[1] = f"{int(nums[1]) - 1}"
+                        result =  ",".join(nums)
                         print(observacion['id_registro'])
-                        print(counter)
+                        print(nums[1]) 
+                        worksheet.write(f'A{counter}', result,
+                                    workbook.add_format(center_text_param | font_type | font_size)) 
                         worksheet.write(f'B{counter}', "41",
                                         workbook.add_format(bold_param | center_text_param))
                         worksheet.write(f'C{counter}', observacion['descripcion'])
-                        obs.asiento = 41 
+                        obs.id_registro = result
+                        obs.asiento = 41
+                        obs.impreso = True 
                         obs.save()
-                        break 
+                        last_id_registro_checked = observacion['id_registro']
+                        print(last_id_registro_checked)
+                        break
 
-                    worksheet.write(f'B{counter}', int(observacion['asiento']) -1,
+                    worksheet.write(f'A{counter}', new_id_registro,
+                                    workbook.add_format(center_text_param | font_type | font_size))
+                    worksheet.write(f'B{counter}', new_asiento,
                                     workbook.add_format(bold_param | center_text_param))
-                    obs.asiento = int(observacion['asiento'])-1
+
+                    obs.id_registro = new_id_registro
+                    obs.asiento = new_asiento
+                    obs.impreso = True
                     obs.save()
                     worksheet.write(f'C{counter}', observacion['descripcion'])
-
-                    
-                    #observacion:Observaciones = Observaciones.objects.get(id_registro = observacion['id_registro'])
-                    # observacion.asiento = int(observacion['asiento']) - 1
-                    # observacion.save()
-                    
-                    if counter == 42:
-                        break
-                    counter += 1 
-                    pass 
+                    counter += 1
+ 
                 workbook.close()
+
+                query_activos = Activos.objects.filter(impreso=0) \
+                                    .annotate(origen=Value('activos', output_field=CharField())) \
+                                    .values('id_registro', 'asiento', 'origen', 'descripcion')
+
+                # Query for Observaciones
+                query_observaciones = Observaciones.objects.filter(impreso=0) \
+                                                        .annotate(origen=Value('observaciones', output_field=CharField())) \
+                                                        .values('id_registro', 'asiento', 'origen', 'descripcion')
+
+                # Combine both queries using union
+                resultados = query_activos.union(query_observaciones).order_by('id_registro')
+                resultados_list = list(resultados)
+                for resultado in resultados_list:
+
+                    if resultado['origen'] == 'activos':                         
+                        activo:Activos = Activos.objects.get(id_registro = resultado['id_registro'])
+                        updated_values = update_id_registro_and_asiento(activo.id_registro)
+                        print("Estoy fallando antes de llegar aca (activos)")
+                        print(resultado['id_registro'])
+                        activo.id_registro = updated_values.get("id_registro")
+                        activo.asiento = updated_values.get("asiento")
+                        activo.save() 
+
+                    if resultado['origen'] == 'observaciones':
+                        observacion:Observaciones = Observaciones.objects.get(id_registro = resultado['id_registro'])
+                        updated_values = update_id_registro_and_asiento(observacion.id_registro)
+                        print("Estoy fallando antes de llegar aca (observaciones)")
+                        print(resultado['id_registro'])
+                        observacion.id_registro = updated_values.get("id_registro")
+                        observacion.asiento = updated_values.get("asiento")
+                        observacion.save()                       
+
                 return Response({"testing": "SoloObservaciones"},
                                 status = status.HTTP_200_OK)
 
-            if print_type == "ObservacionesYActivos":
-                 
+            if print_type == "ObservacionesYActivos": 
                 return Response({"testing": "ObservacionesYActivos"}, 
                                 status = status.HTTP_200_OK)
     

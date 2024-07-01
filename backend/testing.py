@@ -2,19 +2,6 @@ import requests
 import xlsxwriter
 
 
-# UPDATE observaciones
-# SET impreso = 1
-# WHERE impreso = 0 AND id_registro = '1,137,01';
-
-# UPDATE observaciones
-# SET impreso = 0
-# WHERE impreso = 1 AND id_registro = '1,137,02';
-
-
-
-# DELETE FROM observaciones
-# WHERE id_registro = '1,137,01';
-
 url = "http://127.0.0.1:8000/agregar-activo/"
 data = {
     "descripcion": "Azul",
@@ -43,7 +30,7 @@ def test_all_activos():
     }
 
 
-    for i in range(41):
+    for i in range(20):
         x = requests.post(
             url = url,
             json = data
@@ -57,7 +44,8 @@ def test_observaciones():
         "activo": "1,124,31"
     }
 
-    for i in range(41):
+    #41
+    for i in range(82):
         x = requests.post(
             url = url,
             json = data
@@ -65,10 +53,43 @@ def test_observaciones():
 
     print(x.text)
     
-
 #testing for observaciones and activos------
 def test_observaciones_y_activos():
     pass
 
-
 test_observaciones()
+test_all_activos()
+
+
+# def update_id_registro_and_asiento(id_registro:str) -> dict:
+#     """
+#     Este metodo toma como el param el id_registro y le resta uno,
+#     esto haciendo que el output sea un nuevo value valido para escri
+#     birlo en la base de datos.
+#     """
+#     nums = id_registro.split(",")
+
+#     if int(nums[2]) -1 < 10 and int(nums[2]) > 2:
+#         nums[2] = f"0{int(nums[2]) - 1}"
+#         return {
+#             "id_registro": ",".join(nums),
+#             "asiento": nums[2]
+#         }
+    
+#     if int(nums[2]) == 2:
+#         nums[1] = str(int(nums[1]) -1)
+#         nums[2] = "41"
+#         return {
+#             "id_registro": ",".join(nums),
+#             "asiento": nums[2]
+#         }
+
+    
+#     if int(nums[2]) -1 >= 10: 
+#         nums[2] = f"{int(nums[2]) - 1}"
+#         return {
+#             "id_registro": ",".join(nums),
+#             "asiento": nums[2]
+#         }
+
+# print(update_id_registro_and_asiento('1,138,11'))

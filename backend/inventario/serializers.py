@@ -104,11 +104,5 @@ class ReadDocSerializer(serializers.ModelSerializer):
         model = Docs
         fields = ['id', 'titulo', 'tipo', 'ruta', 'creado_el']
 
-class WhatTheExcelTypeIs(serializers.Serializer):
+class WhatTheExcelNameIs(serializers.Serializer):
     file_name = serializers.CharField()
-    type = serializers.ChoiceField(choices=[
-        ("SoloActivos", "SoloActivos"),
-        ("SoloObservaciones", "SoloObservaciones"),
-        ("ObservacionesYActivos", "ObservacionesYActivos")
-    ], allow_blank=False)
-    
