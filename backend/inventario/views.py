@@ -109,8 +109,7 @@ class UserView(APIView):
 
     def post(self, request):
         path = request.path
-        if path == "/crear-usuario/": 
-            
+        if path == "/crear-usuario/":  
             return self.user_do.new_usuario(request)
         if path == "/iniciar-sesion/":
             return self.user_do.sign_up(request)

@@ -251,6 +251,7 @@ class UserActions:
 
 #Metodos para el HTTP POST-------------------------------
     def new_usuario(self, request) -> Response:
+        
         serializer:UserSerializer = UserSerializer(data = request.data)
         
         if serializer.is_valid():
