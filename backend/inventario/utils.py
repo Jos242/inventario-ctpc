@@ -10,7 +10,7 @@ from django.contrib.auth import authenticate
 from sgica.settings import MEDIA_ROOT
 from django.db.models import F, Value, CharField
 from django.db.models.functions import Cast
-
+from django.http import Http404
 #----------------------------------------------
 
 #Django rest frameworks herramientas-----------
@@ -253,15 +253,47 @@ class UserActions:
     def new_usuario(self, request) -> Response:
         
         serializer:UserSerializer = UserSerializer(data = request.data)
-        
-        if serializer.is_valid():
-            user:User = serializer.create(serializer.validated_data)
-            user.set_password(serializer.validated_data.get('password'))
+             
+        if serializer.is_valid():       
+            user_type:str = serializer.validated_data.get('user_type') 
+            user:User = serializer.create_instance(serializer.validated_data) 
+
+            if user_type == 'OBSERVADOR':
+                user.is_staff = False
+                user.is_superuser = False
+
+            if user_type == 'ADMINISTRADOR':
+                user.is_staff = False
+                user.is_superuser = False
+
+            if user_type == 'PROFESOR': 
+                user.save()
+                data = serializer.validated_data | {"user": user.pk}
+                extra_info_serializer= ExtraInfoSerializer(data = data)
+                print(extra_info_serializer) 
+                
+                if extra_info_serializer.is_valid():
+                    validated_data = extra_info_serializer.validated_data
+                    extra_info = extra_info_serializer.create(validated_data = validated_data) 
+                    data = extra_info_serializer.data | serializer.data
+                    
+                    del data['user']
+                    del data['user_type']
+                    print(data) 
+
+                    return Response(data,
+                                    status = status.HTTP_200_OK)
+
+                User.objects.get(pk = user.pk).delete() 
+                return Response(extra_info_serializer.errors)
+
             user.save()
             print(serializer) 
-            return Response(serializer.validated_data, status = status.HTTP_200_OK) 
+            return Response(serializer.validated_data, 
+                            status = status.HTTP_200_OK) 
    
-        return Response(serializer.errors, status = status.HTTP_200_OK)
+        return Response(serializer.errors,
+                         status = status.HTTP_200_OK)
   
     def sign_up(self, request) -> Response:
         required_keys:tuple = ("username", "password")

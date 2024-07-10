@@ -88,7 +88,7 @@ class Docs(models.Model):
         return f"Title: {self.titulo}, Path: {self.ruta}" 
 
 class Puestos(models.Model):
-
+    id = models.AutoField(primary_key = True)
     descripcion = models.CharField(unique=True, max_length=240)
 
     class Meta:
@@ -99,6 +99,7 @@ class Puestos(models.Model):
         return self.descripcion
 
 class Departamentos(models.Model):
+    id = models.AutoField(primary_key = True)
     descripcion = models.CharField(unique=True, max_length=240)
 
     class Meta:
@@ -109,6 +110,7 @@ class Departamentos(models.Model):
         return self.descripcion
     
 class Aulas(models.Model):
+    id = models.AutoField(primary_key = True)
     descripcion = models.CharField(unique=True, max_length=240)
 
     class Meta:

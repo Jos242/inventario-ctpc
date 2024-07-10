@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from inventario.models import Activos, Observaciones, Docs
+from inventario.models import *
 from rest_framework import serializers
 
 class ActivoSerializer(serializers.Serializer):
@@ -72,11 +72,40 @@ class ObservacionesSerializer(serializers.Serializer):
         return Observaciones.objects.create(**validated_data)
      
 class UserSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField(max_length=150)
-    last_name = serializers.CharField(max_length=150) 
+    user_type = serializers.ChoiceField(choices=[
+                ("ADMINISTRADOR", "ADMINISTRADOR"),
+                ("PROFESOR", "PROFESOR"),
+                ("OBSERVADOR", "OBSERVADOR")
+            ], required=True)
+    nombre_completo = serializers.CharField()
+    departamento = serializers.SlugRelatedField(queryset = Departamentos.objects.all(), slug_field = 'id',
+                                                required = False)
+    puesto = serializers.SlugRelatedField(queryset = Puestos.objects.all(), slug_field='id',
+                                           required = False)
+    aula = serializers.SlugRelatedField(allow_null = True, queryset = Aulas.objects.all(),
+                                         required = False, slug_field = 'id')
+
+    
     class Meta:
         model  = User
-        fields = ['username', 'first_name', 'last_name', 'password'] 
+        fields = ['username', 'password', 'user_type',
+                  'nombre_completo', 'departamento', 'puesto',
+                  'aula']
+
+    def create_instance(self, validated_data:dict):
+        user:User = User(
+            username = validated_data.get('username'),
+            password = validated_data.get('password')
+        )
+        user.set_password(user.password)  
+        return user
+class ExtraInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExtraInfo
+        fields = ['user', 'nombre_completo', 'departamento',
+                  'puesto', 'aula']
+    
+
 
 class ReadUserSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150, required = False)
@@ -106,3 +135,4 @@ class ReadDocSerializer(serializers.ModelSerializer):
 
 class WhatTheExcelNameIs(serializers.Serializer):
     file_name = serializers.CharField()
+
