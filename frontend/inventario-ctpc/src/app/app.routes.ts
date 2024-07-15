@@ -9,6 +9,7 @@ import { ActaIndexComponent } from './acta/acta-index/acta-index.component';
 import { LoginIndexComponent } from './login/login-index/login-index.component';
 import { ActaBajaCreateComponent } from './acta/acta-baja-create/acta-baja-create.component';
 import { ActaMoverCreateComponent } from './acta/acta-mover-create/acta-mover-create.component';
+import { ActivoScanComponent } from './activo/activo-scan/activo-scan.component';
 
 
 export const routes: Routes = [
@@ -21,7 +22,10 @@ export const routes: Routes = [
     { path:'actas/traslado', component: ActaMoverCreateComponent, canActivate: [authGuard]},
     
     { path:'activos/crear', component: ActivoCreateComponent, canActivate: [authGuard]},
+    { path:'activos/scan', component: ActivoScanComponent },
+
     { path:'activos/:id', component: ActivoDetailComponent },
+    
 
     //en caso de que el link no tenga nada, se redirige a /home
     { path:'', redirectTo:'/index' ,pathMatch:'full'},

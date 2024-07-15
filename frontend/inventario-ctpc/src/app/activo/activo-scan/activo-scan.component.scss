@@ -1,0 +1,113 @@
+.inst h1{
+    margin: 0 auto;
+    max-width: 80%;
+}
+
+.titulo h1{
+    font-size: xx-large;
+    font-weight: bold;
+}
+
+
+
+@import url('https://fonts.googleapis.com/css?family=Libre+Barcode+128+Text');
+
+
+// html, body {
+//     box-sizing: border-box;
+//     height: 100%;
+//     margin: 0;
+//     padding: 0;
+//   }
+  
+//   *, *:before, *:after {
+//     box-sizing: inherit;
+//   }
+  
+//   body {
+//     display: flex;
+//     justify-content: center;
+//     align-items: center;
+//     background: #0B1110;
+//     background: linear-gradient(45deg, #0B1110, #171717);
+//     cursor: pointer;
+//   }
+  
+//   .glowing-animation {
+//     animation: glowing 17000ms infinite;
+//   }
+  
+//   @keyframes glowing {
+//     0% { box-shadow: 0 0 -2px 1 rgba(61, 72, 70, .4) }
+//     40% { box-shadow: 0 0 20px 3px rgba(61, 72, 70, .5) }
+//     60% { box-shadow: 0 0 30px 3px rgba(61, 72, 70, .3) }
+//     100% { box-shadow: 0 0 -10px 0 rgba(61, 72, 70, .2) }
+//   }
+  
+  #barcodeContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    // background-color: #0B1110;
+    padding: 0px 20px;
+    // border-radius: 15px;
+    // box-shadow: 0 0px 1px rgba(61, 72, 70, .8);
+    // cursor: crosshair;
+    margin: 0 auto;
+    margin-top: 70px;
+    width: 20%;
+    height: 100px;
+  }
+  
+  #barcode {
+    position: relative;
+    color: #000000;
+    font-family: 'Libre Barcode 128 Text', cursive;
+    font-size: 5rem;
+    font-weight: 100;
+    white-space: nowrap;
+  }
+  
+  .animatedSpan {
+    user-select: none;
+  }
+  
+//   .animatedSpan:hover {
+//     color: darkturquoise;
+//   }
+  
+  .barcodeSelected {
+    color: darkturquoise;
+  }
+  
+//   .highlighted {
+//     color: #beafaf;
+//     border-bottom: 1px solid rgb(255, 0, 0);
+//     padding-bottom: 10px;
+//     text-shadow: 1px 1px 35px rgb(255, 0, 0);
+//   }
+
+.highlighted {
+    color: rgb(0, 55, 138);
+    border-bottom: 1px solid rgb(255, 0, 0);
+    padding-bottom: 10px;
+    text-shadow: 1px 1px 35px rgb(0, 202, 202);
+  }
+
+
+  /* HTML: <div class="loader"></div> */
+.loader {
+    width: fit-content;
+    font-weight: bold;
+    font-family: monospace;
+    font-size: 30px;
+    clip-path: inset(0 3ch 0 0);
+    animation: l4 1s steps(4) infinite;
+    margin: 0 auto;
+    height: 30px;
+    padding-left: 40px;
+  }
+  .loader:before {
+    content:"Esperando escaneo..."
+  }
+  @keyframes l4 {to{clip-path: inset(0 -1ch 0 0)}}
