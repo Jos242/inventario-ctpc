@@ -28,6 +28,7 @@
 button{
     max-width: 150px;
     margin-left: 12px;
+    margin-top: 5px;
 }
 
 .titulo{
@@ -39,3 +40,8 @@ button{
     font-size: xx-large;
 }
 
+@media (max-width: 769px) {
+  .formAgregar{
+    max-width: 90%;
+  }
+}

@@ -1,27 +1,31 @@
-.divLogin{
+.divLogin {
     margin: 0 auto;
-    width: 40%;
+    width: 90%; /* Change width to 90% for better appearance on small screens */
+    max-width: 400px; /* Add max-width for larger screens */
     margin-top: 1%;
 }
 
-.inputsForm{
+.inputsForm {
     width: 100%;
 }
 
-mat-card-actions button{
+mat-card-actions button {
     margin: 5px;
 }
 
-.logo{
+.logo {
     margin: 0 auto;
     margin-top: 10px;
+    text-align: center; /* Ensure the logo is centered */
 }
 
-.logo img{
+.logo img {
     max-width: 200px;
+    width: 100%; /* Ensure the image is responsive */
 }
 
-h1{
+h1 {
     margin-top: 25px;
     font-size: xx-large;
+    text-align: center; /* Ensure the title is centered */
 }

@@ -1,11 +1,13 @@
 .inst h1{
     margin: 0 auto;
     max-width: 80%;
+    text-align: center;
 }
 
 .titulo h1{
     font-size: xx-large;
     font-weight: bold;
+    text-align: center;
 }
 
 
@@ -106,8 +108,16 @@
     margin: 0 auto;
     height: 30px;
     padding-left: 40px;
+    text-align: center;
   }
   .loader:before {
     content:"Esperando escaneo..."
   }
   @keyframes l4 {to{clip-path: inset(0 -1ch 0 0)}}
+
+  @media (max-width: 768px) {
+    /* For mobile phones: */
+    .loader{
+      padding-left:0px ;
+    }
+  }

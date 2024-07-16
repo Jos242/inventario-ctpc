@@ -1,55 +1,51 @@
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
-    <div class="container-fluid">
-
-        <a class="navbar-brand" [routerLink]="['/index']">
-            <img src="assets/images/logocole.png" alt="Logo" width="50" class="d-inline-block align-text-middle">
-            Inventario CTP Carrizal
-          </a>
-
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
-        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <li class="nav-item"> 
-            <button mat-button [routerLink]="'/activos/scan'" >
-                <mat-icon>barcode_reader</mat-icon>
-                <span>Escanear</span>
-            </button>
-
-          </li>
-          <li class="nav-item"> 
-            <button mat-button [routerLink]="'/activos'" >
-                <mat-icon>list</mat-icon>
-                <span>Listado de Activos</span>
-            </button>
-            <!-- <a class="nav-link" [routerLink]="['/activos']">Listado de Activos</a> -->
-          </li>
-          <li class="nav-item"> 
-            <button mat-button [routerLink]="'/actas'" >
-                <mat-icon>description</mat-icon>
-                <span>Impresion de Actas</span>
-            </button>
-          </li>
-          <li class="nav-item"> 
-            <button mat-button [routerLink]="'/activos/crear'" >
-                <mat-icon>add_box</mat-icon>
-                <span>Crear Activos</span>
-            </button>
-          </li>
-          <li class="nav-item"> 
-            <button mat-button [routerLink]="'/admin'" >
-                <mat-icon>settings</mat-icon>
-                <span>Administracion</span>
-            </button>
-          </li>
-          <li class="nav-item"> 
-            <button mat-button (click)="logout()" >
-                <mat-icon>logout</mat-icon>
-                <span>Cerrar Sesion</span>
-            </button>
-          </li>
-        </ul>
-      </div>
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center" [routerLink]="['/index']">
+      <img src="assets/images/logocole.png" alt="Logo" width="50" class="d-inline-block align-text-middle">
+      <span class="ms-2 d-none d-lg-inline">Inventario CTP Carrizal</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item"> 
+          <button mat-button [routerLink]="'/activos/scan'" >
+            <mat-icon>barcode_reader</mat-icon>
+            <span>Escanear</span> 
+          </button>
+        </li>
+        <li class="nav-item"> 
+          <button mat-button [routerLink]="'/activos'" >
+            <mat-icon>list</mat-icon>
+            <span>Listado de Activos</span>
+          </button>
+        </li>
+        <li class="nav-item"> 
+          <button mat-button [routerLink]="'/actas'" >
+            <mat-icon>description</mat-icon>
+            <span>Impresion de Actas</span>
+          </button>
+        </li>
+        <li class="nav-item"> 
+          <button mat-button [routerLink]="'/activos/crear'" >
+            <mat-icon>add_box</mat-icon>
+            <span>Crear Activos</span>
+          </button>
+        </li>
+        <li class="nav-item"> 
+          <button mat-button [routerLink]="'/admin'" >
+            <mat-icon>settings</mat-icon>
+            <span>Administracion</span>
+          </button>
+        </li>
+        <li class="nav-item"> 
+          <button mat-button (click)="logout()" >
+            <mat-icon>logout</mat-icon>
+            <span>Cerrar Sesion</span>
+          </button>
+        </li>
+      </ul>
     </div>
-  </nav>
+  </div>
+</nav>

@@ -42,13 +42,25 @@ table {
 
 .example-loading-shade {
   position: absolute;
-  top: 0;
+  top: 73px; /* Adjust this to match your header height */
   left: 0;
-  bottom: 56px;
+  bottom: 0; /* Changed to 0 to cover the entire content area below the header */
   right: 0;
   background: rgba(0, 0, 0, 0.15);
   z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@media (max-width: 1435px) {
+  .example-container{
+      width: 90%;
+  }
+}
+
+@media (max-width: 768px) {
+  .example-container{
+      width: 97%;
+  }
 }

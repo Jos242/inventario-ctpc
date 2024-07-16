@@ -10,13 +10,18 @@
 .row{ 
     margin: 0 auto;
     margin-top:50px ;
-    width: 80%;
+    width: 90%;
 }
 
 mat-card{
 
     text-align: justify;
-    min-height:240px;
+    
+    margin-bottom: 15px;
+}
+
+.example-card{
+    min-height:270px;
 }
 
 .card-subtitle{
@@ -27,4 +32,28 @@ h1{
     margin-top: 25px;
     font-size: xx-large;
 }
+
+div div h1{
+    text-align: center;
+}
+
+@media (min-width: 912px) and (max-width: 1400px) {
+    .example-card{
+        min-height:200px;
+    }
+  }
+
+@media (max-width: 768px) {
+    /* For mobile phones: */
+    .logo img{
+        max-width: 150px;
+    }
+
+    .row{
+        width: 95%;
+        margin-top: 10px;
+    }
+  }
+
+ 
 

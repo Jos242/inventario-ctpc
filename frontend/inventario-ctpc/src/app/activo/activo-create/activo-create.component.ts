@@ -18,6 +18,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AuthService } from '../../share/auth.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-activo-create',
@@ -76,11 +77,26 @@ export class ActivoCreateComponent {
       // const formData = this.myForm.value;
       this.gService.create('agregar-activo/', formData)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((data:any)=>{
-        console.log(data);
+      .subscribe({
+        next: (data: any) => {
+          console.log(data);
+          this.myForm.reset();
+          Swal.fire({
+            icon: 'success',
+            title: 'Exito',
+            text: 'Se ha creado el activo correctamente',
+          });
 
-        this.myForm.reset();
-      });
+        },
+        error: (error) => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Hubo un error de servidor al crear el activo, por favor intente otra vez o contacte a su administrador si el problema persiste.',
+          });
+        }
+      } 
+    );
 
       
     }

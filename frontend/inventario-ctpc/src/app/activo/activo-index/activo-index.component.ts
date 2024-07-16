@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
@@ -24,6 +24,8 @@ import {MatSort, MatSortModule} from '@angular/material/sort';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { MatTooltip } from '@angular/material/tooltip';
+import { MatPaginatorIntl } from '@angular/material/paginator';
+import Swal from 'sweetalert2';
 
 export interface ActivoData {
   id:number;
@@ -47,7 +49,7 @@ export interface ActivoData {
   templateUrl: './activo-index.component.html',
   styleUrl: './activo-index.component.scss'
 })
-export class ActivoIndexComponent implements AfterViewInit {
+export class ActivoIndexComponent implements AfterViewInit  {
 
   displayedColumns: string[] = ['id_registro', 'no_identificacion', 'descripcion', 'ubicacion'];
   dataSource: MatTableDataSource<ActivoData> = new MatTableDataSource<ActivoData>();
@@ -59,6 +61,13 @@ export class ActivoIndexComponent implements AfterViewInit {
   datos:any;
   destroy$:Subject<boolean>=new Subject<boolean>();
   baseUrl: string = environment.apiURL;
+
+  totalItems: number;
+
+  pageSizeOptions: number[] = [10, 25, 40, 100];
+  loading = false; // Add a loading state flag
+
+
 
   constructor(private gService:GenericService,
     private router:Router,
@@ -78,16 +87,50 @@ export class ActivoIndexComponent implements AfterViewInit {
       this.dataSource.sort = this.sort;
     }
 
+    ngOnDestroy(): void {
+
+      this.destroy$.complete();
+    }
+
     listaActivos(){
       this.isLoadingResults = true;  // Start loading
+
+      const loadingTimeout = setTimeout(() => {
+        if (this.isLoadingResults) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Hay problemas...',
+            text: 'La carga de datos esta durando mas de lo esperado... Por favor intente nuevamente',
+          });
+        }
+      }, 15000); // 15 seconds
+
       this.gService.list('activos-filtrados-columna/')
-        .pipe(takeUntil(this.destroy$))
-        .subscribe((data:any)=>{
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data: any) => {
           this.datos = data;
           this.dataSource.data = data;
+          this.totalItems = data.length;
+          this.updatePageSizeOptions();
           console.log(data);
           this.isLoadingResults = false; // Stop loading
-        });
+          clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
+        },
+        error: (error) => {
+          this.isLoadingResults = false; // Stop loading on error
+          clearTimeout(loadingTimeout); // Clear the timeout if there's an error
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador.',
+          });
+        }
+      });
+    }
+
+    updatePageSizeOptions() {
+      this.pageSizeOptions = [10, 25, 40, 100, this.totalItems];
     }
 
     applyFilter(event: Event) {
@@ -102,4 +145,6 @@ export class ActivoIndexComponent implements AfterViewInit {
     verDetalles(id: string): void {
       this.router.navigate(['activos/', id]);
     }
+
+  
 }
