@@ -8,4 +8,4 @@ algo dice? no habia tomado en cuenta el dolor de cabeza de estar trabajando con 
 
 eso de que casi hay mas python que front solo por todo el codigo de los excels esta funny
 
-Y eso que aun falta, espere cuando termine para que vea ese 70%
+Es que este comparado con el del gym diria yo que tiene mas bussines logic, y tambien aun falta, espere cuando termine para que vea ese 70%
