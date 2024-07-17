@@ -248,6 +248,7 @@ class UserActions:
      
     def __init__(self) -> None:
         pass
+#Metodos para el HTTP GET--------------------------------
 
 #Metodos para el HTTP POST-------------------------------
     def new_usuario(self, request) -> Response:
@@ -264,13 +265,14 @@ class UserActions:
 
             if user_type == 'ADMINISTRADOR':
                 user.is_staff = False
-                user.is_superuser = False
+                user.is_superuser = True 
 
-            if user_type == 'PROFESOR': 
+            if user_type == 'PROFESOR':
+                user.is_staff = True
+                user.is_superuser = False 
                 user.save()
                 data = serializer.validated_data | {"user": user.pk}
-                extra_info_serializer= ExtraInfoSerializer(data = data)
-                print(extra_info_serializer) 
+                extra_info_serializer= ExtraInfoSerializer(data = data) 
                 
                 if extra_info_serializer.is_valid():
                     validated_data = extra_info_serializer.validated_data
@@ -279,16 +281,13 @@ class UserActions:
                     
                     del data['user']
                     del data['user_type']
-                    print(data) 
-
+                    print(f"Aqui -> {extra_info_serializer.data['aula']}")
                     return Response(data,
                                     status = status.HTTP_200_OK)
-
+               
                 User.objects.get(pk = user.pk).delete() 
                 return Response(extra_info_serializer.errors)
 
-            user.save()
-            print(serializer) 
             return Response(serializer.validated_data, 
                             status = status.HTTP_200_OK) 
    
@@ -596,5 +595,127 @@ class DocsActions:
         return Response(serializer.errors,
                         status = status.HTTP_200_OK)
 #--------------------------------------------------------    
+
+class CierreInventarioActions():
+#Metodos para el HTTP GET---------------------------------
+    def cierre_by_pk(self, pk) -> Response:
+        try:
+            cierre = CierreInventario.objects.get(id = pk)
+            context = {
+            "id": cierre.id,
+            "profesor": str(cierre.profesor.nombre_completo),
+            "aula": str(cierre.aula),
+            "tipo_revision": str(cierre.tipo_revision),
+            "fecha": cierre.fecha,
+            "finalizado": cierre.finalizado   
+            }
+                
+        except CierreInventario.DoesNotExist:
+            return Response({"error": "cierre inventario does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+
+        return Response(context, 
+                        status = status.HTTP_200_OK)
+
+    def all_cierres(self) -> Response:
+        try: 
+            cierres = CierreInventario.objects.all()
+            serializer = ReadCierreInventarioSerializer(instance = cierres,
+                                                    many = True) 
+        except CierreInventario.DoesNotExist:
+            return Response({"error": "cierre inventario db is empty"},
+                            status = status.HTTP_404_NOT_FOUND)
+        return Response(serializer.data, 
+                        status = status.HTTP_200_OK)
+
     
+#Metodos para el HTTP POST--------------------------------
+    def nuevo_cierre(self, request):
+        serializer = CierreInventarioSerializer(data = request.data)
+        if serializer.is_valid():
+            cierre = serializer.create(serializer.validated_data)
+            serializer = CierreInventarioSerializer(instance = cierre)
+            return Response(serializer.data, 
+                            status = status.HTTP_200_OK) 
+        return Response(serializer.errors,
+                        status = status.HTTP_400_BAD_REQUEST)
+
+#Metodos para el HTTP UPDATE-------------------------------
+    def update_cierre(self, request, pk:int) -> Response:
+        data = request.data
+        serializer = CierreInventarioSerializer(data = data)
+        try:
+            cierre = CierreInventario.objects.get(id = pk)
+
+        except CierreInventario.DoesNotExist:
+            return Response({"error": "cierre inventario does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+            
+
+        if serializer.is_valid():
+            cierre:CierreInventario = serializer.update(instance = cierre,
+                                                        validated_data= serializer.validated_data)
+            cierre.save()
+            serializer = ReadCierreInventarioSerializer(instance = cierre)  
+            return Response(serializer.data) 
+
+        return Response(serializer.errors)
+
+#Metodos para el HTTP DELETE-------------------------------
+    def delete_cierre(self, pk:int) -> Response:
+        try: 
+            cierre = CierreInventario.objects.get(id = pk)
+            cierre.delete()
+        except CierreInventario.DoesNotExist:
+            return Response({"error": "cierre inventario db is empty"},
+                            status = status.HTTP_404_NOT_FOUND)
+
+        return Response({"status": "entry was deleted"}, 
+                        status = status.HTTP_200_OK)
+
 #--------------------------------------------------------    
+class RevisionesActions():
+
+#Metodos para el HTTP GET---------------------------------
+    def revision_by_id(self, pk:int) -> Response:
+        try: 
+            revision = Revisiones.objects.get(id = pk)
+            serializer = RevisionesSerializer(instance = revision)
+
+        except Revisiones.DoesNotExist:
+            return Response({"error": "revision does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+
+        return Response(serializer.data, 
+                        status = status.HTTP_200_OK)
+
+    def revision_by_no_existe(self) -> Response:
+        try: 
+            revisiones = Revisiones.objects.filter(status = "NO EXISTE")
+            serializer = RevisionesSerializer(instance = revisiones, 
+                                            many = True)
+
+        except Revisiones.DoesNotExist:
+            return Response({"error": "there are not 'revisiones' with status 'NO EXISTE'"},
+                            status = status.HTTP_404_NOT_FOUND)
+        return Response(serializer.data, 
+                        status = status.HTTP_200_OK)
+    
+#Metodos para el HTTP POST--------------------------------
+    def nueva_revision(self, request) -> Response:
+        serializer = RevisionesSerializer(data = request.data)
+
+        if serializer.is_valid():
+            if serializer.validated_data["status"] == "NO EXISTE" and "nota" not in serializer.validated_data:
+                return Response({"error": "field 'nota' is required"})
+            revision = serializer.create(serializer.validated_data)
+
+            return Response(serializer.data, 
+                            status = status.HTTP_200_OK)
+
+        return Response(serializer.errors,
+                        status = status.HTTP_400_BAD_REQUEST)
+#Metodod para el HTTP PATCH----------------------------------
+#Metodos para el HTTP DELETE---------------------------------
+
+ 

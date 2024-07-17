@@ -97,7 +97,6 @@ class ObservacionesView(APIView):
         if path == "/nueva-observacion/":
             return self.observaciones_do.add_new_observacion(request)
         
-
 class UserView(APIView):
 
     authentication_classes = []
@@ -149,3 +148,84 @@ class DocsView(APIView):
 
         return Response({"error": "not a valid post request"},
                         status = status.HTTP_400_BAD_REQUEST)
+
+class CierreInventarioView(APIView):
+    parser_classes   = (MultiPartParser, FormParser, JSONParser)
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated] 
+    authentication_classes = []
+    permission_classes = []
+    cierre_do:CierreInventarioActions = None 
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.cierre_do = CierreInventarioActions()
+
+    def get(self, request, pk = None) -> Response:
+       path = request.path
+       if f'/cierre/{pk}/' == path:
+           rp:Response = self.cierre_do.cierre_by_pk(pk)
+           return rp 
+       if '/all-cierres/' == path:
+           rp:Response = self.cierre_do.all_cierres()
+           return rp
+
+       return Response({"error": "not a valid endpoint"},
+                       status = status.HTTP_400_BAD_REQUEST) 
+
+    def post(self, request) -> Response:
+       path = request.path
+       if '/nuevo-cierre/' == path:
+           rp:Response = self.cierre_do.nuevo_cierre(request)
+           return rp
+
+       return Response({"error": "not a valid endpoint"},
+                       status = status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk = None):
+        path = request.path
+        if f"/update-cierre/{pk}/" == path:
+            rp:Response = self.cierre_do.update_cierre(request = request,
+                                                       pk = pk)
+            return rp 
+
+    def delete(self, request, pk = None) -> Response:
+        path = request.path
+        if f"/delete-cierre/{pk}/" == path:
+            rp:Response = self.cierre_do.delete_cierre(pk)
+            return rp
+
+        return Response({"error": "not a valid endpoint"},
+                       status = status.HTTP_400_BAD_REQUEST)
+
+
+
+class RevisionesView(APIView):
+    parser_classes   = (MultiPartParser, FormParser, JSONParser)
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated] 
+    authentication_classes = []
+    permission_classes = []
+    revisiones_do:RevisionesActions = None
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.revisiones_do = RevisionesActions()
+    
+    def get(self, request, pk = None):
+       path = request.path
+
+       if f"/revision/{pk}/" == path:
+            rp:Response = self.revisiones_do.revision_by_id(pk)
+            return rp
+
+       if "/no-existe/revisiones/" == path:
+            rp:Response = self.revisiones_do.revision_by_no_existe()
+            return rp      
+           
+
+    def post(self, request):
+        path = request.path
+        if "/nueva-revision/" == path:
+            rp:Response = self.revisiones_do.nueva_revision(request)
+            return rp

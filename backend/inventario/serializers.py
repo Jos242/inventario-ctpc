@@ -78,12 +78,10 @@ class UserSerializer(serializers.ModelSerializer):
                 ("OBSERVADOR", "OBSERVADOR")
             ], required=True)
     nombre_completo = serializers.CharField()
-    departamento = serializers.SlugRelatedField(queryset = Departamentos.objects.all(), slug_field = 'id',
-                                                required = False)
-    puesto = serializers.SlugRelatedField(queryset = Puestos.objects.all(), slug_field='id',
-                                           required = False)
-    aula = serializers.SlugRelatedField(allow_null = True, queryset = Aulas.objects.all(),
-                                         required = False, slug_field = 'id')
+
+    departamento = serializers.IntegerField(required = False)
+    puesto = serializers.IntegerField(required = False)
+    aula = serializers.IntegerField(required = False)
 
     
     class Meta:
@@ -99,11 +97,14 @@ class UserSerializer(serializers.ModelSerializer):
         )
         user.set_password(user.password)  
         return user
+
 class ExtraInfoSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = ExtraInfo
         fields = ['user', 'nombre_completo', 'departamento',
                   'puesto', 'aula']
+
     
 
 
@@ -132,6 +133,28 @@ class ReadDocSerializer(serializers.ModelSerializer):
     class Meta:
         model = Docs
         fields = ['id', 'titulo', 'tipo', 'ruta', 'creado_el']
+
+class CierreInventarioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CierreInventario
+        fields = ['tipo_revision', 'profesor',
+                  'aula', 'fecha', 'finalizado']
+        read_only_fields = ['id']
+
+class ReadCierreInventarioSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only = True)
+    profesor = serializers.CharField(read_only = True)
+    aula = serializers.CharField(read_only = True)
+    tipo_revision = serializers.CharField(read_only = True)
+    fecha = serializers.CharField(read_only = True)
+    finalizado = serializers.BooleanField(read_only = True)
+
+        
+class RevisionesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Revisiones
+        fields = ['id_registro', 'status', 'fecha', 'nota', 'cierre_inventario_id'] 
+        ready_only_fields = ['id']
 
 class WhatTheExcelNameIs(serializers.Serializer):
     file_name = serializers.CharField()

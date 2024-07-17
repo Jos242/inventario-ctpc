@@ -110,19 +110,63 @@ class Departamentos(models.Model):
         return self.descripcion
     
 class Aulas(models.Model):
+
     id = models.AutoField(primary_key = True)
     descripcion = models.CharField(unique=True, max_length=240)
 
     class Meta:
         managed = False
         db_table = 'aulas'
+    def __str__(self) -> str:
+        return self.descripcion
 
 class ExtraInfo(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE)
     nombre_completo = models.TextField()
-    departamento = models.ForeignKey(Departamentos, models.DO_NOTHING, db_column='departamento', to_field='descripcion')
-    puesto = models.ForeignKey(Puestos, models.DO_NOTHING, db_column='puesto', to_field='descripcion')
-    aula = models.ForeignKey(Aulas, models.DO_NOTHING, db_column='aula', to_field='descripcion', blank=True, null=True) # MUST BE NOT NULL THIS IS FOR TESTING PURPOSES
+    departamento = models.ForeignKey(Departamentos, models.DO_NOTHING, db_column='departamento')
+    puesto = models.ForeignKey(Puestos, models.DO_NOTHING, db_column='puesto')
+    aula = models.ForeignKey(Aulas, models.DO_NOTHING, db_column='aula') 
     
     class Meta:
         db_table = 'extra_info'
+    
+    def __str__(self) -> str:
+        return self.nombre_completo
+
+class CierreInventario(models.Model):
+    VALID_REVISIONES = {
+        "PRINCIPIO": "PRINCIPIO",
+        "MEDIO": "MEDIO",
+        "FINAL": "FINAL"
+    }
+     
+    id = models.AutoField(primary_key = True)
+    tipo_revision = models.CharField(choices = VALID_REVISIONES, max_length = 10) 
+    profesor = models.ForeignKey(ExtraInfo, models.DO_NOTHING, db_column = 'profesor')
+    aula = models.ForeignKey(Aulas, models.DO_NOTHING, db_column = 'aula')
+    fecha = models.DateField(null = True)
+    finalizado = models.BooleanField(default = False)
+
+    class Meta: 
+        db_table = 'cierreinventario'
+
+    def __str__(self) -> str:
+        return self.tipo_revision
+
+class Revisiones(models.Model):
+    REVISIONES_STATUS = {
+        "SI EXISTE": "SI EXISTE",
+        "NO EXISTE": "NO EXISTE",
+    }
+         
+    id = models.AutoField(primary_key = True)
+    id_registro = models.ForeignKey(Activos, models.DO_NOTHING,
+                                    db_column = 'id_registro', to_field = 'id_registro')
+    status = models.CharField(max_length = 11, choices = REVISIONES_STATUS)
+    fecha = models.DateField(null = True)
+    nota = models.TextField(null = True)
+    cierre_inventario_id = models.ForeignKey(CierreInventario, models.DO_NOTHING, db_column = 'cierre_inventario_id')
+
+    class Meta:
+        db_table = 'revisiones'
+

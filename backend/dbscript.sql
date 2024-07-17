@@ -68,6 +68,7 @@ CREATE TABLE aulas(
 ) ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4;
 
+
 -- LINUX QUERIES----------------------------------------------------------------------------
 LOAD DATA INFILE '/var/lib/mysql-files/all_activos.csv'
 INTO TABLE activos 
