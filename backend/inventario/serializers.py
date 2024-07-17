@@ -151,10 +151,11 @@ class ReadCierreInventarioSerializer(serializers.Serializer):
 
         
 class RevisionesSerializer(serializers.ModelSerializer):
+  
     class Meta:
         model = Revisiones
-        fields = ['id_registro', 'status', 'fecha', 'nota', 'cierre_inventario_id'] 
-        ready_only_fields = ['id']
+        fields = ['id', 'id_registro', 'status', 'fecha', 'nota', 'cierre_inventario_id'] 
+     
 
 class WhatTheExcelNameIs(serializers.Serializer):
     file_name = serializers.CharField()

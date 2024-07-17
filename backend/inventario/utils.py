@@ -700,7 +700,19 @@ class RevisionesActions():
                             status = status.HTTP_404_NOT_FOUND)
         return Response(serializer.data, 
                         status = status.HTTP_200_OK)
-    
+
+    def all_revisiones(self) -> Response:
+        try:
+            revisiones = Revisiones.objects.all()
+            serializer = RevisionesSerializer(instance = revisiones,
+                                              many = True)
+        except Revisiones.DoesNotExist:
+            return Response({"error": "there are not 'revisiones'"},
+                            status = status.HTTP_404_NOT_FOUND)
+
+        return Response(serializer.data,
+                        status = status.HTTP_200_OK)
+
 #Metodos para el HTTP POST--------------------------------
     def nueva_revision(self, request) -> Response:
         serializer = RevisionesSerializer(data = request.data)
@@ -715,7 +727,40 @@ class RevisionesActions():
 
         return Response(serializer.errors,
                         status = status.HTTP_400_BAD_REQUEST)
-#Metodod para el HTTP PATCH----------------------------------
+#Metodos para el HTTP PATCH----------------------------------
+    def update_revision(self, request, pk:int) -> Response:
+        data = request.data
+        serializer = RevisionesSerializer(data = data)
+
+        try:
+            cierre = Revisiones.objects.get(id = pk)
+
+        except Revisiones.DoesNotExist:
+            return Response({"error": "revisiones does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+            
+
+        if serializer.is_valid():
+            revision:Revisiones = serializer.update(instance = cierre,
+                                                    validated_data= serializer.validated_data)
+            revision.save()
+            serializer = RevisionesSerializer(instance = cierre)  
+            return Response(serializer.data) 
+
+        return Response(serializer.errors)
+
 #Metodos para el HTTP DELETE---------------------------------
+    def delete_revision_by_id(self, pk:int) -> Response:
+        try: 
+            revision = Revisiones.objects.get(id = pk)
+            revision.delete() 
+
+        except Revisiones.DoesNotExist:
+            return Response({"error": "revision does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+
+        return Response({"status": "revision has been deleted"}, 
+                        status = status.HTTP_200_OK)
+
 
  

@@ -36,5 +36,8 @@ urlpatterns = [
     #Endpoints relacionados a las Revisiones----------------------------------
     path("revision/<int:pk>/", views.RevisionesView.as_view()),
     path("no-existe/revisiones/", views.RevisionesView.as_view()),
-    path("nueva-revision/", views.RevisionesView.as_view()) 
+    path("all-revisiones/", views.RevisionesView.as_view()),
+    path("nueva-revision/", views.RevisionesView.as_view()),
+    path("update-revision/<int:pk>/", views.RevisionesView.as_view()),
+    path("delete-revision/<int:pk>/", views.RevisionesView.as_view()) 
 ]

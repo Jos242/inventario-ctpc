@@ -221,11 +221,29 @@ class RevisionesView(APIView):
 
        if "/no-existe/revisiones/" == path:
             rp:Response = self.revisiones_do.revision_by_no_existe()
-            return rp      
+            return rp
+
+       if "/all-revisiones/" == path:
+            rp:Response = self.revisiones_do.all_revisiones()
+            return rp
            
 
-    def post(self, request):
+    def post(self, request) -> Response:
         path = request.path
+
         if "/nueva-revision/" == path:
             rp:Response = self.revisiones_do.nueva_revision(request)
+            return rp
+    def patch(self, request, pk = None) -> Response:
+        path = request.path
+
+        if f"/update-revision/{pk}/" == path:
+            rp:Response = self.revisiones_do.update_revision(request = request,
+                                                             pk = pk)
+            return rp
+    def delete(self, request, pk = None) -> Response:
+        path = request.path
+
+        if f"/delete-revision/{pk}/" == path:
+            rp:Response = self.revisiones_do.delete_revision_by_id(pk) 
             return rp
