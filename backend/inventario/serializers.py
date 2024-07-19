@@ -26,7 +26,7 @@ class ActivoSerializer(serializers.Serializer):
         print(validated_data)
         return Activos.objects.create(**validated_data)
 
-    def update(self, instance, validated_data):
+    def update(self, instance:Activos, validated_data:dict):
         instance.id_registro = validated_data.get('id_registro', instance.id_registro)
         instance.asiento = validated_data.get('asiento', instance.asiento)
         instance.no_identificacion = validated_data.get('no_identificacion', instance.no_identificacion)
@@ -48,18 +48,6 @@ class ReadActivoSerializer(serializers.Serializer):
     no_identificacion = serializers.CharField(max_length=150, required = False) 
     descripcion = serializers.CharField(max_length=150, required = False)
     ubicacion = serializers.CharField(max_length=255, required = False)
-# class ObservacionesSerializer():
-#     descripcion = serializers.CharField()
-#     activo = serializers.CharField(source='activo.id_registro')
-    
-#     def update(self, instance, validated_data):
-#         """
-#         Update and return an existing `Observaciones` instance, given the validated data.
-#         """
-#         instance.descripcion = validated_data.get('descripcion', instance.descripcion)
-#         instance.activo_id = validated_data.get('activo')['id_registro']
-#         instance.save()
-#         return instance
  
 class ObservacionesSerializer(serializers.Serializer):
     id_registro = serializers.CharField(max_length=150, read_only=True, required=False)
@@ -74,21 +62,21 @@ class ObservacionesSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     user_type = serializers.ChoiceField(choices=[
                 ("ADMINISTRADOR", "ADMINISTRADOR"),
-                ("PROFESOR", "PROFESOR"),
+                ("FUNCIONARIO", "FUNCIONARIO"),
                 ("OBSERVADOR", "OBSERVADOR")
             ], required=True)
     nombre_completo = serializers.CharField()
 
     departamento = serializers.IntegerField(required = False)
     puesto = serializers.IntegerField(required = False)
-    aula = serializers.IntegerField(required = False)
+    ubicacion = serializers.IntegerField(required = False)
 
     
     class Meta:
         model  = User
         fields = ['username', 'password', 'user_type',
                   'nombre_completo', 'departamento', 'puesto',
-                  'aula']
+                  'ubicacion']
 
     def create_instance(self, validated_data:dict):
         user:User = User(
@@ -98,15 +86,12 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(user.password)  
         return user
 
-class ExtraInfoSerializer(serializers.ModelSerializer):
+class FuncionariosSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = ExtraInfo
+        model = Funcionarios 
         fields = ['user', 'nombre_completo', 'departamento',
-                  'puesto', 'aula']
-
-    
-
+                  'puesto', 'ubicacion']
 
 class ReadUserSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150, required = False)
@@ -117,7 +102,6 @@ class ReadUserSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=128, required = False)
     class Meta:
         model = User
-
  
 class DocSerializer(serializers.ModelSerializer):
 
@@ -137,26 +121,31 @@ class ReadDocSerializer(serializers.ModelSerializer):
 class CierreInventarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = CierreInventario
-        fields = ['tipo_revision', 'profesor',
-                  'aula', 'fecha', 'finalizado']
+        fields = ['tipo_revision', 'funcionario',
+                  'ubicacion', 'fecha', 'finalizado']
         read_only_fields = ['id']
 
 class ReadCierreInventarioSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only = True)
-    profesor = serializers.CharField(read_only = True)
-    aula = serializers.CharField(read_only = True)
+    funcionario = serializers.CharField(read_only = True)
+    ubicacion = serializers.CharField(read_only = True)
     tipo_revision = serializers.CharField(read_only = True)
     fecha = serializers.CharField(read_only = True)
     finalizado = serializers.BooleanField(read_only = True)
-
-        
+      
 class RevisionesSerializer(serializers.ModelSerializer):
   
     class Meta:
         model = Revisiones
         fields = ['id', 'id_registro', 'status', 'fecha', 'nota', 'cierre_inventario_id'] 
      
-
 class WhatTheExcelNameIs(serializers.Serializer):
     file_name = serializers.CharField()
+
+class UbicacionesSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Ubicaciones
+        fields = ['id', 'nombre_oficial',
+                  'alias', 'funcionario_id']
 

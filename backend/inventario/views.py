@@ -89,7 +89,9 @@ class ObservacionesView(APIView):
             return self.observaciones_do.all_observaciones() 
         
         if path == f"/observacion/{activo}/":
-            return self.observaciones_do.get_observacion_by_id_registro(activo)
+            print("Hola entre aqui")
+            rp:Response = self.observaciones_do.get_observacion_by_id_registro(activo = activo) 
+            return rp
         
     def post(self, request): 
         path = request.path
@@ -141,7 +143,7 @@ class DocsView(APIView):
     def post(self, request):
         path = request.path
         if path == "/guardar-acta/":
-            return self.docs_do.save_acta() 
+            return self.docs_do.save_acta(request) 
 
         if path == f"/crear-excel/impresiones/":
             return self.docs_do.create_print_doc(request = request)
@@ -197,8 +199,6 @@ class CierreInventarioView(APIView):
 
         return Response({"error": "not a valid endpoint"},
                        status = status.HTTP_400_BAD_REQUEST)
-
-
 
 class RevisionesView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)

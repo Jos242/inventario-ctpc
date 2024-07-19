@@ -61,12 +61,6 @@ CREATE TABLE puestos(
 ) ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4;
 
-DROP TABLE IF EXISTS aulas;
-CREATE TABLE aulas(
-	id INT PRIMARY KEY AUTO_INCREMENT,
-    descripcion VARCHAR(240) NOT NULL UNIQUE
-) ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb4;
 
 
 -- LINUX QUERIES----------------------------------------------------------------------------

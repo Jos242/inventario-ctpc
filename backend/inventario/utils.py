@@ -146,7 +146,7 @@ class ActivosActions:
     def __init__(self) -> None:
         pass
 
-#Metodos para el HTTP GET-------------------------------
+    #Metodos para el HTTP GET-------------------------------
     def all_activos(self) -> Response: #Working
         activos:ReadActivos = ReadActivos.objects.all().order_by('-id')
         serializer:ActivoSerializer = ActivoSerializer(instance = activos, many = True)
@@ -167,7 +167,7 @@ class ActivosActions:
                             status = status.HTTP_404_NOT_FOUND)
         serializer:ActivoSerializer = ActivoSerializer(instance = activo)
         return Response(serializer.data,
-                        status = status.HTTP_400_BAD_REQUEST)
+                        status = status.HTTP_200_OK)
     
     def get_activo_by_no_identificacion(self, no_identificacion:str) -> Response:
         try:
@@ -204,17 +204,16 @@ class ObservacionesActivos():
     def __init__(self) -> None:
         pass
 #Metodos para el HTTP GET--------------------------------
-    def all_observaciones() -> Response:
-
+    def all_observaciones(self) -> Response:
         observacion = Observaciones.objects.all()
         serializer = ObservacionesSerializer(instance = observacion, many = True)
         return Response(serializer.data, status = status.HTTP_200_OK)
 
-    def get_observacion_by_id_registro(activo:str) -> Response: 
+    def get_observacion_by_id_registro(self, activo:str) -> Response: 
         try:
             observacion = Observaciones.objects.filter(activo = activo) 
         except Observaciones.DoesNotExist:
-            return Response({"error": "Observacion does not exist"}, status = status.HTTP_404_NOT_FOUND)
+            return Response({"error": "observacion does not exist"}, status = status.HTTP_404_NOT_FOUND)
         serializer = ObservacionesSerializer(instance = observacion, many=True)
         return Response(serializer.data, status= status.HTTP_200_OK)
 #----------------------------------------------------------
@@ -267,26 +266,26 @@ class UserActions:
                 user.is_staff = False
                 user.is_superuser = True 
 
-            if user_type == 'PROFESOR':
+            if user_type == 'FUNCIONARIO':
                 user.is_staff = True
                 user.is_superuser = False 
                 user.save()
                 data = serializer.validated_data | {"user": user.pk}
-                extra_info_serializer= ExtraInfoSerializer(data = data) 
+                funcionario_serializer= FuncionariosSerializer(data = data) 
                 
-                if extra_info_serializer.is_valid():
-                    validated_data = extra_info_serializer.validated_data
-                    extra_info = extra_info_serializer.create(validated_data = validated_data) 
-                    data = extra_info_serializer.data | serializer.data
+                if funcionario_serializer.is_valid():
+                    validated_data = funcionario_serializer.validated_data
+                    extra_info = funcionario_serializer.create(validated_data = validated_data) 
+                    data = funcionario_serializer.data | serializer.data
                     
                     del data['user']
                     del data['user_type']
-                    print(f"Aqui -> {extra_info_serializer.data['aula']}")
+                    print(f"Aqui -> {funcionario_serializer.data['ubicacion']}")
                     return Response(data,
                                     status = status.HTTP_200_OK)
                
                 User.objects.get(pk = user.pk).delete() 
-                return Response(extra_info_serializer.errors)
+                return Response(funcionario_serializer.errors)
 
             return Response(serializer.validated_data, 
                             status = status.HTTP_200_OK) 
@@ -603,8 +602,8 @@ class CierreInventarioActions():
             cierre = CierreInventario.objects.get(id = pk)
             context = {
             "id": cierre.id,
-            "profesor": str(cierre.profesor.nombre_completo),
-            "aula": str(cierre.aula),
+            "funcionario": str(cierre.funcionario.nombre_completo),
+            "ubicacion": str(cierre.ubicacion),
             "tipo_revision": str(cierre.tipo_revision),
             "fecha": cierre.fecha,
             "finalizado": cierre.finalizado   
@@ -676,7 +675,7 @@ class CierreInventarioActions():
 #--------------------------------------------------------    
 class RevisionesActions():
 
-#Metodos para el HTTP GET---------------------------------
+    #Metodos para el HTTP GET---------------------------------
     def revision_by_id(self, pk:int) -> Response:
         try: 
             revision = Revisiones.objects.get(id = pk)
@@ -713,7 +712,7 @@ class RevisionesActions():
         return Response(serializer.data,
                         status = status.HTTP_200_OK)
 
-#Metodos para el HTTP POST--------------------------------
+    #Metodos para el HTTP POST--------------------------------
     def nueva_revision(self, request) -> Response:
         serializer = RevisionesSerializer(data = request.data)
 
@@ -727,7 +726,8 @@ class RevisionesActions():
 
         return Response(serializer.errors,
                         status = status.HTTP_400_BAD_REQUEST)
-#Metodos para el HTTP PATCH----------------------------------
+
+    #Metodos para el HTTP PATCH----------------------------------
     def update_revision(self, request, pk:int) -> Response:
         data = request.data
         serializer = RevisionesSerializer(data = data)

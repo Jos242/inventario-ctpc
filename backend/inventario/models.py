@@ -24,6 +24,7 @@ class Activos(models.Model):
     creado_el = models.DateTimeField(db_default = Now())
     observacion = models.TextField(blank = True) 
     impreso = models.IntegerField(default = False)
+
     class Meta:
         managed = False
         db_table = 'activos'
@@ -49,7 +50,8 @@ class ReadActivos(models.Model):
     modo_adquisicion = models.CharField(max_length=255)
     precio = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     creado_el = models.DateTimeField()
-    impreso = models.BooleanField(default = False) 
+    impreso = models.BooleanField(default = False)
+
     class Meta:
         managed = False
         db_table = 'activos'
@@ -65,6 +67,7 @@ class Observaciones(models.Model):
     descripcion = models.TextField()
     activo = models.ForeignKey(Activos, to_field='id_registro', on_delete = models.CASCADE)
     impreso = models.BooleanField(default = False) 
+
     class Meta:
         managed = False
         db_table = 'observaciones'
@@ -109,26 +112,30 @@ class Departamentos(models.Model):
     def __str__(self) -> str:
         return self.descripcion
     
-class Aulas(models.Model):
+class Ubicaciones(models.Model):
 
     id = models.AutoField(primary_key = True)
-    descripcion = models.CharField(unique=True, max_length=240)
+    nombre_oficial = models.CharField(unique=True, max_length=240)
+    alias = models.CharField(unique = True, max_length = 240)
+    funcionario_id = models.ForeignKey(User, models.DO_NOTHING,
+                                       db_column= "funcionario_id")
+    img_path = models.FileField(upload_to = 'uploads/', null = True, blank = True)
 
-    class Meta:
-        managed = False
-        db_table = 'aulas'
+    class Meta: 
+        db_table = 'ubicaciones'
+
     def __str__(self) -> str:
-        return self.descripcion
+        return self.nombre_oficial
 
-class ExtraInfo(models.Model):
+class Funcionarios(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE)
     nombre_completo = models.TextField()
     departamento = models.ForeignKey(Departamentos, models.DO_NOTHING, db_column='departamento')
     puesto = models.ForeignKey(Puestos, models.DO_NOTHING, db_column='puesto')
-    aula = models.ForeignKey(Aulas, models.DO_NOTHING, db_column='aula') 
+    ubicacion = models.ForeignKey(Ubicaciones, models.DO_NOTHING, db_column='ubicacion', null = True) 
     
     class Meta:
-        db_table = 'extra_info'
+        db_table = 'funcionarios'
     
     def __str__(self) -> str:
         return self.nombre_completo
@@ -142,8 +149,8 @@ class CierreInventario(models.Model):
      
     id = models.AutoField(primary_key = True)
     tipo_revision = models.CharField(choices = VALID_REVISIONES, max_length = 10) 
-    profesor = models.ForeignKey(ExtraInfo, models.DO_NOTHING, db_column = 'profesor')
-    aula = models.ForeignKey(Aulas, models.DO_NOTHING, db_column = 'aula')
+    funcionario = models.ForeignKey(Funcionarios, models.DO_NOTHING, db_column = 'funcionario')
+    ubicacion = models.ForeignKey(Ubicaciones, models.DO_NOTHING, db_column = 'aula', null = True)
     fecha = models.DateField(null = True)
     finalizado = models.BooleanField(default = False)
 
