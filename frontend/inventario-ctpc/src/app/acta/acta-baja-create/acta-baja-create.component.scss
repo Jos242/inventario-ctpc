@@ -1,15 +1,24 @@
 .cont{
     position: relative;
-    border: 1px solid #000; /* Just to visualize the parent div */
+   
 }
 
 img{
-    max-width: 150px;
+    // max-width: 150px;
 }
 
 .tabla{
     border: 1px solid #000;
     margin-bottom: 20px;
+    width: 82.425%;
+    margin-top: 25px;
+    font-family: Calibri;
+    font-size: 11pt;
+    color: #000;
+}
+
+.tabla th{
+    font-weight: normal;
 }
 
 td, th {
@@ -29,25 +38,7 @@ h1{
     margin-top: 20px;
 }
 
-.centered {
-    margin: 0 auto;
-}
 
-.absolute-img {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-}
-
-.tabla {
-    width: 70%;
-    margin-top: 25px;
-}
-
-.tabla th,
-.tabla td {
-    padding: 10px;
-}
 
 .tabla th.full-width,
 .tabla td.full-width {
@@ -69,5 +60,60 @@ h1{
 }
 
 .tabla2{
-    margin-bottom: 200px;
+    width: 82.425%;
 }
+
+.tabla2 tr th{
+    font-family: Arial;
+    font-size: 10pt;
+    text-align: center;
+    background-color: #bdd7ee;
+    font-weight: bolder;
+}
+
+.tabla2 tr td{
+    font-family: Calibri;
+    font-size: 11pt;
+}
+
+.firmas{
+    width: 78.5889%;
+}
+
+.footer{
+    width: 80.981%;
+}
+
+.espacios{
+    margin: 0px;
+}
+
+
+
+.specific-div {
+    width:8.5in;  
+    height: 11in;  
+ 
+    border: 1px solid #000; /* Just to visualize the parent div */
+  }
+
+  .parent-component {
+    transform: scale(1); 
+    transform-origin: top left; 
+    margin-left: 10px;
+    
+  }
+
+
+
+  .header{
+    width: 66%;
+    margin: 0 auto;
+  }
+
+  .titulos{
+    margin: 0 auto;
+    font-family: Calibri;
+    font-size: 14pt;
+    font-weight: bolder;
+  }

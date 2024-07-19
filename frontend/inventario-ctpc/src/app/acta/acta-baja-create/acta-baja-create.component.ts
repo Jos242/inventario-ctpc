@@ -23,6 +23,7 @@ import moment from 'moment';
 import 'moment/locale/es';
 
 
+
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 
@@ -68,6 +69,8 @@ export class ActaBajaCreateComponent {
   @ViewChild(MatSort) sort: MatSort;
 
   destroy$:Subject<boolean>=new Subject<boolean>();
+
+
   
 
 
@@ -102,8 +105,12 @@ export class ActaBajaCreateComponent {
         this.applyFilter(value);
       });
 
+  
+
     
   }
+
+  
 
   applyFilter(filterValue: string): void {
     this.dataSource.filter = filterValue.trim().toLowerCase();
@@ -111,6 +118,7 @@ export class ActaBajaCreateComponent {
 
   selectActivo(activo: any): void {
     this.myForm.patchValue({ activo: activo.no_identificacion });
+    
   }
 
   listaDocs(){

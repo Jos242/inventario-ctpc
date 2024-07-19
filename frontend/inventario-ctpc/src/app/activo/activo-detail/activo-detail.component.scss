@@ -8,3 +8,15 @@ mat-card{
 .example-full-width {
     width: 100%;
   }
+
+  @media (max-width: 769px) {
+    mat-card{
+      width: 90%;
+    }
+  }
+
+  @media (max-width: 576px) {
+    mat-card{
+      width: 95%;
+    }
+  }

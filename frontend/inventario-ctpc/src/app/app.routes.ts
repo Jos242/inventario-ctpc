@@ -13,8 +13,9 @@ import { ActivoScanComponent } from './activo/activo-scan/activo-scan.component'
 
 
 export const routes: Routes = [
-    { path:'activos', component: ActivoIndexComponent , canActivate: [authGuard] },
-    { path:'index', component: HomeIndexComponent , canActivate: [authGuard] },
+    { path:'activos', component: ActivoIndexComponent  },
+    { path:'index', component: HomeIndexComponent },
+    // { path:'index', component: HomeIndexComponent , canActivate: [authGuard] },
     { path: 'login', component: LoginIndexComponent },
 
     { path:'actas', component: ActaIndexComponent},
