@@ -116,10 +116,11 @@ class Ubicaciones(models.Model):
 
     id = models.AutoField(primary_key = True)
     nombre_oficial = models.CharField(unique=True, max_length=240)
-    alias = models.CharField(unique = True, max_length = 240)
+    alias = models.CharField(unique = True, max_length = 240, null = True)
     funcionario_id = models.ForeignKey(User, models.DO_NOTHING,
-                                       db_column= "funcionario_id")
-    img_path = models.FileField(upload_to = 'uploads/', null = True, blank = True)
+                                       db_column= "funcionario_id", null = True,
+                                       blank = True)
+    img_path = models.CharField(max_length = 250, blank = True)
 
     class Meta: 
         db_table = 'ubicaciones'

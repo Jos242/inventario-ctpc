@@ -143,9 +143,11 @@ class WhatTheExcelNameIs(serializers.Serializer):
     file_name = serializers.CharField()
 
 class UbicacionesSerializer(serializers.ModelSerializer):
-    
+    img_path = serializers.FileField(required = False)
+
     class Meta:
         model = Ubicaciones
         fields = ['id', 'nombre_oficial',
-                  'alias', 'funcionario_id']
+                  'alias', 'funcionario_id',
+                  'img_path']
 

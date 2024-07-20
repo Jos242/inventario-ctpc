@@ -26,11 +26,12 @@ class ActivosView(APIView):
     """
 
     parser_classes = (FormParser, MultiPartParser, JSONParser)
-    # permission_classes = [IsAuthenticatedOrReadOnly]
+    # permission_classes = [IsAuthenticated]
     # authentication_classes = [JWTAuthentication]
+    activos_do:ActivosActions = None
     permission_classes = []
     authentication_classes = []
-    activos_do:ActivosActions = None
+
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -51,14 +52,6 @@ class ActivosView(APIView):
         
         if path == "/activos-filtrados-columna/":
             return self.activos_do.activos_filter_column()   
-        
-        if path == f"/activo/{pk}/":
-            return self.activos_do.get_activo_by_id(pk)
-
-        if path == f"/activo/{no_identificacion}/":
-            print(f"Hello macaco {no_identificacion}")
-            rp:Response = self.activos_do.get_activo_by_no_identificacion(no_identificacion)
-            return rp
 
         return Response({"data": "did not match an endpoint for a HTTP GET Method"}, status= status.HTTP_404_NOT_FOUND)
 
@@ -69,6 +62,27 @@ class ActivosView(APIView):
             resp = self.activos_do.add_activo(request)  
             return resp
         return Response({"data": "did not match an endpoint for a HTTP POST Method"}, status = status.HTTP_404_NOT_FOUND)
+
+class ActivosViewNoAuth(APIView):
+
+    permission_classes = []
+    authentication_classes = []
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.activos_do = ActivosActions()
+    
+    def get(self, request, pk:int = None, no_identificacion:str = None):
+        path = request.path
+
+        if path == f"/activo/{pk}/":
+            return self.activos_do.get_activo_by_id(pk)
+
+        if path == f"/activo/{no_identificacion}/":
+            rp:Response = self.activos_do.get_activo_by_no_identificacion(no_identificacion)
+            return rp
+
+        return Response({"data": "did not match an endpoint for a HTTP GET Method"}, status= status.HTTP_404_NOT_FOUND)
 
 class ObservacionesView(APIView):
     parser_classes = (FormParser, MultiPartParser, JSONParser)
@@ -247,3 +261,31 @@ class RevisionesView(APIView):
         if f"/delete-revision/{pk}/" == path:
             rp:Response = self.revisiones_do.delete_revision_by_id(pk) 
             return rp
+        
+
+class UbicacionesView(APIView):
+    parser_classes   = (MultiPartParser, FormParser, JSONParser)
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated] 
+    authentication_classes = []
+    permission_classes = []
+    ubicaciones_do:UbicacionesActions = None
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.ubicaciones_do = UbicacionesActions()
+
+    def get(self, request, pk:int = None):
+        path = request.path
+
+        if f"/ubicacion/{pk}/" == path:
+            rp:Response = self.ubicaciones_do.ubicacion_by_id(pk)
+            return rp
+    def post(self, request):
+        path = request.path
+
+        if f"/nueva-ubicacion/" == path:
+            rp:Response = self.ubicaciones_do.nueva_ubicacion(request)
+            return rp
+
+

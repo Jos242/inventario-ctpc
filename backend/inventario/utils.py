@@ -22,38 +22,64 @@ from .models import *
 from .serializers import * 
 
 #Metodos globales-----------------------------------------------
-def handle_file_directories() -> list:
+def count_files_in_directory(directory):
+    count = 0
+    for _, _, files in os.walk(directory):
+        count += len(files)
+    return count
+
+def handle_file_directories(doc_type:str = None) -> list:
     """
         It creates a directory for the file in case that is a new product otherwise
         it returns the path for the specified product
     """
+    if doc_type is None:
+        absolute_path:str = f"{MEDIA_ROOT}/uploads/actas/"
+        relative_path:str = f"uploads/actas/"
 
-    absolute_path:str = f"{MEDIA_ROOT}/uploads/actas/"
-    relative_path:str = f"uploads/actas/"
-        
+    if doc_type == "ubicacion_img":
+        absolute_path:str = f"{MEDIA_ROOT}/uploads/ubicaciones/"
+        relative_path:str = f"uploads/ubicaciones/"
+ 
     if os.path.exists(absolute_path):
         return [relative_path, absolute_path]
 
     os.makedirs(absolute_path)
     return [relative_path, absolute_path]
 
-def handle_uploaded_file(files: list) -> str:
+def handle_uploaded_file(files: list, doc_type:str = None) -> str:
     """
         This method is just for saving the file following this structure:
         uploads/{model pk}/{file_name.ext}
     """
     
-    paths_list = handle_file_directories()
+    paths_list = handle_file_directories(doc_type = doc_type)
     absolute_path = paths_list[1] 
     relative_path = paths_list[0]
-    
-    for file in files:
-        relative_path = os.path.join(relative_path, str(file))
-        path_to_write = os.path.join(absolute_path, str(file)) 
-        with open(path_to_write, 'wb') as destination: 
-            for chunk in file.chunks():
-                destination.write(chunk)
-    
+
+    if doc_type is None: 
+        for file in files:
+            relative_path = os.path.join(relative_path, str(file))
+            path_to_write = os.path.join(absolute_path, str(file)) 
+            with open(path_to_write, 'wb') as destination: 
+                for chunk in file.chunks():
+                    destination.write(chunk)
+
+    if doc_type == "ubicacion_img":
+        img_name = "img"
+        count = count_files_in_directory(directory = absolute_path)
+
+        for file in files:
+            ext = str(file).split(".")[1]  
+            relative_path = os.path.join(relative_path, f"{img_name}{count}.{ext}")
+            path_to_write = os.path.join(absolute_path, f"{img_name}{count}.{ext}")  
+            
+            with open(path_to_write, 'wb') as destination: 
+                for chunk in file.chunks():
+                    destination.write(chunk)
+            
+            count+=1 
+
     return relative_path 
 
 def calculate_no_identificacion(no_identificacion: str):
@@ -247,9 +273,9 @@ class UserActions:
      
     def __init__(self) -> None:
         pass
-#Metodos para el HTTP GET--------------------------------
+    #Metodos para el HTTP GET--------------------------------
 
-#Metodos para el HTTP POST-------------------------------
+    #Metodos para el HTTP POST-------------------------------
     def new_usuario(self, request) -> Response:
         
         serializer:UserSerializer = UserSerializer(data = request.data)
@@ -596,7 +622,7 @@ class DocsActions:
 #--------------------------------------------------------    
 
 class CierreInventarioActions():
-#Metodos para el HTTP GET---------------------------------
+    #Metodos para el HTTP GET---------------------------------
     def cierre_by_pk(self, pk) -> Response:
         try:
             cierre = CierreInventario.objects.get(id = pk)
@@ -628,7 +654,7 @@ class CierreInventarioActions():
                         status = status.HTTP_200_OK)
 
     
-#Metodos para el HTTP POST--------------------------------
+    #Metodos para el HTTP POST--------------------------------
     def nuevo_cierre(self, request):
         serializer = CierreInventarioSerializer(data = request.data)
         if serializer.is_valid():
@@ -639,7 +665,7 @@ class CierreInventarioActions():
         return Response(serializer.errors,
                         status = status.HTTP_400_BAD_REQUEST)
 
-#Metodos para el HTTP UPDATE-------------------------------
+    #Metodos para el HTTP UPDATE-------------------------------
     def update_cierre(self, request, pk:int) -> Response:
         data = request.data
         serializer = CierreInventarioSerializer(data = data)
@@ -660,7 +686,7 @@ class CierreInventarioActions():
 
         return Response(serializer.errors)
 
-#Metodos para el HTTP DELETE-------------------------------
+    #Metodos para el HTTP DELETE-------------------------------
     def delete_cierre(self, pk:int) -> Response:
         try: 
             cierre = CierreInventario.objects.get(id = pk)
@@ -749,7 +775,7 @@ class RevisionesActions():
 
         return Response(serializer.errors)
 
-#Metodos para el HTTP DELETE---------------------------------
+    #Metodos para el HTTP DELETE---------------------------------
     def delete_revision_by_id(self, pk:int) -> Response:
         try: 
             revision = Revisiones.objects.get(id = pk)
@@ -762,5 +788,41 @@ class RevisionesActions():
         return Response({"status": "revision has been deleted"}, 
                         status = status.HTTP_200_OK)
 
+class UbicacionesActions:
 
- 
+   #Metodos para el HTTP GET---------------------------------
+   def ubicacion_by_id(self, pk:int) -> Response:
+        try: 
+            ubicacion = Ubicaciones.objects.get(id = pk)
+            serializer = UbicacionesSerializer(instance = ubicacion)
+
+        except Ubicaciones.DoesNotExist:
+            return Response({"error": "ubicacion does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+
+        return Response(serializer.data, 
+                        status = status.HTTP_200_OK)
+
+   #Metodos para el HTTP POST--------------------------------
+   def nueva_ubicacion(self, request) -> Response:
+        serializer = UbicacionesSerializer(data = request.data)
+
+        if serializer.is_valid():
+            nombre_oficial =serializer.validated_data["nombre_oficial"]
+            
+            files:list = request.FILES.getlist('img_path') 
+            ruta:str = handle_uploaded_file(files, "ubicacion_img") if files != [] else None 
+            
+
+            if "alias" not in serializer.validated_data:
+                serializer.validated_data["alias"] = nombre_oficial
+
+            ubicacion = serializer.create(serializer.validated_data)
+
+            return Response(serializer.data, 
+                            status = status.HTTP_200_OK)
+
+        return Response(serializer.errors,
+                        status = status.HTTP_400_BAD_REQUEST)
+
+
