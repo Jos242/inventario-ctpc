@@ -186,7 +186,6 @@ class ActivosActions:
         return Response(serializer.data,
                         status = status.HTTP_200_OK)
 
-
     def get_activo_by_id(self, pk:int) -> Response: 
         try:
             activo:Activos = Activos.objects.get(pk = pk)
@@ -914,11 +913,7 @@ class ModoAdquisicionActions():
 
         return Response(serializer.errors,
                         status = status.HTTP_400_BAD_REQUEST)
-
-   
-
-
-    
+ 
     #Metodos para el HTTP DELETE-------------------------------
     def delete_modo_adquisicion(self, pk:int):
         try: 
