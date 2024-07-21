@@ -2,6 +2,34 @@ from django.db import models
 from django.db.models.functions import Now
 from django.contrib.auth.models import User
 # Create your models here.
+class Ubicaciones(models.Model):
+
+    id = models.AutoField(primary_key = True)
+    nombre_oficial = models.CharField(unique=True, max_length=240,
+                                      blank = True)
+    alias = models.CharField(unique = True, max_length = 240,
+                             null = True, blank = True)
+    funcionario_id = models.ForeignKey(User, models.DO_NOTHING,
+                                       db_column= "funcionario_id", null = True,
+                                       blank = True)
+    img_path = models.CharField(max_length = 250, blank = True)
+
+    class Meta: 
+        db_table = 'ubicaciones'
+
+    def __str__(self) -> str:
+        return self.alias
+
+class ModoAdquisicion(models.Model):
+    id = models.AutoField(primary_key = True)
+    descripcion = models.CharField(max_length = 240, unique = True,
+                                   blank = False) #IN PRODUCTION THIS ONE IS FALSE
+
+    class Meta:
+        db_table = 'modoadquisicion'
+
+    def __str__(self) -> str:
+        return self.descripcion
 
 class Activos(models.Model):
     ESTADO_ACTIVO = {
@@ -17,13 +45,21 @@ class Activos(models.Model):
     marca = models.CharField(max_length=150, blank=True)
     modelo = models.CharField(max_length=150, blank=True)
     serie = models.CharField(max_length=150, blank=True)
-    estado = models.CharField(max_length=7, blank=True,choices= ESTADO_ACTIVO)
-    ubicacion = models.CharField(max_length=255)
-    modo_adquisicion = models.CharField(max_length=255)
+    estado = models.CharField(max_length=7, blank=True,choices= ESTADO_ACTIVO) 
+    ubicacion_original = models.ForeignKey(Ubicaciones, models.DO_NOTHING, db_column='ubicacion_original',
+                                           blank=True, null=True, related_name = 'ubicacion_original')
+    modo_adquisicion = models.ForeignKey(ModoAdquisicion, models.DO_NOTHING, db_column = 'modo_adquisicion',
+                                         blank = True, null = True) 
     precio = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True) 
     creado_el = models.DateTimeField(db_default = Now())
     observacion = models.TextField(blank = True) 
     impreso = models.IntegerField(default = False)
+    ubicacion_actual = models.ForeignKey(Ubicaciones, models.DO_NOTHING, db_column = 'ubicacion_actual',
+                                         blank = True, null = True, related_name = 'ubicacion_actual')
+    conectividad = models.BooleanField(default = False)
+    seguridad = models.BooleanField(default = False)
+    placa_impresa = models.BooleanField(default = False)
+    de_baja = models.BooleanField(default = False)
 
     class Meta:
         managed = False
@@ -46,11 +82,19 @@ class ReadActivos(models.Model):
     modelo = models.CharField(max_length=150, blank=True)
     serie = models.CharField(max_length=150, blank=True)
     estado = models.CharField(max_length=7, blank=True,choices= ESTADO_ACTIVO)
-    ubicacion = models.CharField(max_length=255)
-    modo_adquisicion = models.CharField(max_length=255)
+    ubicacion_original = models.ForeignKey(Ubicaciones, models.DO_NOTHING, db_column='ubicacion_original',
+                                           blank=True, null=True, related_name = 'ubicacion_original_read_activos')
+    modo_adquisicion = models.ForeignKey(ModoAdquisicion, models.DO_NOTHING, db_column = 'modo_adquisicion',
+                                         blank = True, null = True) 
     precio = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     creado_el = models.DateTimeField()
     impreso = models.BooleanField(default = False)
+    ubicacion_actual = models.ForeignKey(Ubicaciones, models.DO_NOTHING, db_column = 'ubicacion_actual',
+                                         blank = True, null = True, related_name = 'ubicacion_actual_read_activos')
+    conectividad = models.BooleanField(default = False)
+    seguridad = models.BooleanField(default = False)
+    placa_impresa = models.BooleanField(default = False)
+    de_baja = models.BooleanField(default = False)
 
     class Meta:
         managed = False
@@ -59,7 +103,7 @@ class ReadActivos(models.Model):
     def __str__(self):
         return str({"id_registro": self.id_registro, 
                     "no_identificacion": self.no_identificacion})
-    
+
 class Observaciones(models.Model):
     id = models.AutoField(primary_key=True)
     id_registro = models.CharField(unique=True, max_length=150)
@@ -112,22 +156,6 @@ class Departamentos(models.Model):
     def __str__(self) -> str:
         return self.descripcion
     
-class Ubicaciones(models.Model):
-
-    id = models.AutoField(primary_key = True)
-    nombre_oficial = models.CharField(unique=True, max_length=240)
-    alias = models.CharField(unique = True, max_length = 240, null = True)
-    funcionario_id = models.ForeignKey(User, models.DO_NOTHING,
-                                       db_column= "funcionario_id", null = True,
-                                       blank = True)
-    img_path = models.CharField(max_length = 250, blank = True)
-
-    class Meta: 
-        db_table = 'ubicaciones'
-
-    def __str__(self) -> str:
-        return self.nombre_oficial
-
 class Funcionarios(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE)
     nombre_completo = models.TextField()
@@ -187,3 +215,4 @@ class HistorialUbicacion(models.Model):
 
     class Meta:
         db_table = 'historialubicaciones'
+

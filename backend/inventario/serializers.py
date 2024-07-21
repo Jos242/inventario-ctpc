@@ -2,52 +2,51 @@ from django.contrib.auth.models import User
 from inventario.models import *
 from rest_framework import serializers
 
-class ActivoSerializer(serializers.Serializer):
-    id = serializers.IntegerField(required = False)
-    id_registro = serializers.CharField(max_length = 150, required = False) 
+class ActivoSerializer(serializers.ModelSerializer):
+    id_registro = serializers.CharField(required = False)
     asiento = serializers.IntegerField(required = False)
-    no_identificacion = serializers.CharField(max_length=150, required = False) 
-    descripcion = serializers.CharField(max_length=150)
-    marca = serializers.CharField(max_length=150, required=False, allow_blank=True)
-    modelo = serializers.CharField(max_length=150, required=False, allow_blank=True)
-    serie = serializers.CharField(max_length=150, required=False, allow_blank=True)
-    estado = serializers.ChoiceField(choices=[
-        ("Bueno", "Bueno"),
-        ("Malo", "Malo"),
-        ("Regular", "Regular")
-    ], required=False, allow_blank=True)
-      
-    ubicacion = serializers.CharField(max_length=255)
-    modo_adquisicion = serializers.CharField(max_length=255)
-    precio = serializers.DecimalField(max_digits=10, decimal_places=2, required=False, allow_null=True)   
-    creado_el = serializers.DateTimeField(required = False)
+    no_identificacion = serializers.CharField(required = False) 
+    creado_el = serializers.CharField(required = False)
+    modo_adquisicion = serializers.PrimaryKeyRelatedField(queryset=ModoAdquisicion.objects.all())
 
-    def create(self, validated_data):
-        print(validated_data)
-        return Activos.objects.create(**validated_data)
+    class Meta:
+        model = Activos
+        fields = '__all__' 
+   
+    # def update(self, instance:Activos, validated_data:dict):
+    #     instance.id_registro = validated_data.get('id_registro', instance.id_registro)
+    #     instance.asiento = validated_data.get('asiento', instance.asiento)
+    #     instance.no_identificacion = validated_data.get('no_identificacion', instance.no_identificacion)
+    #     instance.descripcion = validated_data.get('descripcion', instance.descripcion)
+    #     instance.marca = validated_data.get('marca', instance.marca)
+    #     instance.modelo = validated_data.get('modelo', instance.modelo)
+    #     instance.serie = validated_data.get('serie', instance.serie)
+    #     instance.estado = validated_data.get('estado', instance.estado)
+    #     instance.ubicacion = validated_data.get('ubicacion', instance.ubicacion)
+    #     instance.modo_adquisicion = validated_data.get('modo_adquisicion', instance.modo_adquisicion)
+    #     instance.precio = validated_data.get('precio', instance.precio)
+    #     instance.creado_el = validated_data.get('creado_el', instance.creado_el)
+    #     instance.save()
+    #     return instance
 
-    def update(self, instance:Activos, validated_data:dict):
-        instance.id_registro = validated_data.get('id_registro', instance.id_registro)
-        instance.asiento = validated_data.get('asiento', instance.asiento)
-        instance.no_identificacion = validated_data.get('no_identificacion', instance.no_identificacion)
-        instance.descripcion = validated_data.get('descripcion', instance.descripcion)
-        instance.marca = validated_data.get('marca', instance.marca)
-        instance.modelo = validated_data.get('modelo', instance.modelo)
-        instance.serie = validated_data.get('serie', instance.serie)
-        instance.estado = validated_data.get('estado', instance.estado)
-        instance.ubicacion = validated_data.get('ubicacion', instance.ubicacion)
-        instance.modo_adquisicion = validated_data.get('modo_adquisicion', instance.modo_adquisicion)
-        instance.precio = validated_data.get('precio', instance.precio)
-        instance.creado_el = validated_data.get('creado_el', instance.creado_el)
-        instance.save()
-        return instance
-    
-class ReadActivoSerializer(serializers.Serializer):
-    id = serializers.IntegerField(required = False)
-    id_registro = serializers.CharField(max_length = 150, required = False) 
-    no_identificacion = serializers.CharField(max_length=150, required = False) 
-    descripcion = serializers.CharField(max_length=150, required = False)
-    ubicacion = serializers.CharField(max_length=255, required = False)
+class ReadActivoSerializerComplete(serializers.ModelSerializer):
+    ubicacion_original = serializers.CharField(required = False)
+    modo_adquisicion = serializers.CharField(required = False)
+
+    class Meta:
+        model = Activos
+        fields = ['id', 'id_registro', 'asiento', 'no_identificacion',
+                  'descripcion', 'marca', 'modelo', 'serie', 'estado',
+                  'ubicacion_original', 'ubicacion_actual', 'modo_adquisicion',
+                  'precio', 'conectividad', 'seguridad', 'placa_impresa','de_baja', 'creado_el']
+
+class ReadActivoSerializerIncomplete(serializers.ModelSerializer):
+    ubicacion_original = serializers.CharField(required = False) 
+
+    class Meta: 
+        model = Activos
+        fields = ['id', 'id_registro', 'no_identificacion',
+                  'descripcion', 'ubicacion_original']
  
 class ObservacionesSerializer(serializers.Serializer):
     id_registro = serializers.CharField(max_length=150, read_only=True, required=False)
@@ -93,6 +92,12 @@ class FuncionariosSerializer(serializers.ModelSerializer):
         model = Funcionarios 
         fields = ['user', 'nombre_completo', 'departamento',
                   'puesto', 'ubicacion']
+
+class ReadFuncionariosSerializer(serializers.Serializer):
+    user = serializers.CharField(max_length = 240, required = False)
+    nombre_completo = serializers.CharField(max_length = 240, required = False)
+    departamento = serializers.CharField(max_length = 240, required = False)
+    puesto = serializers.CharField(max_length = 240, required = False)
 
 class ReadUserSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150, required = False)
@@ -161,3 +166,8 @@ class ReadUbicacionesSerializer(serializers.ModelSerializer):
                   'alias', 'funcionario_id',
                   'img_path']
 
+class ModoAdquisicionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ModoAdquisicion
+        fields = ['id', 'descripcion']

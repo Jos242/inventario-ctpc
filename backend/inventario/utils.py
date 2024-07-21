@@ -171,32 +171,38 @@ class ActivosActions:
         pass
 
     #Metodos para el HTTP GET-------------------------------
-    def all_activos(self) -> Response: #Working
+    def all_activos(self) -> Response: 
         activos:ReadActivos = ReadActivos.objects.all().order_by('-id')
-        serializer:ActivoSerializer = ActivoSerializer(instance = activos, many = True)
+        serializer = ReadActivoSerializerComplete(instance = activos,
+                                                  many = True)
         return Response(serializer.data, status = status.HTTP_200_OK)
 
-    def activos_filter_column(self) -> Response: #Working
-        filter_all_activos = Activos.objects.values('id', 'id_registro', 'no_identificacion',
-                                                    'descripcion', 'ubicacion').order_by('-id')
-        serializer = ReadActivoSerializer(instance = filter_all_activos, many = True)
-        return Response(serializer.data, status = status.HTTP_200_OK)
+    def activos_filter_column(self) -> Response: 
+        filter_all_activos = Activos.objects.only('id', 'id_registro', 'no_identificacion',
+                                                  'descripcion', 'ubicacion_original').order_by('-id')
+
+        serializer = ReadActivoSerializerIncomplete(instance = filter_all_activos,
+                                                    many = True)
+        return Response(serializer.data,
+                        status = status.HTTP_200_OK)
 
 
-    def get_activo_by_id(self, pk:int) -> Response: #Working
+    def get_activo_by_id(self, pk:int) -> Response: 
         try:
             activo:Activos = Activos.objects.get(pk = pk)
         except Activos.DoesNotExist:
             return Response({"error": "activo does not exist"}, 
                             status = status.HTTP_404_NOT_FOUND)
-        serializer:ActivoSerializer = ActivoSerializer(instance = activo)
+
+        serializer = ReadActivoSerializerComplete(instance = activo)
+
         return Response(serializer.data,
                         status = status.HTTP_200_OK)
     
     def get_activo_by_no_identificacion(self, no_identificacion:str) -> Response:
         try:
             activo:Response = Activos.objects.get(no_identificacion = no_identificacion)
-            serializer:ActivoSerializer = ActivoSerializer(instance = activo) 
+            serializer = ReadActivoSerializerComplete(instance = activo) 
             return Response(serializer.data,
                             status = status.HTTP_200_OK) 
 
@@ -209,16 +215,14 @@ class ActivosActions:
     
 #Metodos para el HTTP POST-------------------------------
     def add_activo(self, request) -> Response: #Working
-        remaining_fields = get_remaining_fields()
-        print(f"remaining_fields-------\n{remaining_fields}")
-        serializer = ActivoSerializer(data = request.data)
-        if serializer.is_valid():
-            valid_activo = serializer.data | remaining_fields
-            activo = Activos(**valid_activo)
-            activo.save()
-            
-            return Response(ReadActivoSerializer(instance = activo).data,
+        remaining_fields = get_remaining_fields() 
+        serializer = ActivoSerializer(data = request.data | remaining_fields)
+
+        if serializer.is_valid():          
+            activo = serializer.create(serializer.validated_data)
+            return Response(ReadActivoSerializerIncomplete(instance = activo).data,
                             status= status.HTTP_200_OK)
+        
         return Response(serializer.errors,
                         status = status.HTTP_400_BAD_REQUEST)
 #--------------------------------------------------------
@@ -335,10 +339,8 @@ class UserActions:
    
         return Response(serializer.errors,
                          status = status.HTTP_200_OK)
-  
       
 #-------------------------------------------------------------
-
 class DocsActions:
 
     def __init__(self) -> None:
@@ -820,5 +822,115 @@ class UbicacionesActions:
                         status = status.HTTP_400_BAD_REQUEST)
    
    #FALTA PATCH Y DELETE
+
+class FuncionariosActions():
+
+   #Metodos para el HTTP GET---------------------------------
+   def funcionario_by_id(self, pk:int): 
+        try: 
+            funcionario = Funcionarios.objects.get(id = pk)
+            serializer = ReadFuncionariosSerializer(instance = funcionario)
+
+        except Funcionarios.DoesNotExist:
+            return Response({"error": "funcionario does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+
+        return Response(serializer.data, 
+                        status = status.HTTP_200_OK)
+
+   def all_funcionarios(self):   
+        try:
+            funcionarios = Funcionarios.objects.all()
+            serializer = ReadFuncionariosSerializer(instance = funcionarios,
+                                              many = True)
+        except Revisiones.DoesNotExist:
+            return Response({"error": "there are not 'funcionarios'"},
+                            status = status.HTTP_404_NOT_FOUND)
+
+        return Response(serializer.data,
+                        status = status.HTTP_200_OK)
+
+class ModoAdquisicionActions():
+
+
+    #Metodos para el HTTP GET---------------------------------
+    def modo_adquisicion_by_id(self, pk:int):
+        try: 
+            adquisicion = ModoAdquisicion.objects.get(id = pk)
+            serializer = ModoAdquisicionSerializer(instance = adquisicion)
+
+        except ModoAdquisicion.DoesNotExist:
+            return Response({"error": "modo adquisicion does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+
+        return Response(serializer.data, 
+                        status = status.HTTP_200_OK)
+    
+    def all_modo_adquisicion(self):
+        try:
+            adquisicion = ModoAdquisicion.objects.all().order_by('id')
+            serializer = ModoAdquisicionSerializer(instance = adquisicion,
+                                              many = True)
+        except ModoAdquisicion.DoesNotExist:
+            return Response({"error": "there are not 'modos de adquisicion'"},
+                            status = status.HTTP_404_NOT_FOUND)
+
+        return Response(serializer.data,
+                        status = status.HTTP_200_OK)
+
+    #Metodos para el HTTP POST--------------------------------
+    def nuevo_modo_adquisicion(self, request):
+        serializer = ModoAdquisicionSerializer(data = request.data)
+
+        if serializer.is_valid():
+            revision = serializer.create(serializer.validated_data)
+
+            return Response(serializer.data, 
+                            status = status.HTTP_200_OK)
+
+        return Response(serializer.errors,
+                        status = status.HTTP_400_BAD_REQUEST)
+
+    #Metodos para el HTTP PATCH--------------------------------
+    def update_modo_adquisicion(self, request, pk:int):
+        data = request.data
+        serializer = ModoAdquisicionSerializer(data = data)
+
+        try:
+            adquisicion = ModoAdquisicion.objects.get(id = pk)
+
+        except ModoAdquisicion.DoesNotExist:
+            return Response({"error": "modo adquisicion does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+            
+
+        if serializer.is_valid():
+            revision = serializer.update(instance = adquisicion,
+                                                    validated_data= serializer.validated_data)
+            revision.save()
+            serializer = ModoAdquisicionSerializer(instance = adquisicion)  
+            return Response(serializer.data,
+                           status = status.HTTP_200_OK) 
+
+        return Response(serializer.errors,
+                        status = status.HTTP_400_BAD_REQUEST)
+
+   
+
+
+    
+    #Metodos para el HTTP DELETE-------------------------------
+    def delete_modo_adquisicion(self, pk:int):
+        try: 
+            adquisicion = ModoAdquisicion.objects.get(id = pk)
+            adquisicion.delete()
+
+        except ModoAdquisicion.DoesNotExist:
+            return Response({"error": "modo adquisicion does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+
+        return Response({"status": "modo adquisicion deleted"}, 
+                        status = status.HTTP_200_OK)
+    
 
 

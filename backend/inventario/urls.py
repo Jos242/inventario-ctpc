@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 urlpatterns = [
     path("crear-usuario/", views.UserView.as_view()),
-    
+
     #Endpoints relacionados a los activos------------------------------------
     path("agregar-activo/", views.ActivosView.as_view()),
     path("todos-los-activos/", views.ActivosView.as_view()),
@@ -38,6 +38,18 @@ urlpatterns = [
 
     #Endpoints relacionados a la ubicaciones----------------------------------
     path("ubicacion/<int:pk>/", views.UbicacionesView.as_view()),
-    path("nueva-ubicacion/", views.UbicacionesView.as_view())
+    path("nueva-ubicacion/", views.UbicacionesView.as_view()),
 
+    #Endpoints relacionados a los funcionarios--------------------------------
+    path("funcionario/<int:pk>/", views.FuncionariosView.as_view()),
+    path("all-funcionarios/", views.FuncionariosView.as_view()),
+
+    #Endpoints relacionados a el modo de aquisicion---------------------------
+    path("modo-adquisicion/<int:pk>/", views.ModoAdquisicionView.as_view()),
+    path("all/modo-adquisicion/", views.ModoAdquisicionView.as_view()),
+    path("nuevo/modo-adquisicion/", views.ModoAdquisicionView.as_view()),
+    path("update/modo-adquisicion/<int:pk>/", views.ModoAdquisicionView.as_view()),
+    path("delete/modo-adquisicion/<int:pk>/", views.ModoAdquisicionView.as_view())
+
+    
 ]

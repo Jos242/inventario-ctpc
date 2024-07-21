@@ -127,7 +127,6 @@ class UserView(APIView):
         if path == "/crear-usuario/":  
             return self.user_do.new_usuario(request)
 
-
 class DocsView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
     # authentication_classes = [JWTAuthentication]
@@ -259,7 +258,6 @@ class RevisionesView(APIView):
             rp:Response = self.revisiones_do.delete_revision_by_id(pk) 
             return rp
         
-
 class UbicacionesView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
     # authentication_classes = [JWTAuthentication]
@@ -286,4 +284,68 @@ class UbicacionesView(APIView):
             rp:Response = self.ubicaciones_do.nueva_ubicacion(request)
             return rp
 
+class FuncionariosView(APIView):
+    parser_classes   = (MultiPartParser, FormParser, JSONParser)
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated] 
+    authentication_classes = []
+    permission_classes = []
+    funcionarios_do:FuncionariosActions = None
 
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.funcionarios_do = FuncionariosActions()
+
+    def get(self, request, pk:int = None) -> Response:
+        path = request.path
+
+        if f"/funcionario/{pk}/" == path:
+            rp:Response = self.funcionarios_do.funcionario_by_id(pk)
+            return rp
+        
+        if f"/all-funcionarios/" == path:
+            rp:Response = self.funcionarios_do.all_funcionarios()
+            return rp
+
+class ModoAdquisicionView(APIView):
+    parser_classes   = (MultiPartParser, FormParser, JSONParser)
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated] 
+    authentication_classes = []
+    permission_classes = []
+    adquisicion_do:ModoAdquisicionActions = None
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.adquisicion_do = ModoAdquisicionActions()
+
+    def get(self, request, pk:int = None) -> Response:
+        path = request.path
+
+        if f'/modo-adquisicion/{pk}/' == path:
+            rp:Response = self.adquisicion_do.modo_adquisicion_by_id(pk)
+            return rp 
+
+        if f'/all/modo-adquisicion/' == path:
+            rp:Response = self.adquisicion_do.all_modo_adquisicion()
+            return rp
+
+    def post(self, request):
+        path = request.path
+        if '/nuevo/modo-adquisicion/' == path:
+            rp:Response = self.adquisicion_do.nuevo_modo_adquisicion(request)
+            return rp
+        
+    def patch(self, request, pk:int = None) -> Response:
+        path = request.path
+        if f'/update/modo-adquisicion/{pk}/' == path:
+            rp:Response = self.adquisicion_do.update_modo_adquisicion(request = request,
+                                                                      pk = pk)
+            return rp
+        
+    def delete(self, request, pk:int = None) -> Response:
+        path = request.path
+        if f'/delete/modo-adquisicion/{pk}/' == path:
+            rp:Response = self.adquisicion_do.delete_modo_adquisicion(pk)
+            return rp
+        
