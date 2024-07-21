@@ -87,7 +87,8 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 class FuncionariosSerializer(serializers.ModelSerializer):
-
+    ubicacion = serializers.PrimaryKeyRelatedField(allow_null=True, queryset=Ubicaciones.objects.all(), required=False) 
+    
     class Meta:
         model = Funcionarios 
         fields = ['user', 'nombre_completo', 'departamento',
@@ -144,6 +145,15 @@ class WhatTheExcelNameIs(serializers.Serializer):
 
 class UbicacionesSerializer(serializers.ModelSerializer):
     img_path = serializers.FileField(required = False)
+
+    class Meta:
+        model = Ubicaciones
+        fields = ['id', 'nombre_oficial',
+                  'alias', 'funcionario_id',
+                  'img_path']
+
+class ReadUbicacionesSerializer(serializers.ModelSerializer):
+    img_path = serializers.CharField(required = False)
 
     class Meta:
         model = Ubicaciones

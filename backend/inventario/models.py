@@ -132,8 +132,7 @@ class Funcionarios(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE)
     nombre_completo = models.TextField()
     departamento = models.ForeignKey(Departamentos, models.DO_NOTHING, db_column='departamento')
-    puesto = models.ForeignKey(Puestos, models.DO_NOTHING, db_column='puesto')
-    ubicacion = models.ForeignKey(Ubicaciones, models.DO_NOTHING, db_column='ubicacion', null = True) 
+    puesto = models.ForeignKey(Puestos, models.DO_NOTHING, db_column='puesto') 
     
     class Meta:
         db_table = 'funcionarios'
@@ -178,3 +177,13 @@ class Revisiones(models.Model):
     class Meta:
         db_table = 'revisiones'
 
+class HistorialUbicacion(models.Model):
+    id = models.AutoField(primary_key = True)
+    ubicacion = models.ForeignKey(Ubicaciones, models.DO_NOTHING,
+                                  db_column = 'ubicacion')
+    activo = models.ForeignKey(Activos, models.DO_NOTHING,
+                               to_field = 'id_registro', db_column= 'activo')
+    fecha =  models.DateField(null = True)
+
+    class Meta:
+        db_table = 'historialubicaciones'

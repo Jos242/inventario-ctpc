@@ -92,8 +92,8 @@ IGNORE 1 LINES
 
 INSERT INTO puestos (descripcion) VALUES
 ('AGENTE DE SEGURIDAD'),
-('AUX.ADMINISTRATIVA'),
-('AUX.ADMINISTRATIVO'),
+('AUX. ADMINISTRATIVA'),
+('AUX. ADMINISTRATIVO'),
 ('CONSERJE'),
 ('COORD. CON LA EMPRESA'),
 ('COORDINADOR ACADÉMICO'),
@@ -150,6 +150,14 @@ UPDATE activos SET precio = NULL WHERE precio = 'N/A';
 UPDATE activos SET precio = NULL WHERE precio = '';
 ALTER TABLE activos MODIFY precio Decimal(10,2);
 ALTER TABLE activos ADD impreso BOOLEAN DEFAULT 0;
+
+ALTER TABLE activos CHANGE ubicacion ubicacion_original INT;
+ALTER TABLE activos ADD ubicacion_actual INT;
+
+ALTER TABLE activos ADD conectividad BOOLEAN DEFAULT 0;
+ALTER TABLE activos ADD seguridad BOOLEAN DEFAULT 0;
+ALTER TABLE activos ADD placa_impresa BOOLEAN DEFAULT 0;
+
 ALTER TABLE observaciones ADD impreso BOOLEAn DEFAULT 0;
 UPDATE activos SET impreso = 1 WHERE impreso = 0;
 UPDATE observaciones SET impreso = 1 WHERE impreso = 0; 

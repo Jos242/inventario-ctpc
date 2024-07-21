@@ -126,10 +126,7 @@ class UserView(APIView):
         path = request.path
         if path == "/crear-usuario/":  
             return self.user_do.new_usuario(request)
-        if path == "/iniciar-sesion/":
-            return self.user_do.sign_up(request)
-        if path == "/salir/":
-            return self.user_do.log_out(request)
+
 
 class DocsView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
@@ -281,6 +278,7 @@ class UbicacionesView(APIView):
         if f"/ubicacion/{pk}/" == path:
             rp:Response = self.ubicaciones_do.ubicacion_by_id(pk)
             return rp
+
     def post(self, request):
         path = request.path
 

@@ -23,7 +23,7 @@ from .serializers import *
 
 #Metodos globales-----------------------------------------------
 def count_files_in_directory(directory):
-    count = 0
+    count = 1
     for _, _, files in os.walk(directory):
         count += len(files)
     return count
@@ -163,8 +163,6 @@ def update_id_registro_and_asiento(id_registro:str) -> dict:
             "asiento": nums[2]
         }
  
-
-
 #--------------------------------------------------------------
 
 class ActivosActions:
@@ -276,8 +274,7 @@ class UserActions:
     #Metodos para el HTTP GET--------------------------------
 
     #Metodos para el HTTP POST-------------------------------
-    def new_usuario(self, request) -> Response:
-        
+    def new_usuario(self, request) -> Response: 
         serializer:UserSerializer = UserSerializer(data = request.data)
              
         if serializer.is_valid():       
@@ -293,21 +290,41 @@ class UserActions:
                 user.is_superuser = True 
 
             if user_type == 'FUNCIONARIO':
+                content = {
+                    "username": None,
+                    "user_type": None,
+                    "full_name": None,
+                    "department": None, 
+                    "location": None,
+                    "position_title": None
+                } 
                 user.is_staff = True
                 user.is_superuser = False 
                 user.save()
                 data = serializer.validated_data | {"user": user.pk}
-                funcionario_serializer= FuncionariosSerializer(data = data) 
-                
+                funcionario_serializer= FuncionariosSerializer(data = data)  
                 if funcionario_serializer.is_valid():
+                    
+                    if 'ubicacion' in funcionario_serializer.validated_data:
+                        ubicacion = funcionario_serializer.validated_data['ubicacion'] 
+                        funcionario_serializer.validated_data.pop('ubicacion')
+                    else:
+                        content.pop('location')
+
                     validated_data = funcionario_serializer.validated_data
-                    extra_info = funcionario_serializer.create(validated_data = validated_data) 
+                    funcionario:Funcionarios = funcionario_serializer.create(validated_data) 
                     data = funcionario_serializer.data | serializer.data
                     
-                    del data['user']
-                    del data['user_type']
-                    print(f"Aqui -> {funcionario_serializer.data['ubicacion']}")
-                    return Response(data,
+                    content['username'] = user.username 
+                    content['user_type'] = 'Funcionario'
+                    content['full_name'] = str(funcionario.nombre_completo)
+                    content['department'] = str(funcionario.departamento)
+                    content['position_title'] = str(funcionario.puesto)
+
+                    if 'location' in content:
+                        content['location'] = str(ubicacion)
+
+                    return Response(content,
                                     status = status.HTTP_200_OK)
                
                 User.objects.get(pk = user.pk).delete() 
@@ -319,34 +336,7 @@ class UserActions:
         return Response(serializer.errors,
                          status = status.HTTP_200_OK)
   
-    def sign_up(self, request) -> Response:
-        required_keys:tuple = ("username", "password")
-        
-        for key in required_keys:
-            if key not in request.data:
-                return Response({"error": "required keys to authenticate 'username' and 'password'"})
-
-        serializer:ReadUserSerializer = ReadUserSerializer(data = request.data) 
-        
-        if serializer.is_valid():
-            username = serializer.validated_data.get("username")
-            password = serializer.validated_data.get("password")
-            print(f"Username: {username}")
-            print(f"Password: {password}")
-            user:User = authenticate(username = username, password = password)
-            
-            if user is None:
-                return Response({"error": "could not authenticate the user"})
-
-            login(request, user) 
-            serializer_1:UserSerializer = UserSerializer(instance = user)
-            return Response(serializer_1.data, status = status.HTTP_200_OK)   
-        
-        return Response(serializer.errors, status= status.HTTP_400_BAD_REQUEST)
-
-    def log_out(self, request) -> Response:
-        logout(request)
-        return Response({"info": "you are logged out"}, status = status.HTTP_200_OK)  
+      
 #-------------------------------------------------------------
 
 class DocsActions:
@@ -620,7 +610,6 @@ class DocsActions:
         return Response(serializer.errors,
                         status = status.HTTP_200_OK)
 #--------------------------------------------------------    
-
 class CierreInventarioActions():
     #Metodos para el HTTP GET---------------------------------
     def cierre_by_pk(self, pk) -> Response:
@@ -817,12 +806,19 @@ class UbicacionesActions:
             if "alias" not in serializer.validated_data:
                 serializer.validated_data["alias"] = nombre_oficial
 
+            if "img_path" in serializer.validated_data:
+                serializer.validated_data["img_path"] = ruta
+
+            
             ubicacion = serializer.create(serializer.validated_data)
+            serializer = ReadUbicacionesSerializer(instance = ubicacion)
 
             return Response(serializer.data, 
                             status = status.HTTP_200_OK)
 
         return Response(serializer.errors,
                         status = status.HTTP_400_BAD_REQUEST)
+   
+   #FALTA PATCH Y DELETE
 
 

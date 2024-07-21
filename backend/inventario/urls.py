@@ -2,9 +2,7 @@ from django.urls import path
 from . import views
 urlpatterns = [
     path("crear-usuario/", views.UserView.as_view()),
-    path("iniciar-sesion/", views.UserView.as_view()),
-    path("salir/", views.UserView.as_view()), 
-
+    
     #Endpoints relacionados a los activos------------------------------------
     path("agregar-activo/", views.ActivosView.as_view()),
     path("todos-los-activos/", views.ActivosView.as_view()),
@@ -41,7 +39,5 @@ urlpatterns = [
     #Endpoints relacionados a la ubicaciones----------------------------------
     path("ubicacion/<int:pk>/", views.UbicacionesView.as_view()),
     path("nueva-ubicacion/", views.UbicacionesView.as_view())
-
-
 
 ]
