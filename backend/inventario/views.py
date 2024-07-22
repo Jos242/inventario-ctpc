@@ -61,6 +61,11 @@ class ActivosView(APIView):
         if path == "/agregar-activo/":
             resp = self.activos_do.add_activo(request)  
             return resp
+        
+        if path == "/activos/select-columns/":
+            rp:Response = self.activos_do.select_columns_to_filter(request)
+            return rp
+
         return Response({"data": "did not match an endpoint for a HTTP POST Method"}, status = status.HTTP_404_NOT_FOUND)
 
 class ActivosViewNoAuth(APIView):

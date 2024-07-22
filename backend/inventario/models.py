@@ -65,8 +65,7 @@ class Activos(models.Model):
         managed = False
         db_table = 'activos'
 
-    def __str__(self):
-        return str({"id_registro": self.id_registro, "no_identificacion": self.no_identificacion})
+
 
 class ReadActivos(models.Model):
     ESTADO_ACTIVO = {
