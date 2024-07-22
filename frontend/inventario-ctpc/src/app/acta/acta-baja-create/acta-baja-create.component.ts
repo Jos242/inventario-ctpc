@@ -70,6 +70,7 @@ export class ActaBajaCreateComponent {
 
   destroy$:Subject<boolean>=new Subject<boolean>();
 
+  selectedActivos: string[] = []; // Array to store selected activos
 
   
 
@@ -117,8 +118,12 @@ export class ActaBajaCreateComponent {
   }
 
   selectActivo(activo: any): void {
-    this.myForm.patchValue({ activo: activo.no_identificacion });
-    
+    // Add the activo to the array if it's not already present
+    if (!this.selectedActivos.includes(activo.no_identificacion)) {
+      this.selectedActivos.push(activo.no_identificacion);
+    }
+    // Update the form control with the array
+    this.myForm.patchValue({ activo: this.selectedActivos.join(', ') });
   }
 
   listaDocs(){

@@ -21,7 +21,7 @@
                         </mat-form-field>
                       </div>
                   
-                      <div class="row">
+                      <div class="row"> 
                         <mat-form-field>
                           <mat-label>Search</mat-label>
                           <input matInput formControlName="search" placeholder="Search activos">
@@ -87,87 +87,90 @@
     <h1>Previsualizacion del Acta</h1>
 </div>
 <br>
-<div class="parent-component">
-  <div class="specific-div">
+<div class="d-flex justify-content-center">
+  <div class="parent-component">
+    <div class="specific-div">
+        
+      <div #contentToConvert class="cont"> 
+        <img src="assets/images/header.png" alt="" class="header">
+        <!-- <h1 class="centered">Ministerio de Educacion Publica</h1>
+        <h1 class="centered">Direccion Regional Educacion de Alajuela</h1>
+        <h3 class="centered">Colegio Tecnico Profesional de Carrizal</h3>
+        <br>
+        <br>
+        <h4 class="centered">Info Contacto</h4>
+        <h4 class="centered">Info Contacto</h4> -->
+        <p>&nbsp;</p>
+        <p class="titulos">ACTA DE BAJA DE BIENES N {{numActa}}</p>
+        <p class="titulos">Fecha del Acta: {{fechaActa}}</p>
+        <!-- <img src="assets/images/logocole.png" alt="" class="absolute-img"> -->
+        <br>
+        <table class="tabla">
+            <tr>
+              <th colspan="2"><b>Colegio Tecnico Profesional:</b> CARRIZAL</th>
+            </tr>
+            <tr>
+              <td class="half-width"><b>Fecha de baja del bien:</b> {{fechaActa}}</td>
+              <td class="half-width"><b>Curso Lectivo:</b> {{ahno}}</td>
+            </tr>
+            <tr>
+              <td colspan="2"><b>Empresa a la cual se va a entregar para su reciclaje o destruccion. O bien, el metodo que se va a utilizar para desecharlo: </b> {{descActa}}</td>
+            </tr>
+        </table> 
+  
+        <table class="tabla2">
+            <thead>
+                <tr>
+                    <th rowspan="2" style="width: 15.218%;">Número de identificacion del bien</th>
+                    <th rowspan="2" style="width: 22.277%; padding: 0%;">Descripción del bien</th>
+                    <th rowspan="2" style="width: 9.725%;">Marca</th>
+                    <th rowspan="2" style="width: 9.725%;">Modelo</th>
+                    <th rowspan="2" style="width: 11.055%;">Serie</th>
+                    <th colspan="2" style="width: 32%;">Marque con X según corresponda</th>
+                </tr>
+                <tr>
+                    <th>Obsolencia</th>
+                    <th>Inservibilidad</th>
+                </tr>
+            </thead>
+            <tr>
+                <td>{{id}}</td>
+                <td>{{desc}}</td>
+                <td>{{marca}}</td>
+                <td>{{modelo}}</td>
+                <td>{{serie}}</td>
+                <td>{{obs}}</td>
+                <td>{{ins}}</td>
+            </tr>
+  
+        </table>
+        <p class="espacios">&nbsp;</p>
+        <p class="espacios">&nbsp;</p>
+        <p class="espacios">&nbsp;</p>
+        <p class="espacios">&nbsp;</p>
+        <p class="espacios">&nbsp;</p>
+        <img src="assets/images/firmas.png" alt="" class="firmas">
+        <p class="espacios">&nbsp;</p>
+        <p class="espacios">&nbsp;</p>
+        <p class="espacios">&nbsp;</p>
+        <p class="espacios">&nbsp;</p>
+        <p class="espacios">&nbsp;</p>
+        <p class="espacios">&nbsp;</p>
+        <p class="espacios">&nbsp;</p>
+        <p class="espacios">&nbsp;</p>
+        <p class="espacios">&nbsp;</p>
+        <p class="espacios">&nbsp;</p>
+        <p class="espacios">&nbsp;</p>
+        <p class="espacios">&nbsp;</p>
+        <img src="assets/images/footer.png" alt="" class="footer">
+      </div>
+  
       
-    <div #contentToConvert class="cont"> 
-      <img src="assets/images/header.png" alt="" class="header">
-      <!-- <h1 class="centered">Ministerio de Educacion Publica</h1>
-      <h1 class="centered">Direccion Regional Educacion de Alajuela</h1>
-      <h3 class="centered">Colegio Tecnico Profesional de Carrizal</h3>
-      <br>
-      <br>
-      <h4 class="centered">Info Contacto</h4>
-      <h4 class="centered">Info Contacto</h4> -->
-      <p>&nbsp;</p>
-      <p class="titulos">ACTA DE BAJA DE BIENES N {{numActa}}</p>
-      <p class="titulos">Fecha del Acta: {{fechaActa}}</p>
-      <!-- <img src="assets/images/logocole.png" alt="" class="absolute-img"> -->
-      <br>
-      <table class="tabla">
-          <tr>
-            <th colspan="2"><b>Colegio Tecnico Profesional:</b> CARRIZAL</th>
-          </tr>
-          <tr>
-            <td class="half-width"><b>Fecha de baja del bien:</b> {{fechaActa}}</td>
-            <td class="half-width"><b>Curso Lectivo:</b> {{ahno}}</td>
-          </tr>
-          <tr>
-            <td colspan="2"><b>Empresa a la cual se va a entregar para su reciclaje o destruccion. O bien, el metodo que se va a utilizar para desecharlo: </b> {{descActa}}</td>
-          </tr>
-      </table> 
-
-      <table class="tabla2">
-          <thead>
-              <tr>
-                  <th rowspan="2" style="width: 15.218%;">Número de identificacion del bien</th>
-                  <th rowspan="2" style="width: 22.277%; padding: 0%;">Descripción del bien</th>
-                  <th rowspan="2" style="width: 9.725%;">Marca</th>
-                  <th rowspan="2" style="width: 9.725%;">Modelo</th>
-                  <th rowspan="2" style="width: 11.055%;">Serie</th>
-                  <th colspan="2" style="width: 32%;">Marque con X según corresponda</th>
-              </tr>
-              <tr>
-                  <th>Obsolencia</th>
-                  <th>Inservibilidad</th>
-              </tr>
-          </thead>
-          <tr>
-              <td>{{id}}</td>
-              <td>{{desc}}</td>
-              <td>{{marca}}</td>
-              <td>{{modelo}}</td>
-              <td>{{serie}}</td>
-              <td>{{obs}}</td>
-              <td>{{ins}}</td>
-          </tr>
-
-      </table>
-      <p class="espacios">&nbsp;</p>
-      <p class="espacios">&nbsp;</p>
-      <p class="espacios">&nbsp;</p>
-      <p class="espacios">&nbsp;</p>
-      <p class="espacios">&nbsp;</p>
-      <img src="assets/images/firmas.png" alt="" class="firmas">
-      <p class="espacios">&nbsp;</p>
-      <p class="espacios">&nbsp;</p>
-      <p class="espacios">&nbsp;</p>
-      <p class="espacios">&nbsp;</p>
-      <p class="espacios">&nbsp;</p>
-      <p class="espacios">&nbsp;</p>
-      <p class="espacios">&nbsp;</p>
-      <p class="espacios">&nbsp;</p>
-      <p class="espacios">&nbsp;</p>
-      <p class="espacios">&nbsp;</p>
-      <p class="espacios">&nbsp;</p>
-      <p class="espacios">&nbsp;</p>
-      <img src="assets/images/footer.png" alt="" class="footer">
+  
     </div>
-
-    
-
   </div>
 </div>
+
 <br>
 
 
