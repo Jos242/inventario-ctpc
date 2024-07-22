@@ -11,6 +11,7 @@ from sgica.settings import MEDIA_ROOT
 from django.db.models import F, Value, CharField
 from django.db.models.functions import Cast
 from django.http import Http404
+from django.core.exceptions import FieldDoesNotExist 
 #----------------------------------------------
 
 #Django rest frameworks herramientas-----------
@@ -175,6 +176,7 @@ class ActivosActions:
         activos:ReadActivos = ReadActivos.objects.all().order_by('-id')
         serializer = ReadActivoSerializerComplete(instance = activos,
                                                   many = True)
+        print(serializer)
         return Response(serializer.data, status = status.HTTP_200_OK)
 
     def activos_filter_column(self) -> Response: 
@@ -224,6 +226,20 @@ class ActivosActions:
         
         return Response(serializer.errors,
                         status = status.HTTP_400_BAD_REQUEST)
+
+    def select_columns_to_filter(self, request) -> Response:  
+        FIELDS = request.data['fields'] 
+        try:
+            activos = Activos.objects.only(*FIELDS) 
+            serializer = DynamicReadActivosSerializer(instance = activos,
+                                                      many = True, fields = FIELDS )
+
+        except FieldDoesNotExist as e: # ESTE TRY CATCH NO SE PORQUE NO SIRVE XD
+           return Response({'error': str(e)},
+                            status=status.HTTP_400_BAD_REQUEST) 
+ 
+        return Response(serializer.data, 
+                        status= status.HTTP_200_OK)
 #--------------------------------------------------------
 
 class ObservacionesActivos():
@@ -612,6 +628,7 @@ class DocsActions:
                         status = status.HTTP_200_OK)
 #--------------------------------------------------------    
 class CierreInventarioActions():
+
     #Metodos para el HTTP GET---------------------------------
     def cierre_by_pk(self, pk) -> Response:
         try:
@@ -687,8 +704,8 @@ class CierreInventarioActions():
 
         return Response({"status": "entry was deleted"}, 
                         status = status.HTTP_200_OK)
-
 #--------------------------------------------------------    
+
 class RevisionesActions():
 
     #Metodos para el HTTP GET---------------------------------
