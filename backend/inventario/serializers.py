@@ -40,8 +40,6 @@ class ReadActivoSerializerComplete(serializers.ModelSerializer):
                   'ubicacion_original', 'ubicacion_actual', 'modo_adquisicion',
                   'precio', 'conectividad', 'seguridad', 'placa_impresa','de_baja', 'creado_el']
 
-        
-
 class ReadActivoSerializerIncomplete(serializers.ModelSerializer):
     ubicacion_original = serializers.CharField(required = False) 
 
@@ -177,40 +175,24 @@ class ModoAdquisicionSerializer(serializers.ModelSerializer):
 class ColumnsToFilterActivosSerializer(serializers.Serializer):
     columns_list = serializers.ListField()
 
+class DynamicReadActivosSerializer(serializers.ModelSerializer):  
+    ubicacion_original_alias = serializers.CharField()
+    ubicacion_actual_alias = serializers.CharField()
+    modo_adquisicion_desc = serializers.CharField()
 
-# class DynamicFieldsModelSerializer(serializers.ModelSerializer):
-#     """
-#     A ModelSerializer that takes an additional `fields` argument that
-#     controls which fields should be displayed.
-#     """
-
-#     def __init__(self, *args, **kwargs):
-#         # Instantiate the superclass normally
-#         super(DynamicFieldsModelSerializer, self).__init__(*args, **kwargs)
-#         fields = self.context['request'].query_params.get('fields')
-
-#         if fields:
-#             fields = fields.split(',')
-#             # Drop any fields that are not specified in the `fields` argument.
-#             allowed = set(fields)
-#             existing = set(self.fields.keys())
-#             for field_name in existing - allowed:
-#                 self.fields.pop(field_name)
-
-class DynamicReadActivosSerializer(serializers.ModelSerializer):
-  
-    ubicacion_original = serializers.CharField(required = False)
-    ubicacion_actual = serializers.CharField(required = False)
-    modo_adquisicion = serializers.CharField(required = False) 
   
     class Meta:
        model = Activos
-       fields = ['id', 'id_registro', 'asiento', 'no_identificacion',
-                  'descripcion', 'marca', 'modelo', 'serie', 'estado',
-                  'ubicacion_original', 'ubicacion_actual', 'modo_adquisicion',
-                  'precio', 'conectividad', 'seguridad', 'placa_impresa','de_baja', 'creado_el']
+       fields = [
+            'id', 'id_registro', 'asiento',
+            'no_identificacion', 'descripcion', 'marca',
+            'modelo', 'serie', 'estado',
+            'ubicacion_original_alias', 'modo_adquisicion_desc', 'precio',
+            'creado_el', 'observacion', 'impreso',
+            'ubicacion_actual_alias', 'conectividad', 'seguridad',
+            'placa_impresa', 'de_baja'
+        ]
 
-   
     def __init__(self, *args, **kwargs):
         # Obtener los campos dinámicos desde kwargs
         fields = kwargs.pop('fields', None)
@@ -223,9 +205,9 @@ class DynamicReadActivosSerializer(serializers.ModelSerializer):
             for field_name in existing - allowed: 
                 self.fields.pop(field_name)
 
+class PlantillasSerializer(serializers.ModelSerializer):
 
-# class TestinSerializer(serializers.ModelSerializer):
-    
-#     class Meta:
-#         model = Activos
-#         fields = '__all__' 
+    class Meta:
+        model = Plantillas
+        fields = '__all__'
+

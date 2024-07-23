@@ -154,7 +154,9 @@ ALTER TABLE activos ADD ubicacion_actual INT;
 ALTER TABLE activos ADD conectividad BOOLEAN DEFAULT 0;
 ALTER TABLE activos ADD seguridad BOOLEAN DEFAULT 0;
 ALTER TABLE activos ADD placa_impresa BOOLEAN DEFAULT 0;
-ALTER TABLE activos ADD de_baja BOOLEAN DEFAULT 0;
+ALTER TABLE activos 
+ADD COLUMN de_baja ENUM('NO DADO DE BAJA', 'DADO DE BAJA CON PLACA', 'DADO DE BAJA SIN PLACA') 
+NOT NULL DEFAULT 'NO DADO DE BAJA';
 ALTER TABLE observaciones ADD impreso BOOLEAN DEFAULT 0;
 UPDATE activos SET impreso = 1 WHERE impreso = 0;
 UPDATE observaciones SET impreso = 1 WHERE impreso = 0; 

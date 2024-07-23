@@ -8,6 +8,8 @@ from rest_framework.views       import APIView
 from rest_framework.parsers     import FormParser, MultiPartParser, JSONParser 
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework import generics
+from rest_framework import mixins
 #----------------------------------------------
 from .utils import *
 #----------------------------------------------
@@ -354,3 +356,24 @@ class ModoAdquisicionView(APIView):
             rp:Response = self.adquisicion_do.delete_modo_adquisicion(pk)
             return rp
         
+class PlantillasView(mixins.CreateModelMixin,
+                     mixins.RetrieveModelMixin,
+                     mixins.UpdateModelMixin,
+                     mixins.DestroyModelMixin,
+                    generics.GenericAPIView):
+    queryset = Plantillas.objects.all()
+    serializer_class = PlantillasSerializer
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+    
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)

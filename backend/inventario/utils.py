@@ -227,17 +227,30 @@ class ActivosActions:
         return Response(serializer.errors,
                         status = status.HTTP_400_BAD_REQUEST)
 
-    def select_columns_to_filter(self, request) -> Response:  
-        FIELDS = request.data['fields'] 
-        try:
-            activos = Activos.objects.only(*FIELDS) 
-            serializer = DynamicReadActivosSerializer(instance = activos,
-                                                      many = True, fields = FIELDS )
+    def select_columns_to_filter(self, request) -> Response:
+        FIELDS = request.data.get('fields', [])
+        RELATED_FIELDS = ["ubicacion_original_alias", "ubicacion_actual_alias", "modo_adquisicion_desc"]
+        SELECT_RELATED = ['ubicacion_original', 'ubicacion_actual', 'modo_adquisicion']
+        related_map = dict(zip(RELATED_FIELDS, SELECT_RELATED))
+        related_fields = [related_map[column] for column in RELATED_FIELDS if column in FIELDS]
+        annotations = {
+                'ubicacion_original_alias': F('ubicacion_original__alias'),
+                'ubicacion_actual_alias': F('ubicacion_actual__alias'),
+                'modo_adquisicion_desc': F('modo_adquisicion__descripcion'),
+        }
 
-        except FieldDoesNotExist as e: # ESTE TRY CATCH NO SE PORQUE NO SIRVE XD
-           return Response({'error': str(e)},
-                            status=status.HTTP_400_BAD_REQUEST) 
- 
+        for column in RELATED_FIELDS:
+            if column not in annotations:
+                del annotations[column]
+
+        activos = Activos.objects.select_related(*related_fields) \
+                                 .annotate(**annotations) \
+                                 .values(*FIELDS) \
+                                 .order_by('-id')
+        
+        serializer = DynamicReadActivosSerializer(instance = activos,
+                                                  many = True, fields = FIELDS)
+
         return Response(serializer.data, 
                         status= status.HTTP_200_OK)
 #--------------------------------------------------------

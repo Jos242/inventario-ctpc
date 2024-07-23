@@ -23,7 +23,7 @@ class Ubicaciones(models.Model):
 class ModoAdquisicion(models.Model):
     id = models.AutoField(primary_key = True)
     descripcion = models.CharField(max_length = 240, unique = True,
-                                   blank = False) #IN PRODUCTION THIS ONE IS FALSE
+                                   blank = True) #IN PRODUCTION THIS ONE IS FALSE
 
     class Meta:
         db_table = 'modoadquisicion'
@@ -37,6 +37,12 @@ class Activos(models.Model):
         "MALO": "MALO",
         "REGULAR": "REGULAR"
     }
+    DE_BAJA_TYPES = {
+        "NO DADO DE BAJA": "NO DADO DE BAJA",
+        "DADO DE BAJA CON PLACA": "DADO DE BAJA CON PLACA",
+        "DADO DE BAJA SIN PLACA": "DADO DE BAJA SIN PLACA"
+    }
+
     id = models.AutoField(primary_key=True)
     id_registro = models.CharField(max_length=150, unique = True)
     asiento = models.IntegerField()
@@ -59,19 +65,24 @@ class Activos(models.Model):
     conectividad = models.BooleanField(default = False)
     seguridad = models.BooleanField(default = False)
     placa_impresa = models.BooleanField(default = False)
-    de_baja = models.BooleanField(default = False)
+    de_baja = models.CharField(max_length = 25 ,choices = DE_BAJA_TYPES, default = "NO DADO DE BAJA")
 
     class Meta:
         managed = False
         db_table = 'activos'
-
-
 
 class ReadActivos(models.Model):
     ESTADO_ACTIVO = {
         "BUENO": "BUENO",
         "MALO": "MALO",
         "REGULAR": "REGULAR"}
+    
+    DE_BAJA_TYPES = {
+        "NO DADO DE BAJA": "NO DADO DE BAJA",
+        "DADO DE BAJA CON PLACA": "DADO DE BAJA CON PLACA",
+        "DADO DE BAJA SIN PLACA": "DADO DE BAJA SIN PLACA"
+    }
+
     id = models.AutoField(primary_key=True)
     id_registro = models.CharField(max_length=150)
     asiento = models.IntegerField()
@@ -93,7 +104,7 @@ class ReadActivos(models.Model):
     conectividad = models.BooleanField(default = False)
     seguridad = models.BooleanField(default = False)
     placa_impresa = models.BooleanField(default = False)
-    de_baja = models.BooleanField(default = False)
+    de_baja = models.CharField(max_length = 25 ,choices = DE_BAJA_TYPES, default = "NO DADO DE BAJA")
 
     class Meta:
         managed = False
@@ -214,4 +225,19 @@ class HistorialUbicacion(models.Model):
 
     class Meta:
         db_table = 'historialubicaciones'
+
+class Plantillas(models.Model):
+    TIPOS_PLANTILLA = {
+        "OBSERVACION": "OBSERVACION",
+        "ACTA B": "ACTA B",
+        "ACTA T": "ACTA T",
+        "REVISIONES NOTAS": "REVISIONES NOTAS"
+    }
+    id = models.AutoField(primary_key = True)
+    descripcion = models.TextField()
+    tipo = models.CharField(max_length = 21,
+                            choices= TIPOS_PLANTILLA)
+
+    class Meta:
+        db_table = 'plantillas'
 
