@@ -55,43 +55,22 @@ class ObservacionesSerializer(serializers.Serializer):
     activo = serializers.SlugRelatedField(queryset=Activos.objects.all(), slug_field='id_registro')
     class Meta:
         model = Observaciones
+
     def create(self, validated_data):
         return Observaciones.objects.create(**validated_data)
-     
+
 class UserSerializer(serializers.ModelSerializer):
-    user_type = serializers.ChoiceField(choices=[
-                ("ADMINISTRADOR", "ADMINISTRADOR"),
-                ("FUNCIONARIO", "FUNCIONARIO"),
-                ("OBSERVADOR", "OBSERVADOR")
-            ], required=True)
-    nombre_completo = serializers.CharField()
-
-    departamento = serializers.IntegerField(required = False)
-    puesto = serializers.IntegerField(required = False)
-    ubicacion = serializers.IntegerField(required = False)
-
-    
+       
     class Meta:
         model  = User
-        fields = ['username', 'password', 'user_type',
-                  'nombre_completo', 'departamento', 'puesto',
-                  'ubicacion']
-
-    def create_instance(self, validated_data:dict):
-        user:User = User(
-            username = validated_data.get('username'),
-            password = validated_data.get('password')
-        )
-        user.set_password(user.password)  
-        return user
+        fields = ['username', 'password']
 
 class FuncionariosSerializer(serializers.ModelSerializer):
-    ubicacion = serializers.PrimaryKeyRelatedField(allow_null=True, queryset=Ubicaciones.objects.all(), required=False) 
-    
+   
     class Meta:
         model = Funcionarios 
         fields = ['user', 'nombre_completo', 'departamento',
-                  'puesto', 'ubicacion']
+                  'puesto']
 
 class ReadFuncionariosSerializer(serializers.Serializer):
     user = serializers.CharField(max_length = 240, required = False)

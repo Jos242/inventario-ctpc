@@ -306,57 +306,54 @@ class UserActions:
     #Metodos para el HTTP GET--------------------------------
 
     #Metodos para el HTTP POST-------------------------------
-    def new_usuario(self, request) -> Response: 
+    def new_usuario(self, request) -> Response:
+        USER_TYPES = ["ADMINISTRADOR", "OBSERVADOR", "FUNCIONARIO"]
+        
+        try: 
+            user_type = request.data.get("user_type")
+
+            if user_type not in USER_TYPES:
+                return Response({"error": f"not a valid user type, valid user types: {USER_TYPES}"},
+                                status = status.HTTP_400_BAD_REQUEST)
+
+            else:
+                user_type = request.data.pop("user_type")
+
+        except KeyError as e:
+            return Response({"error": "required field: 'user_type'"},
+                            status = status.HTTP_400_BAD_REQUEST)
+
         serializer:UserSerializer = UserSerializer(data = request.data)
-             
-        if serializer.is_valid():       
-            user_type:str = serializer.validated_data.get('user_type') 
-            user:User = serializer.create_instance(serializer.validated_data) 
+
+        if serializer.is_valid():   
+            user:User = serializer.create(serializer.validated_data)
 
             if user_type == 'OBSERVADOR':
                 user.is_staff = False
                 user.is_superuser = False
+                user.set_password(serializer.validated_data['password'])
+                user.save()
 
             if user_type == 'ADMINISTRADOR':
                 user.is_staff = False
                 user.is_superuser = True 
+                user.set_password(serializer.validated_data['password'])
+                user.save()
 
             if user_type == 'FUNCIONARIO':
-                content = {
-                    "username": None,
-                    "user_type": None,
-                    "full_name": None,
-                    "department": None, 
-                    "location": None,
-                    "position_title": None
-                } 
                 user.is_staff = True
                 user.is_superuser = False 
+                user.set_password(serializer.validated_data['password'])
                 user.save()
-                data = serializer.validated_data | {"user": user.pk}
-                funcionario_serializer= FuncionariosSerializer(data = data)  
+                data = request.data | {"user": user.pk}
+                funcionario_serializer= FuncionariosSerializer(data = data)
+
                 if funcionario_serializer.is_valid():
-                    
-                    if 'ubicacion' in funcionario_serializer.validated_data:
-                        ubicacion = funcionario_serializer.validated_data['ubicacion'] 
-                        funcionario_serializer.validated_data.pop('ubicacion')
-                    else:
-                        content.pop('location')
-
                     validated_data = funcionario_serializer.validated_data
-                    funcionario:Funcionarios = funcionario_serializer.create(validated_data) 
-                    data = funcionario_serializer.data | serializer.data
-                    
-                    content['username'] = user.username 
-                    content['user_type'] = 'Funcionario'
-                    content['full_name'] = str(funcionario.nombre_completo)
-                    content['department'] = str(funcionario.departamento)
-                    content['position_title'] = str(funcionario.puesto)
+                    funcionario:Funcionarios = funcionario_serializer.create(validated_data)  
+                    serializer = FuncionariosSerializer(instance = funcionario)
 
-                    if 'location' in content:
-                        content['location'] = str(ubicacion)
-
-                    return Response(content,
+                    return Response(serializer.data,
                                     status = status.HTTP_200_OK)
                
                 User.objects.get(pk = user.pk).delete() 
