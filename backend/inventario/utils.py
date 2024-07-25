@@ -1,4 +1,6 @@
 #Python clases incorporadas and others---------
+from io import StringIO
+import io
 import os
 import xlsxwriter
 #----------------------------------------------
@@ -11,7 +13,9 @@ from sgica.settings import MEDIA_ROOT
 from django.db.models import F, Value, CharField
 from django.db.models.functions import Cast
 from django.http import Http404
-from django.core.exceptions import FieldDoesNotExist 
+from django.core.exceptions import FieldDoesNotExist
+from django.db.models.functions import Coalesce 
+from django.http import FileResponse, HttpResponse
 #----------------------------------------------
 
 #Django rest frameworks herramientas-----------
@@ -211,7 +215,7 @@ class ActivosActions:
             return Response({"error": "activo does not exist"},
                             status = status.HTTP_404_NOT_FOUND)
 
-        
+ 
     #--------------------------------------------------------
     
     #Metodos para el HTTP POST-------------------------------
@@ -278,7 +282,7 @@ class ActivosActions:
                         status = status.HTTP_400_BAD_REQUEST )
 #--------------------------------------------------------
 
-class ObservacionesActivos():
+class ObservacionesActions():
     
     def __init__(self) -> None:
         pass
@@ -297,11 +301,41 @@ class ObservacionesActivos():
         serializer = ObservacionesSerializer(instance = observacion,
                                              many=True)
         return Response(serializer.data, status= status.HTTP_200_OK)
+
+    def observaciones_excel(self):
+        resultado = Observaciones.objects.filter(                            ).values(
+                                'id_registro',
+                                'descripcion',
+                                'activo_id'
+                            )
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {"in_memory": True})
+        worksheet = workbook.add_worksheet()
+        worksheet.write('A1', "Registro ID")
+        worksheet.write('B1', "Descripcion")
+        worksheet.write('C1', "Activo")
+        counter = 2
+
+        for item in resultado:
+            id_registro = str(item['id_registro'])
+            descripcion = str(item['descripcion'])
+            activo = str(item['activo_id'])
+            worksheet.write(f'A{counter}', id_registro)
+            worksheet.write(f'B{counter}', descripcion)
+            worksheet.write(f'C{counter}', activo)
+            counter += 1
+
+        workbook.close()
+        output.seek(0)
+        response = HttpResponse(output.read(), 
+                                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response['Content-Disposition'] = "attachment; filename=excel_observaciones.xlsx"
+        output.close()
+        return response
+
 #----------------------------------------------------------
 
-
 #Metodos para el HTTP POST-------------------------------
-
     def add_new_observacion(self, request) -> Response:
         remaining_fields:dict = get_remaining_fields()
         remaining_fields.pop('no_identificacion')
@@ -844,6 +878,43 @@ class UbicacionesActions:
 
         return Response(serializer.data, 
                         status = status.HTTP_200_OK)
+   
+   def ubicaciones_excel(self):
+    resultado = Ubicaciones.objects.annotate(
+                            nombre_completo_funcionario=Coalesce(
+                            F('funcionario_id__funcionarios__nombre_completo'),
+                            Value(None)
+                        )
+                        ).values(
+                            'nombre_oficial',
+                            'alias',
+                            'nombre_completo_funcionario'
+                        )
+
+    output = io.BytesIO()
+    workbook = xlsxwriter.Workbook(output, {"in_memory": True})
+    worksheet = workbook.add_worksheet()
+    worksheet.write('A1', "Nombre Oficial")
+    worksheet.write('B1', "Alias")
+    worksheet.write('C1', "Funcionario")
+    counter = 2
+
+    for item in resultado:
+        nombre_oficial = str(item['nombre_oficial'] or '')
+        alias = str(item['alias'] or '')
+        funcionario = str(item['nombre_completo_funcionario'] or 'No Asignado')
+        worksheet.write(f'A{counter}', nombre_oficial)
+        worksheet.write(f'B{counter}', alias)
+        worksheet.write(f'C{counter}', funcionario)
+        counter += 1 
+
+    workbook.close()
+    output.seek(0)
+    response = HttpResponse(output.read(), 
+                            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response['Content-Disposition'] = "attachment; filename=excel_ubicaciones.xlsx"
+    output.close()
+    return response
 
    #Metodos para el HTTP POST--------------------------------
    def nueva_ubicacion(self, request) -> Response:
@@ -873,7 +944,7 @@ class UbicacionesActions:
                         status = status.HTTP_400_BAD_REQUEST)
    
    #FALTA PATCH Y DELETE
-
+    
 class FuncionariosActions():
 
    #Metodos para el HTTP GET---------------------------------

@@ -55,7 +55,8 @@ class ActivosView(APIView):
         if path == "/activos-filtrados-columna/":
             return self.activos_do.activos_filter_column()   
 
-        return Response({"data": "did not match an endpoint for a HTTP GET Method"}, status= status.HTTP_404_NOT_FOUND)
+        return Response({"data": "did not match an endpoint for a HTTP GET Method"},
+                         status= status.HTTP_404_NOT_FOUND)
 
     def post(self, request):
         path = request.path
@@ -106,11 +107,11 @@ class ObservacionesView(APIView):
     # permission_classes = [IsAuthenticatedOrReadOnly] 
     authentication_classes = []
     permission_classes = []
-    observaciones_do:ObservacionesActivos = None
+    observaciones_do:ObservacionesActions = None
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
-        self.observaciones_do = ObservacionesActivos()    
+        self.observaciones_do = ObservacionesActions()    
     
     def get(self, request, activo = None): 
         path = request.path
@@ -119,10 +120,12 @@ class ObservacionesView(APIView):
             return self.observaciones_do.all_observaciones() 
         
         if path == f"/observacion/{activo}/":
-            print("Hola entre aqui")
             rp:Response = self.observaciones_do.get_observacion_by_activo(activo = activo) 
             return rp
         
+        if path == f"/observaciones-excel/":
+            rp:Response = self.observaciones_do.observaciones_excel()
+            return rp 
     def post(self, request): 
         path = request.path
         
@@ -292,6 +295,11 @@ class UbicacionesView(APIView):
         if f"/ubicacion/{pk}/" == path:
             rp:Response = self.ubicaciones_do.ubicacion_by_id(pk)
             return rp
+        
+        if path == "/ubicaciones-excel/":
+            return self.ubicaciones_do.ubicaciones_excel()
+            
+ 
 
     def post(self, request):
         path = request.path

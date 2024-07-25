@@ -16,6 +16,7 @@ urlpatterns = [
     path("todas-las-observaciones/", views.ObservacionesView.as_view()),
     path("observacion/<str:activo>/", views.ObservacionesView.as_view()),
     path("nueva-observacion/", views.ObservacionesView.as_view()),
+    path("observaciones-excel/", views.ObservacionesView.as_view()),
 
     #Endpoints relacionados a los documentos--------------------------------- 
     path("guardar-acta/", views.DocsView.as_view()), 
@@ -41,6 +42,7 @@ urlpatterns = [
     #Endpoints relacionados a la ubicaciones----------------------------------
     path("ubicacion/<int:pk>/", views.UbicacionesView.as_view()),
     path("nueva-ubicacion/", views.UbicacionesView.as_view()),
+    path("ubicaciones-excel/", views.UbicacionesView.as_view()),
 
     #Endpoints relacionados a los funcionarios--------------------------------
     path("funcionario/<int:pk>/", views.FuncionariosView.as_view()),
