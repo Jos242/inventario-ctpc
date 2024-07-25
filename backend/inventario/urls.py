@@ -10,6 +10,7 @@ urlpatterns = [
     path("activo/<str:no_identificacion>/", views.ActivosViewNoAuth.as_view()),
     path("agregar-activo/", views.ActivosView.as_view()),
     path("activos/select-columns/", views.ActivosView.as_view()),
+    path("update-activo/<int:pk>/", views.ActivosView.as_view()),
 
     #Endpoints relacionados a las observaciones------------------------------
     path("todas-las-observaciones/", views.ObservacionesView.as_view()),

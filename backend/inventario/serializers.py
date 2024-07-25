@@ -13,22 +13,15 @@ class ActivoSerializer(serializers.ModelSerializer):
         model = Activos
         fields = '__all__' 
    
-    # def update(self, instance:Activos, validated_data:dict):
-    #     instance.id_registro = validated_data.get('id_registro', instance.id_registro)
-    #     instance.asiento = validated_data.get('asiento', instance.asiento)
-    #     instance.no_identificacion = validated_data.get('no_identificacion', instance.no_identificacion)
-    #     instance.descripcion = validated_data.get('descripcion', instance.descripcion)
-    #     instance.marca = validated_data.get('marca', instance.marca)
-    #     instance.modelo = validated_data.get('modelo', instance.modelo)
-    #     instance.serie = validated_data.get('serie', instance.serie)
-    #     instance.estado = validated_data.get('estado', instance.estado)
-    #     instance.ubicacion = validated_data.get('ubicacion', instance.ubicacion)
-    #     instance.modo_adquisicion = validated_data.get('modo_adquisicion', instance.modo_adquisicion)
-    #     instance.precio = validated_data.get('precio', instance.precio)
-    #     instance.creado_el = validated_data.get('creado_el', instance.creado_el)
-    #     instance.save()
-    #     return instance
-
+class UpdateActivoSerializer(serializers.ModelSerializer):
+    descripcion = serializers.CharField(max_length=150,
+                                        required = False)
+    class Meta:
+        model = Activos
+        fields = ['descripcion', 'marca', 'modelo',
+                  'serie', 'estado', 'modo_adquisicion',
+                  'ubicacion_actual', 'precio', 'de_baja']
+    
 class ReadActivoSerializerComplete(serializers.ModelSerializer):
     ubicacion_original = serializers.CharField(required = False)
     modo_adquisicion = serializers.CharField(required = False)
@@ -49,10 +42,13 @@ class ReadActivoSerializerIncomplete(serializers.ModelSerializer):
                   'descripcion', 'ubicacion_original']
  
 class ObservacionesSerializer(serializers.Serializer):
+    id = serializers.IntegerField(required = False)
     id_registro = serializers.CharField(max_length=150, read_only=True, required=False)
     asiento = serializers.IntegerField(read_only=True, required = False)
     descripcion = serializers.CharField(style={'base_template': 'textarea.html'})
     activo = serializers.SlugRelatedField(queryset=Activos.objects.all(), slug_field='id_registro')
+    impreso = serializers.BooleanField(required = False)
+
     class Meta:
         model = Observaciones
 

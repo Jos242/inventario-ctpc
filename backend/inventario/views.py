@@ -68,7 +68,16 @@ class ActivosView(APIView):
             rp:Response = self.activos_do.select_columns_to_filter(request)
             return rp
 
-        return Response({"data": "did not match an endpoint for a HTTP POST Method"}, status = status.HTTP_404_NOT_FOUND)
+        return Response({"data": "did not match an endpoint for a HTTP POST Method"},
+                         status = status.HTTP_404_NOT_FOUND)
+    
+    def patch(self, request, pk:int):
+        path = request.path
+
+        if f'/update-activo/{pk}/' == path:
+            rp:Response = self.activos_do.update_activo(request = request,
+                                                        pk = pk)
+            return rp
 
 class ActivosViewNoAuth(APIView):
 
@@ -111,7 +120,7 @@ class ObservacionesView(APIView):
         
         if path == f"/observacion/{activo}/":
             print("Hola entre aqui")
-            rp:Response = self.observaciones_do.get_observacion_by_id_registro(activo = activo) 
+            rp:Response = self.observaciones_do.get_observacion_by_activo(activo = activo) 
             return rp
         
     def post(self, request): 

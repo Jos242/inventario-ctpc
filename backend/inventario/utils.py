@@ -212,9 +212,9 @@ class ActivosActions:
                             status = status.HTTP_404_NOT_FOUND)
 
         
-#--------------------------------------------------------
+    #--------------------------------------------------------
     
-#Metodos para el HTTP POST-------------------------------
+    #Metodos para el HTTP POST-------------------------------
     def add_activo(self, request) -> Response: #Working
         remaining_fields = get_remaining_fields() 
         serializer = ActivoSerializer(data = request.data | remaining_fields)
@@ -253,6 +253,28 @@ class ActivosActions:
 
         return Response(serializer.data, 
                         status= status.HTTP_200_OK)
+    #Metodos para el HTTP PATCH------------------------------
+    def update_activo(self, request, pk:int) -> Response:
+        data = request.data
+        serializer = UpdateActivoSerializer(data = data)
+        print(serializer)
+        try:
+            activo = Activos.objects.get(id = pk)
+
+        except Activos.DoesNotExist:
+            return Response({"error": "activo does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+            
+        if serializer.is_valid():
+            activo:Activos = serializer.update(instance = activo,
+                                                        validated_data= serializer.validated_data)
+            activo.save()
+            serializer = ReadActivoSerializerComplete(instance = activo)  
+            return Response(serializer.data,
+                            status = status.HTTP_200_OK) 
+
+        return Response(serializer.errors, 
+                        status = status.HTTP_400_BAD_REQUEST )
 #--------------------------------------------------------
 
 class ObservacionesActivos():
@@ -265,12 +287,14 @@ class ObservacionesActivos():
         serializer = ObservacionesSerializer(instance = observacion, many = True)
         return Response(serializer.data, status = status.HTTP_200_OK)
 
-    def get_observacion_by_id_registro(self, activo:str) -> Response: 
+    def get_observacion_by_activo(self, activo:str) -> Response: 
         try:
             observacion = Observaciones.objects.filter(activo = activo) 
         except Observaciones.DoesNotExist:
             return Response({"error": "observacion does not exist"}, status = status.HTTP_404_NOT_FOUND)
-        serializer = ObservacionesSerializer(instance = observacion, many=True)
+        
+        serializer = ObservacionesSerializer(instance = observacion,
+                                             many=True)
         return Response(serializer.data, status= status.HTTP_200_OK)
 #----------------------------------------------------------
 
