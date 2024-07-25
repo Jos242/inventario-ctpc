@@ -220,7 +220,8 @@ class ActivosActions:
         serializer = ActivoSerializer(data = request.data | remaining_fields)
 
         if serializer.is_valid():          
-            activo = serializer.create(serializer.validated_data)
+            activo:Activos = serializer.create(serializer.validated_data)
+            print(activo)
             return Response(ReadActivoSerializerIncomplete(instance = activo).data,
                             status= status.HTTP_200_OK)
         

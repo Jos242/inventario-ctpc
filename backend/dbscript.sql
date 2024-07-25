@@ -160,18 +160,18 @@ NOT NULL DEFAULT 'NO DADO DE BAJA';
 ALTER TABLE observaciones ADD impreso BOOLEAN DEFAULT 0;
 UPDATE activos SET impreso = 1 WHERE impreso = 0;
 UPDATE observaciones SET impreso = 1 WHERE impreso = 0; 
-
+UPDATE activos SET placa_impresa = 1 WHERE placa_impresa = 0;
 
 -- SHOW VARIABLES LIKE "secure_file_priv";
 
--- For test puporposes, delete these queries.
-UPDATE observaciones
-SET impreso = 1
-WHERE impreso = 0 AND id_registro = '1,137,01';
+-- -- For test puporposes, delete these queries.
+-- UPDATE observaciones
+-- SET impreso = 1
+-- WHERE impreso = 0 AND id_registro = '1,137,01';
 
-UPDATE observaciones
-SET impreso = 0
-WHERE impreso = 1 AND id_registro = '1,137,02';
+-- UPDATE observaciones
+-- SET impreso = 0
+-- WHERE impreso = 1 AND id_registro = '1,137,02';
 
-DELETE FROM observaciones
-WHERE id_registro = '1,137,01';
+-- DELETE FROM observaciones
+-- WHERE id_registro = '1,137,01';

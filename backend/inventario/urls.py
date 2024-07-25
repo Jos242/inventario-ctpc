@@ -54,7 +54,10 @@ urlpatterns = [
     path("delete/modo-adquisicion/<int:pk>/", views.ModoAdquisicionView.as_view()),
 
     #Endpoints relaciondaos a las plantillas-----------------------------------
-    path("estoy-testing/", views.PlantillasView.as_view()) 
-
+    path("all-plantillas/", views.PlantillasView.as_view()),
+    path("plantilla/<int:pk>/", views.PlantillasView.as_view()),
+    path("nueva-plantilla/", views.PlantillasView.as_view()),
+    path("update-plantilla/<int:pk>/", views.PlantillasView.as_view()),
+    path("delete-plantilla/<int:pk>/", views.PlantillasView.as_view())
     
 ]

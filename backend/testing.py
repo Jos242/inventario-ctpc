@@ -328,16 +328,16 @@ def modify_activos():
             id_value = result[0]
             query_2 = "UPDATE activos SET modo_adquisicion = %s WHERE modo_adquisicion = %s"
             cursor.execute(query_2, (id_value, modo))
-
+ 
     for ubicacion in UBICACIONES:
-        if ubicacion == 'ORIENTACION':
-           1+1
         query_1 = "SELECT id FROM ubicaciones WHERE nombre_oficial = %s"
         cursor.execute(query_1, (ubicacion,))
         result = cursor.fetchone()
         
-        if result:
+        if result:  
             id_value = result[0]
+            query_3 = "UPDATE activos SET ubicacion_actual = %s WHERE ubicacion = %s"
+            cursor.execute(query_3, (id_value, ubicacion))
             query_2 = "UPDATE activos SET ubicacion = %s WHERE ubicacion = %s"
             cursor.execute(query_2, (id_value, ubicacion))
 

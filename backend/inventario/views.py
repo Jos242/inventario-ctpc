@@ -366,23 +366,42 @@ class ModoAdquisicionView(APIView):
             return rp
         
 class PlantillasView(mixins.CreateModelMixin,
+                     mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
                      mixins.UpdateModelMixin,
                      mixins.DestroyModelMixin,
-                    generics.GenericAPIView):
+                     generics.GenericAPIView):
     queryset = Plantillas.objects.all()
     serializer_class = PlantillasSerializer
     authentication_classes = []
     permission_classes = []
 
     def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+        if 'pk' in kwargs:
+            return self.retrieve(request, *args, **kwargs)
+        elif request.path == '/all-plantillas/':
+            return self.list(request, *args, **kwargs)
+        
+        return Response({"error": "not a valid endpoint"},
+                         status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+        if request.path == '/nueva-plantilla/':
+            return self.create(request, *args, **kwargs)
+        
+        return Response({"error": "not a valid endpoint"},
+                         status=status.HTTP_400_BAD_REQUEST)
     
     def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+        if 'pk' in kwargs:
+            return self.update(request, *args, **kwargs)
+        
+        return Response({"error": "not a valid endpoint"},
+                         status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+        if 'pk' in kwargs:
+            return self.destroy(request, *args, **kwargs)
+        
+        return Response({"error": "not a valid endpoint"},
+                         status=status.HTTP_400_BAD_REQUEST)

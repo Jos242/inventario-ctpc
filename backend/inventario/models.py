@@ -53,7 +53,7 @@ class Activos(models.Model):
     serie = models.CharField(max_length=150, blank=True)
     estado = models.CharField(max_length=7, blank=True,choices= ESTADO_ACTIVO) 
     ubicacion_original = models.ForeignKey(Ubicaciones, models.DO_NOTHING, db_column='ubicacion_original',
-                                           blank=True, null=True, related_name = 'ubicacion_original')
+                                           null=True, related_name = 'ubicacion_original')
     modo_adquisicion = models.ForeignKey(ModoAdquisicion, models.DO_NOTHING, db_column = 'modo_adquisicion',
                                          blank = True, null = True) 
     precio = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True) 
@@ -71,6 +71,11 @@ class Activos(models.Model):
         managed = False
         db_table = 'activos'
 
+    def save(self, *args, **kwargs):
+        if not self.ubicacion_actual:
+            self.ubicacion_actual = self.ubicacion_original
+        super().save(*args, **kwargs)
+        
 class ReadActivos(models.Model):
     ESTADO_ACTIVO = {
         "BUENO": "BUENO",
