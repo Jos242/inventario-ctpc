@@ -21,7 +21,7 @@ export class AuthService {
 
   login(credentials: { username: string; password: string }): Observable<any> {
     // return this.http.post(`${this.baseURL}iniciar-sesion/`, credentials, { withCredentials: true })
-    return this.http.post(`${this.baseURL}iniciar-sesion/`, credentials)
+    return this.http.post(`${this.baseURL}api/token/`, credentials)
       .pipe(
         tap(response => {
 
@@ -36,23 +36,23 @@ export class AuthService {
       );
   }
 
-  logout(): void {
-    this.http.post(`${this.baseURL}salir/`, {})
-      .subscribe(
-        () => {
-          console.log("logout1")
-          localStorage.clear(); 
-          sessionStorage.clear();
+  // logout(): void {
+  //   this.http.post(`${this.baseURL}salir/`, {})
+  //     .subscribe(
+  //       () => {
+  //         console.log("logout1")
+  //         localStorage.clear(); 
+  //         sessionStorage.clear();
 
-          // Clear cookies
-          document.cookie = 'csrftoken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-          document.cookie = 'sessionid=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+  //         // Clear cookies
+  //         document.cookie = 'csrftoken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+  //         document.cookie = 'sessionid=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 
-          this.router.navigate(['/login']);
-          console.log("logout2")
-        }
-      );
-  }
+  //         this.router.navigate(['/login']);
+  //         console.log("logout2")
+  //       }
+  //     );
+  // }
   
 
   setCurrentUser(user: any): void {

@@ -7,14 +7,14 @@ table {
     width: 100%;
   }
   
-  td, th {
-    width: 25%;
-  }
+  // td, th {
+  //   width: 25%;
+  // }
 
   /* Structure */
 .example-container {
   margin: 0 auto;
-  width: 70%;
+  width: 90%;
   margin-top: 50px;
 }
 
@@ -35,9 +35,25 @@ table {
   background-color: rgb(207, 207, 207);
 }
 
+.textFiltros{
+  margin:0px;
+  padding:0px;
+  width:100%;
+  text-align: right;
+  padding-right: 5px;
+}
+
+.accordion-button::after{
+  color: black;
+}
+
 
 table {
   width: 100%;
+}
+
+.mensaje{
+  color: red;
 }
 
 .example-loading-shade {
@@ -51,6 +67,10 @@ table {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.confirmar{
+  margin-left: 11px;
 }
 
 @media (max-width: 1435px) {

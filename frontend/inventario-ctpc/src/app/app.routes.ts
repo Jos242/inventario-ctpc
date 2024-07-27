@@ -10,6 +10,7 @@ import { LoginIndexComponent } from './login/login-index/login-index.component';
 import { ActaBajaCreateComponent } from './acta/acta-baja-create/acta-baja-create.component';
 import { ActaMoverCreateComponent } from './acta/acta-mover-create/acta-mover-create.component';
 import { ActivoScanComponent } from './activo/activo-scan/activo-scan.component';
+import { AdminIndexComponent } from './admin/admin-index/admin-index.component';
 
 
 export const routes: Routes = [
@@ -17,6 +18,8 @@ export const routes: Routes = [
     { path:'index', component: HomeIndexComponent },
     // { path:'index', component: HomeIndexComponent , canActivate: [authGuard] },
     { path: 'login', component: LoginIndexComponent },
+
+    { path:'admin/index', component: AdminIndexComponent },
 
     { path:'actas', component: ActaIndexComponent},
     { path:'actas/baja', component: ActaBajaCreateComponent},
