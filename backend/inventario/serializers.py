@@ -86,18 +86,25 @@ class ReadUserSerializer(serializers.Serializer):
  
 class DocSerializer(serializers.ModelSerializer):
 
-    archivo = serializers.FileField()
-    creado_el = serializers.DateTimeField(required = False)
-
+    archivo = serializers.FileField(write_only = True)
+    creado_el = serializers.DateTimeField(read_only = True)   
     class Meta:
 
         model  = Docs
-        fields = ['titulo', 'tipo', 'archivo', 'creado_el']
+        fields = ['titulo', 'tipo', 'archivo','creado_el']
+    
+    def create(self, validated_data:dict):
+        archivo = validated_data.pop('archivo', None)
+        return super().create(validated_data)
+    
+    def update(self, instance:Docs, validated_data:dict):
+        archivo = validated_data.pop('archivo', None)
+        return super().update(self, instance, validated_data)
 
 class ReadDocSerializer(serializers.ModelSerializer):
     class Meta:
         model = Docs
-        fields = ['id', 'titulo', 'tipo', 'ruta', 'creado_el']
+        fields = ['id', 'titulo', 'tipo', 'ruta', 'impreso', 'creado_el']
 
 class CierreInventarioSerializer(serializers.ModelSerializer):
     class Meta:

@@ -21,6 +21,7 @@ from django.http import FileResponse, HttpResponse
 #Django rest frameworks herramientas-----------
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.request import Request
 #----------------------------------------------
 
 from .models import * 
@@ -170,7 +171,7 @@ def update_id_registro_and_asiento(id_registro:str) -> dict:
  
 #--------------------------------------------------------------
 
-class ActivosActions:
+class ActivosActions():
 
     def __init__(self) -> None:
         pass
@@ -357,8 +358,8 @@ class ObservacionesActions():
  
         return Response(serializer.errors, status = status.HTTP_200_OK)
 #----------------------------------------------------------
-      
-class UserActions:
+   
+class UserActions():
      
     def __init__(self) -> None:
         pass
@@ -425,7 +426,7 @@ class UserActions:
                          status = status.HTTP_200_OK)
       
 #-------------------------------------------------------------
-class DocsActions:
+class DocsActions():
 
     def __init__(self) -> None:
         pass
@@ -436,7 +437,7 @@ class DocsActions:
         serializer:ReadDocSerializer= ReadDocSerializer(instance = docs,
                                                many = True)  
         return Response(serializer.data,
-                    status = status.HTTP_200_OK)
+                        status = status.HTTP_200_OK)
 
     def get_doc_by_id(self, pk:int = None) -> Response:
 
@@ -452,30 +453,31 @@ class DocsActions:
                         status = status.HTTP_200_OK)
 
 
-#Metodos para el HTTP POST-------------------------------
-    def save_acta(self, request) -> Response:
+    #Metodos para el HTTP POST-------------------------------
+    def save_acta(self, request:Request) -> Response:
         serializer:DocSerializer = DocSerializer(data = request.data)  
-        
-        if serializer.is_valid():
-            files:list = request.FILES.getlist('archivo')
-            ruta:str = handle_uploaded_file(files)
 
-            modified_data_serializer:dict = dict(serializer.data)
-            del modified_data_serializer['archivo']
-            modified_data_serializer['ruta'] = ruta 
-            titulo:str = modified_data_serializer.get('titulo')
-            tipo:str = modified_data_serializer.get('tipo')
-        
-            doc = Docs(titulo = titulo,
-                       tipo = tipo,
-                       ruta = ruta)  
-            doc.save()
-            return Response(serializer.data, 
-                        status = status.HTTP_200_OK)
-     
-        return Response(serializer.errors, 
-                    status = status.HTTP_400_BAD_REQUEST)
+        if not serializer.is_valid():
+            return Response(serializer.errors, 
+                            status = status.HTTP_400_BAD_REQUEST)
 
+        impreso = request.data.get('impreso', None)
+        tipo = serializer.validated_data['tipo']
+        
+        if tipo == 'PDF' and impreso is None:
+            return Response({"error": "field 'impreso' is required"},
+                            status = status.HTTP_400_BAD_REQUEST)
+        
+        files:list = request.FILES.getlist('archivo')
+        ruta:str = handle_uploaded_file(files)
+        doc:Docs = serializer.create(serializer.validated_data)
+        doc.ruta = ruta
+        doc.impreso = impreso
+        doc.save()
+
+        return Response(serializer.data, 
+                    status = status.HTTP_200_OK)
+    
     def create_print_doc(self, request) -> Response:
         serializer = WhatTheExcelNameIs(data = request.data)
         # resultados = (Activos.objects.filter(impreso=0)
@@ -695,6 +697,21 @@ class DocsActions:
     
         return Response(serializer.errors,
                         status = status.HTTP_200_OK)
+
+    def update_doc_info(self, request, pk:int) -> Response:
+        data = request.data
+        serializer = DocSerializer(data = data)
+
+        try:
+            cierre = Docs.objects.get(id = pk)
+
+        except Docs.DoesNotExist:
+            return Response({"error": "doc don't not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+
+            
+       
+
 #--------------------------------------------------------    
 class CierreInventarioActions():
 
@@ -774,7 +791,6 @@ class CierreInventarioActions():
         return Response({"status": "entry was deleted"}, 
                         status = status.HTTP_200_OK)
 #--------------------------------------------------------    
-
 class RevisionesActions():
 
     #Metodos para el HTTP GET---------------------------------
@@ -864,7 +880,7 @@ class RevisionesActions():
         return Response({"status": "revision has been deleted"}, 
                         status = status.HTTP_200_OK)
 
-class UbicacionesActions:
+class UbicacionesActions():
 
    #Metodos para el HTTP GET---------------------------------
    def ubicacion_by_id(self, pk:int) -> Response:
@@ -1050,5 +1066,3 @@ class ModoAdquisicionActions():
         return Response({"status": "modo adquisicion deleted"}, 
                         status = status.HTTP_200_OK)
     
-
-

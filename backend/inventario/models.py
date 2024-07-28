@@ -140,6 +140,7 @@ class Docs(models.Model):
     titulo = models.CharField(max_length = 200)
     tipo = models.CharField(max_length = 5, choices = DOCS_TYPE)
     ruta = models.CharField(max_length = 250)
+    impreso  = models.BooleanField(default = False)
     creado_el = models.DateTimeField(db_default = Now())
 
     class Meta:

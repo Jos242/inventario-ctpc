@@ -23,6 +23,7 @@ urlpatterns = [
     path("obtener-documentos/", views.DocsView.as_view()),
     path("obtener-documento/<int:pk>/", views.DocsView.as_view()),
     path("crear-excel/impresiones/", views.DocsView.as_view()),
+    path("update-doc-info/<int:pk>/", views.DocsView.as_view()),
 
     #Endpoints relacionados a los cierres de inventarios----------------------
     path("cierre/<int:pk>/", views.CierreInventarioView.as_view()),

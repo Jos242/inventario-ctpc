@@ -125,13 +125,15 @@ class ObservacionesView(APIView):
         
         if path == f"/observaciones-excel/":
             rp:Response = self.observaciones_do.observaciones_excel()
-            return rp 
+            return rp
+
     def post(self, request): 
         path = request.path
         
         if path == "/nueva-observacion/":
             return self.observaciones_do.add_new_observacion(request)
-        
+
+
 class UserView(APIView):
 
     authentication_classes = []
@@ -179,6 +181,12 @@ class DocsView(APIView):
 
         return Response({"error": "not a valid post request"},
                         status = status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk:int) -> Response:
+        path = request.path
+
+        if path == f"update-doc-info/{pk}/":
+            return self.docs_do.update_doc_info(request, pk) 
 
 class CierreInventarioView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
