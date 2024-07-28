@@ -86,8 +86,10 @@ class ReadUserSerializer(serializers.Serializer):
  
 class DocSerializer(serializers.ModelSerializer):
 
-    archivo = serializers.FileField(write_only = True)
-    creado_el = serializers.DateTimeField(read_only = True)   
+    archivo = serializers.FileField(write_only = True,
+                                    required = False)
+    creado_el = serializers.DateTimeField(read_only = True)  
+
     class Meta:
 
         model  = Docs
@@ -100,6 +102,14 @@ class DocSerializer(serializers.ModelSerializer):
     def update(self, instance:Docs, validated_data:dict):
         archivo = validated_data.pop('archivo', None)
         return super().update(self, instance, validated_data)
+
+class DocUpdateSerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = Docs
+        fields = ['titulo', 'tipo', 'impreso']
+    
 
 class ReadDocSerializer(serializers.ModelSerializer):
     class Meta:

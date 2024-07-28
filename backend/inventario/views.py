@@ -185,7 +185,7 @@ class DocsView(APIView):
     def patch(self, request, pk:int) -> Response:
         path = request.path
 
-        if path == f"update-doc-info/{pk}/":
+        if path == f"/update-doc-info/{pk}/":
             return self.docs_do.update_doc_info(request, pk) 
 
 class CierreInventarioView(APIView):

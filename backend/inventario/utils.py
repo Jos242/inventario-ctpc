@@ -698,18 +698,29 @@ class DocsActions():
         return Response(serializer.errors,
                         status = status.HTTP_200_OK)
 
-    def update_doc_info(self, request, pk:int) -> Response:
+    def update_doc_info(self, request:Request, pk:int) -> Response: 
         data = request.data
-        serializer = DocSerializer(data = data)
+        serializer = DocUpdateSerializer(data = data)
 
+        if not serializer.is_valid():
+            return Response(serializer.errors,
+                            status = status.HTTP_400_BAD_REQUEST)
+        
         try:
-            cierre = Docs.objects.get(id = pk)
+            doc = Docs.objects.get(id = pk)
 
         except Docs.DoesNotExist:
-            return Response({"error": "doc don't not exist"},
+            return Response({"error": "doc does not exist"},
                             status = status.HTTP_404_NOT_FOUND)
 
-            
+        doc = serializer.update(instance = doc,
+                                validated_data = serializer.validated_data)
+        print(type(doc))
+        context = ReadDocSerializer(instance = doc)
+
+        return Response(context.data,
+                        status = status.HTTP_200_OK)      
+    
        
 
 #--------------------------------------------------------    
