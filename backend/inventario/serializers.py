@@ -164,8 +164,6 @@ class ModoAdquisicionSerializer(serializers.ModelSerializer):
         model = ModoAdquisicion
         fields = ['id', 'descripcion']
 
-class ColumnsToFilterActivosSerializer(serializers.Serializer):
-    columns_list = serializers.ListField()
 
 class DynamicReadActivosSerializer(serializers.ModelSerializer):  
     ubicacion_original_alias = serializers.CharField()

@@ -89,9 +89,11 @@ class ActivosViewNoAuth(APIView):
         super().__init__(**kwargs)
         self.activos_do = ActivosActions()
     
-    def get(self, request, pk:int = None, no_identificacion:str = None):
+    def get(self, request, *args, **kwargs):
         path = request.path
-
+        pk = kwargs.get("pk", None)
+        no_identificacion = kwargs.get("no_identificacion", None)
+        ubicacion_actual = kwargs.get("ubicacion_actual", None)
         if path == f"/activo/{pk}/":
             return self.activos_do.get_activo_by_id(pk)
 
@@ -99,6 +101,14 @@ class ActivosViewNoAuth(APIView):
             rp:Response = self.activos_do.get_activo_by_no_identificacion(no_identificacion)
             return rp
 
+        if path == f"/activo/ubicacion-actual/{ubicacion_actual}/":
+            rp:Response = self.activos_do.get_activo_by_ubicacion_id(ubicacion_actual)
+            return rp
+        
+        #For now leave this one here, but it requires auth
+        if path == f"/excel/todos-los-activos/":
+            rp:Response = self.activos_do.get_excel_all_activos()
+            return rp
         return Response({"data": "did not match an endpoint for a HTTP GET Method"}, status= status.HTTP_404_NOT_FOUND)
 
 class ObservacionesView(APIView):
@@ -133,7 +143,6 @@ class ObservacionesView(APIView):
         if path == "/nueva-observacion/":
             return self.observaciones_do.add_new_observacion(request)
 
-
 class UserView(APIView):
 
     authentication_classes = []
@@ -167,7 +176,11 @@ class DocsView(APIView):
 
         if path == f"/obtener-documento/{pk}/":
             return self.docs_do.get_doc_by_id(pk)
-        
+
+        if path == f"/excel/activos-observaciones/":
+            rp:Response = self.docs_do.get_excel_observ_activo()
+            return rp
+
         return Response({"error": "not a valid get request"},
                         status = status.HTTP_400_BAD_REQUEST)
 
@@ -307,8 +320,6 @@ class UbicacionesView(APIView):
         if path == "/ubicaciones-excel/":
             return self.ubicaciones_do.ubicaciones_excel()
             
- 
-
     def post(self, request):
         path = request.path
 
@@ -316,6 +327,19 @@ class UbicacionesView(APIView):
             rp:Response = self.ubicaciones_do.nueva_ubicacion(request)
             return rp
 
+    def patch(self, request, pk:int) -> Response:
+        path = request.path
+        if path == f'/update/ubicacion/{pk}/':
+            rp:Response = self.ubicaciones_do.update_ubicacion(request, pk)
+            return rp
+
+    def delete(self, request, pk:int):
+        path = request.path
+
+        if path == f"/delete/ubicacion/{pk}/":
+            rp:Response = self.ubicaciones_do.delete_ubicacion(pk)
+            return rp
+        pass
 class FuncionariosView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
     # authentication_classes = [JWTAuthentication]

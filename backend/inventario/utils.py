@@ -216,7 +216,71 @@ class ActivosActions():
             return Response({"error": "activo does not exist"},
                             status = status.HTTP_404_NOT_FOUND)
 
- 
+    def get_activo_by_ubicacion_id(self, ubicacion_actual:int):
+        try:
+            activo:Activos = Activos.objects.filter(ubicacion_actual = ubicacion_actual)
+        except Activos.DoesNotExist:
+            return Response({"error": "activo does not exist"}, 
+                            status = status.HTTP_404_NOT_FOUND)
+
+        print("Llegue antes del serializer")
+        serializer = ReadActivoSerializerComplete(instance = activo,
+                                                  many = True)
+
+        return Response(serializer.data,
+                        status = status.HTTP_200_OK)
+
+    def get_excel_all_activos(self):
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {"in_memory": True})
+        worksheet = workbook.add_worksheet()
+        related_fields = ["ubicacion_actual", "modo_adquisicion"]
+        annotations = {
+                'ubicacion_actual_alias': F('ubicacion_actual__alias'),
+                'modo_adquisicion_desc': F('modo_adquisicion__descripcion'),
+        }
+        RETRIEVE_FIELDS = ["id_registro", "no_identificacion",
+                           "descripcion", "marca", "modelo",
+                           "serie", "estado", "ubicacion_actual_alias",
+                           "modo_adquisicion_desc", "precio"]
+        
+        EXCEL_FIELDS = ["", "No.Identificacion", "Descripción",
+                        "Marca", "Modelo", "Serie", "Estado",
+                        "Ubicación", "Modo de adquisición", "Precio",
+                        ]
+
+        COLUMNS = ["A1", "B1", "C1", "D1",
+                   "E1", "F1", "G1", "H1",
+                   "I1", "J1"]
+        activos = Activos.objects.select_related(*related_fields)\
+                                 .annotate(**annotations)\
+                                 .values(*RETRIEVE_FIELDS)
+        [worksheet.write(column, field) for column, field in zip(COLUMNS, EXCEL_FIELDS)] 
+
+        for i, activo in enumerate(activos, start=2):
+            row = [
+                activo["id_registro"],
+                activo["no_identificacion"],
+                activo["descripcion"],
+                activo["marca"],
+                activo["modelo"],
+                activo["serie"],
+                activo["estado"],
+                activo["ubicacion_actual_alias"],
+                activo["modo_adquisicion_desc"],
+                activo["precio"]
+            ]
+            worksheet.write_row(f'A{i}', row)
+            
+        workbook.close()
+        output.seek(0)
+
+        response = HttpResponse(output.read(), 
+                            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response['Content-Disposition'] = "attachment; filename=excel_activos.xlsx"
+        output.close()
+
+        return response 
     #--------------------------------------------------------
     
     #Metodos para el HTTP POST-------------------------------
@@ -431,7 +495,7 @@ class DocsActions():
     def __init__(self) -> None:
         pass
 
-#Metodos para el HTTP GET------------------------------- 
+    #Metodos para el HTTP GET------------------------------- 
     def get_all_docs(self) -> Response:
         docs:Docs = Docs.objects.all()
         serializer:ReadDocSerializer= ReadDocSerializer(instance = docs,
@@ -451,6 +515,107 @@ class DocsActions():
 
         return Response(serializer.data, 
                         status = status.HTTP_200_OK)
+
+    def get_excel_observ_activo(self):
+        activos_query = Activos.objects.select_related('ubicacion_actual', 'modo_adquisicion').annotate(
+        ubicacion_actual_alias=F('ubicacion_actual__alias'),
+        modo_adquisicion_desc=F('modo_adquisicion__descripcion')
+            ).values(
+                'id_registro',
+                'no_identificacion',
+                'descripcion',
+                'marca',
+                'modelo',
+                'serie',
+                'estado',
+                'ubicacion_actual_alias',
+                'modo_adquisicion_desc',
+                'precio'
+            )
+
+        # Consulta para Observaciones
+        observaciones_query = Observaciones.objects.annotate(
+            no_identificacion=Value(None, output_field=CharField()),
+            marca=Value(None, output_field=CharField()),
+            modelo=Value(None, output_field=CharField()),
+            serie=Value(None, output_field=CharField()),
+            estado=Value(None, output_field=CharField()),
+            ubicacion_actual_alias=Value(None, output_field=CharField()),
+            modo_adquisicion_desc=Value(None, output_field=CharField()),
+            precio=Value(None, output_field=CharField())
+        ).values(
+            'id_registro',
+            'no_identificacion',
+            'descripcion',
+            'marca',
+            'modelo',
+            'serie',
+            'estado',
+            'ubicacion_actual_alias',
+            'modo_adquisicion_desc',
+            'precio'
+        )
+
+        # Combinar las consultas
+        resultado = activos_query.union(observaciones_query)
+                
+        print(resultado)
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {"in_memory": True})
+        worksheet = workbook.add_worksheet()
+        related_fields = ["ubicacion_actual", "modo_adquisicion"]
+        annotations = {
+                'ubicacion_actual_alias': F('ubicacion_actual__alias'),
+                'modo_adquisicion_desc': F('modo_adquisicion__descripcion'),
+        }
+        RETRIEVE_FIELDS = ["id_registro", "no_identificacion",
+                           "descripcion", "marca", "modelo",
+                           "serie", "estado", "ubicacion_actual_alias",
+                           "modo_adquisicion_desc", "precio"]
+        
+        EXCEL_FIELDS = ["", "No.Identificacion", "Descripción",
+                        "Marca", "Modelo", "Serie", "Estado",
+                        "Ubicación", "Modo de adquisición", "Precio",
+                        ]
+
+        COLUMNS = ["A1", "B1", "C1", "D1",
+                   "E1", "F1", "G1", "H1",
+                   "I1", "J1"]
+        activos = Activos.objects.select_related(*related_fields)\
+                                 .annotate(**annotations)\
+                                 .values(*RETRIEVE_FIELDS)
+        [worksheet.write(column, field) for column, field in zip(COLUMNS, EXCEL_FIELDS)] 
+
+        for i, activo in enumerate(resultado, start=2):
+            row = [
+                activo["id_registro"],
+                activo["no_identificacion"],
+                activo["descripcion"],
+                activo["marca"],
+                activo["modelo"],
+                activo["serie"],
+                activo["estado"],
+                activo["ubicacion_actual_alias"],
+                activo["modo_adquisicion_desc"],
+                activo["precio"]
+            ]
+            worksheet.write_row(f'A{i}', row)
+
+        print(i)    
+        workbook.close()
+        output.seek(0)
+
+        response = HttpResponse(output.read(), 
+                            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response['Content-Disposition'] = "attachment; filename=excel_activos.xlsx"
+        output.close()
+
+        return response 
+    #--------------------------------------------------------
+
+
+
+
 
 
     #Metodos para el HTTP POST-------------------------------
@@ -721,8 +886,6 @@ class DocsActions():
         return Response(context.data,
                         status = status.HTTP_200_OK)      
     
-       
-
 #--------------------------------------------------------    
 class CierreInventarioActions():
 
@@ -970,7 +1133,46 @@ class UbicacionesActions():
         return Response(serializer.errors,
                         status = status.HTTP_400_BAD_REQUEST)
    
-   #FALTA PATCH Y DELETE
+   #Metodos para el HTTP PATCH--------------------------------
+   def update_ubicacion(self, request:Request, pk:int):
+        data = request.data
+        serializer = UbicacionesSerializer(data = data)
+
+        try:
+            ubicacion = Ubicaciones.objects.get(id = pk)
+
+        except Ubicaciones.DoesNotExist:
+            return Response({"error": "ubicacion does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+            
+
+        if serializer.is_valid():
+            print("Llegue auqi?")
+            print(serializer.data)
+            ubicacion:Ubicaciones = serializer.update(instance = ubicacion,
+                                                    validated_data= serializer.validated_data)                        
+            ubicacion.save()
+            serializer = UbicacionesSerializer(instance = ubicacion)  
+            return Response(serializer.data,
+                           status = status.HTTP_200_OK) 
+
+        return Response(serializer.errors,
+                        status = status.HTTP_400_BAD_REQUEST)
+ 
+    #Metodos para el HTTP DELETE-------------------------------
+   def delete_ubicacion(self, pk:int):
+        try: 
+            ubicacion = Ubicaciones.objects.get(id = pk)
+            ubicacion.delete()
+
+        except Ubicaciones.DoesNotExist:
+            return Response({"error": "ubicacion does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+
+        return Response({"status": "ubicacion has been deleted"}, 
+                        status = status.HTTP_200_OK)
+    
+
     
 class FuncionariosActions():
 

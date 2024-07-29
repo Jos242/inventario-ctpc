@@ -5,10 +5,21 @@ from django.contrib.auth.models import User
 class Ubicaciones(models.Model):
 
     id = models.AutoField(primary_key = True)
+    # WHEN RUNNING testing.py they have to look like this:
+    # nombre_oficial = models.CharField(unique=True, max_length=240,
+    #                                  blank = True)
+    
+    #alias = models.CharField(unique = True, max_length = 240,
+    #                         null = True, blank = True)
+    
+    # When done, like this:
     nombre_oficial = models.CharField(unique=True, max_length=240,
                                       blank = True)
+    
     alias = models.CharField(unique = True, max_length = 240,
                              null = True, blank = True)
+    
+    
     funcionario_id = models.ForeignKey(User, models.DO_NOTHING,
                                        db_column= "funcionario_id", null = True,
                                        blank = True)
