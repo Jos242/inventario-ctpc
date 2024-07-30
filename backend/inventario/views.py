@@ -431,6 +431,7 @@ class PlantillasView(mixins.CreateModelMixin,
     def get(self, request, *args, **kwargs):
         if 'pk' in kwargs:
             return self.retrieve(request, *args, **kwargs)
+
         elif request.path == '/all-plantillas/':
             return self.list(request, *args, **kwargs)
         
@@ -457,3 +458,22 @@ class PlantillasView(mixins.CreateModelMixin,
         
         return Response({"error": "not a valid endpoint"},
                          status=status.HTTP_400_BAD_REQUEST)
+    
+class HistorialDeAccesoView(APIView):
+
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, *args, **kwargs):
+        path = request.path
+
+        if  path == '/all/historial-acceso/':
+            historial_acceso = HistorialDeAcceso.objects.all()
+            serializer = HistorialDeAccesoSerializer(instance = historial_acceso,
+                                                     many = True)
+
+            return Response(serializer.data, 
+                            status = status.HTTP_200_OK)
+        
+        return Response({"error": "not a valid endpoint"},
+                        status = status.HTTP_400_BAD_REQUEST)

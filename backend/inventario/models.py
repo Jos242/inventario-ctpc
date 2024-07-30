@@ -258,5 +258,22 @@ class Plantillas(models.Model):
     class Meta:
         db_table = 'plantillas'
 
-class HistorialAcceso(models.Model):
-    pass
+class HistorialDeAcceso(models.Model):
+    TIPOS_USUARIO = [
+        ('Administrador', 'Administrador'),
+        ('Observador', 'Observador'),
+        ('Funcionario', 'Funcionario'),
+    ]
+
+    id = models.AutoField(primary_key=True)
+    usuario = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='accesos')
+    tipo_usuario = models.CharField(max_length=20, choices=TIPOS_USUARIO)
+    fecha_hora_acceso = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Historial de Acceso"
+        verbose_name_plural = "Historiales de Acceso"
+        db_table = 'historialacceso'
+
+    def __str__(self):
+        return f"{self.usuario.username} - {self.tipo_usuario} - {self.fecha_hora_acceso}" 

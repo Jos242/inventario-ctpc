@@ -202,3 +202,8 @@ class PlantillasSerializer(serializers.ModelSerializer):
         model = Plantillas
         fields = '__all__'
 
+class HistorialDeAccesoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HistorialDeAcceso
+        fields = '__all__'

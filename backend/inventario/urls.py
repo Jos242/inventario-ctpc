@@ -68,6 +68,10 @@ urlpatterns = [
     path("plantilla/<int:pk>/", views.PlantillasView.as_view()),
     path("nueva-plantilla/", views.PlantillasView.as_view()),
     path("update-plantilla/<int:pk>/", views.PlantillasView.as_view()),
-    path("delete-plantilla/<int:pk>/", views.PlantillasView.as_view())
-    
+    path("delete-plantilla/<int:pk>/", views.PlantillasView.as_view()),
+
+
+    #Endpoints relaciondos a el historial de acceso----------------------------
+    path("all/historial-acceso/", views.HistorialDeAccesoView.as_view())
+
 ]
