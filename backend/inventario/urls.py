@@ -9,11 +9,12 @@ urlpatterns = [
     path("activo/<int:pk>/", views.ActivosViewNoAuth.as_view()),
     path("activo/<str:no_identificacion>/", views.ActivosViewNoAuth.as_view()),
     path("activo/ubicacion-actual/<int:ubicacion_actual>/", views.ActivosViewNoAuth.as_view()),
-    path("excel/todos-los-activos/", views.ActivosViewNoAuth.as_view()),
+    path("excel/todos-los-activos/", views.ActivosView.as_view()),
     path("agregar-activo/", views.ActivosView.as_view()),
     path("activos/select-columns/", views.ActivosView.as_view()),
     path("update-activo/<int:pk>/", views.ActivosView.as_view()),
-   
+    path("delete/last/id-registro/", views.ActivosView.as_view()),
+
     #Endpoints relacionados a las observaciones------------------------------
     path("todas-las-observaciones/", views.ObservacionesView.as_view()),
     path("observacion/<str:activo>/", views.ObservacionesView.as_view()),
@@ -45,10 +46,12 @@ urlpatterns = [
 
     #Endpoints relacionados a la ubicaciones----------------------------------
     path("ubicacion/<int:pk>/", views.UbicacionesView.as_view()),
+    path("ubicacion/funcionario-id/<int:funcionario_id>/", views.UbicacionesView.as_view()),
     path("nueva-ubicacion/", views.UbicacionesView.as_view()),
     path("ubicaciones-excel/", views.UbicacionesView.as_view()),
     path("update/ubicacion/<int:pk>/", views.UbicacionesView.as_view()),
     path("delete/ubicacion/<int:pk>/", views.UbicacionesView.as_view()),
+
     #Endpoints relacionados a los funcionarios--------------------------------
     path("funcionario/<int:pk>/", views.FuncionariosView.as_view()),
     path("all-funcionarios/", views.FuncionariosView.as_view()),

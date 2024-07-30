@@ -10,7 +10,7 @@ from django.contrib.auth import logout, login
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from sgica.settings import MEDIA_ROOT
-from django.db.models import F, Value, CharField
+from django.db.models import F, Value, CharField, IntegerField
 from django.db.models.functions import Cast
 from django.http import Http404
 from django.core.exceptions import FieldDoesNotExist
@@ -170,7 +170,6 @@ def update_id_registro_and_asiento(id_registro:str) -> dict:
         }
  
 #--------------------------------------------------------------
-
 class ActivosActions():
 
     def __init__(self) -> None:
@@ -323,6 +322,7 @@ class ActivosActions():
 
         return Response(serializer.data, 
                         status= status.HTTP_200_OK)
+    
     #Metodos para el HTTP PATCH------------------------------
     def update_activo(self, request, pk:int) -> Response:
         data = request.data
@@ -345,6 +345,31 @@ class ActivosActions():
 
         return Response(serializer.errors, 
                         status = status.HTTP_400_BAD_REQUEST )
+
+    #Metodos para el HTTP DELETE------------------------------
+    def delete_last_id_registro(self):
+       
+ 
+       resultado = Activos.objects.values('id_registro')\
+                                  .annotate(tipo = Value('Activo', output_field= CharField()))\
+                                  .union(Observaciones.objects.values('id_registro')\
+                                                              .annotate(tipo = Value('Observacion', output_field = CharField())))\
+                                                              .order_by('-id_registro')[:1]
+       
+       tipo = resultado[0]['tipo']
+       id_registro = resultado[0]['id_registro']
+
+       if tipo == "Observacion":
+           observacion = Observaciones.objects.get(id_registro = id_registro)
+           observacion.delete()           
+
+       if tipo == "Activo":
+           activo = Activos.objects.get(id_registro = id_registro)
+           activo.delete()
+
+       return Response({"info": f"{resultado[0]} has been deleted"},
+                       status = status.HTTP_200_OK) 
+
 #--------------------------------------------------------
 
 class ObservacionesActions():
@@ -1106,6 +1131,21 @@ class UbicacionesActions():
     output.close()
     return response
 
+   def ubicacion_by_funcionario_id(self, pk:int) -> Response:
+        try: 
+            ubicacion = Ubicaciones.objects.get(funcionario_id = pk)
+            serializer = UbicacionesSerializer(instance = ubicacion)
+
+        except Ubicaciones.DoesNotExist:
+            return Response({"error": "ubicacion with selected funcionario does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+
+        return Response(serializer.data, 
+                        status = status.HTTP_200_OK)
+
+        return Response("hola")
+        pass
+
    #Metodos para el HTTP POST--------------------------------
    def nueva_ubicacion(self, request) -> Response:
         serializer = UbicacionesSerializer(data = request.data)
@@ -1171,9 +1211,7 @@ class UbicacionesActions():
 
         return Response({"status": "ubicacion has been deleted"}, 
                         status = status.HTTP_200_OK)
-    
-
-    
+       
 class FuncionariosActions():
 
    #Metodos para el HTTP GET---------------------------------

@@ -358,7 +358,7 @@ def add_foreign_keys():
     query = "ALTER TABLE activos CHANGE ubicacion ubicacion_original INT"
     cursor.execute(query) 
    
-    query = "ALTER TABLE activos ADD CONSTRAINT fk_ubicacion_original FOREIGN KEY (ubicacion_original) REFERENCES ubicaciones(id)"
+    query = "ALTER TABLE activos ADD CONSTRAINT fk_ubicacion_original FOREIGN KEY (ubicacion_original) REFERENCES ubicaciones(id) ON DELETE SET NULL" 
     cursor.execute(query)
     
 
@@ -368,7 +368,7 @@ def add_foreign_keys():
     query = "ALTER TABLE activos ADD CONSTRAINT fk_modo_adquisicion FOREIGN KEY (modo_adquisicion) REFERENCES modoadquisicion(id)"
     cursor.execute(query)
 
-    query = "ALTER TABLE activos ADD CONSTRAINT fk_ubicacion_actual FOREIGN KEY (ubicacion_actual) REFERENCES ubicaciones(id)"
+    query = "ALTER TABLE activos ADD CONSTRAINT fk_ubicacion_actual FOREIGN KEY (ubicacion_actual) REFERENCES ubicaciones(id) ON DELETE SET NULL"
     cursor.execute(query)
     
     db.commit()    

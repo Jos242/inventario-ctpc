@@ -2,6 +2,40 @@ from django.db import models
 from django.db.models.functions import Now
 from django.contrib.auth.models import User
 # Create your models here.
+class Puestos(models.Model):
+    id = models.AutoField(primary_key = True)
+    descripcion = models.CharField(unique=True, max_length=240)
+
+    class Meta:
+        managed = False
+        db_table = 'puestos'
+
+    def __str__(self) -> str:
+        return self.descripcion
+
+class Departamentos(models.Model):
+    id = models.AutoField(primary_key = True)
+    descripcion = models.CharField(unique=True, max_length=240)
+
+    class Meta:
+        managed = False
+        db_table = 'departamentos'
+    
+    def __str__(self) -> str:
+        return self.descripcion
+ 
+class Funcionarios(models.Model):
+    user = models.OneToOneField(User, on_delete = models.CASCADE)
+    nombre_completo = models.TextField()
+    departamento = models.ForeignKey(Departamentos, models.DO_NOTHING, db_column='departamento')
+    puesto = models.ForeignKey(Puestos, models.DO_NOTHING, db_column='puesto') 
+    
+    class Meta:
+        db_table = 'funcionarios'
+    
+    def __str__(self) -> str:
+        return self.nombre_completo
+
 class Ubicaciones(models.Model):
 
     id = models.AutoField(primary_key = True)
@@ -20,7 +54,7 @@ class Ubicaciones(models.Model):
                              null = True, blank = True)
     
     
-    funcionario_id = models.ForeignKey(User, models.DO_NOTHING,
+    funcionario_id = models.ForeignKey(Funcionarios, models.DO_NOTHING,
                                        db_column= "funcionario_id", null = True,
                                        blank = True)
     img_path = models.CharField(max_length = 250, blank = True)
@@ -63,9 +97,9 @@ class Activos(models.Model):
     modelo = models.CharField(max_length=150, blank=True)
     serie = models.CharField(max_length=150, blank=True)
     estado = models.CharField(max_length=7, blank=True,choices= ESTADO_ACTIVO) 
-    ubicacion_original = models.ForeignKey(Ubicaciones, models.DO_NOTHING, db_column='ubicacion_original',
+    ubicacion_original = models.ForeignKey(Ubicaciones, on_delete = models.SET_NULL, db_column='ubicacion_original',
                                            null=True, related_name = 'ubicacion_original')
-    modo_adquisicion = models.ForeignKey(ModoAdquisicion, models.DO_NOTHING, db_column = 'modo_adquisicion',
+    modo_adquisicion = models.ForeignKey(ModoAdquisicion, on_delete= models.SET_NULL, db_column = 'modo_adquisicion',
                                          blank = True, null = True) 
     precio = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True) 
     creado_el = models.DateTimeField(db_default = Now())
@@ -108,9 +142,9 @@ class ReadActivos(models.Model):
     modelo = models.CharField(max_length=150, blank=True)
     serie = models.CharField(max_length=150, blank=True)
     estado = models.CharField(max_length=7, blank=True,choices= ESTADO_ACTIVO)
-    ubicacion_original = models.ForeignKey(Ubicaciones, models.DO_NOTHING, db_column='ubicacion_original',
+    ubicacion_original = models.ForeignKey(Ubicaciones, on_delete = models.SET_NULL, db_column='ubicacion_original',
                                            blank=True, null=True, related_name = 'ubicacion_original_read_activos')
-    modo_adquisicion = models.ForeignKey(ModoAdquisicion, models.DO_NOTHING, db_column = 'modo_adquisicion',
+    modo_adquisicion = models.ForeignKey(ModoAdquisicion, on_delete = models.SET_NULL, db_column = 'modo_adquisicion',
                                          blank = True, null = True) 
     precio = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     creado_el = models.DateTimeField()
@@ -161,39 +195,8 @@ class Docs(models.Model):
     def __str__(self):
         return f"Title: {self.titulo}, Path: {self.ruta}" 
 
-class Puestos(models.Model):
-    id = models.AutoField(primary_key = True)
-    descripcion = models.CharField(unique=True, max_length=240)
+   
 
-    class Meta:
-        managed = False
-        db_table = 'puestos'
-
-    def __str__(self) -> str:
-        return self.descripcion
-
-class Departamentos(models.Model):
-    id = models.AutoField(primary_key = True)
-    descripcion = models.CharField(unique=True, max_length=240)
-
-    class Meta:
-        managed = False
-        db_table = 'departamentos'
-    
-    def __str__(self) -> str:
-        return self.descripcion
-    
-class Funcionarios(models.Model):
-    user = models.OneToOneField(User, on_delete = models.CASCADE)
-    nombre_completo = models.TextField()
-    departamento = models.ForeignKey(Departamentos, models.DO_NOTHING, db_column='departamento')
-    puesto = models.ForeignKey(Puestos, models.DO_NOTHING, db_column='puesto') 
-    
-    class Meta:
-        db_table = 'funcionarios'
-    
-    def __str__(self) -> str:
-        return self.nombre_completo
 
 class CierreInventario(models.Model):
     VALID_REVISIONES = {

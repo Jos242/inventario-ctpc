@@ -54,7 +54,11 @@ class ActivosView(APIView):
         
         if path == "/activos-filtrados-columna/":
             return self.activos_do.activos_filter_column()   
-
+        
+        if path == f"/excel/todos-los-activos/":
+            rp:Response = self.activos_do.get_excel_all_activos()
+            return rp
+        
         return Response({"data": "did not match an endpoint for a HTTP GET Method"},
                          status= status.HTTP_404_NOT_FOUND)
 
@@ -80,6 +84,13 @@ class ActivosView(APIView):
                                                         pk = pk)
             return rp
 
+    def delete(self, request):
+        path = request.path
+
+        if path == "/delete/last/id-registro/":
+            rp:Response = self.activos_do.delete_last_id_registro()
+            return rp
+       
 class ActivosViewNoAuth(APIView):
 
     permission_classes = []
@@ -105,10 +116,6 @@ class ActivosViewNoAuth(APIView):
             rp:Response = self.activos_do.get_activo_by_ubicacion_id(ubicacion_actual)
             return rp
         
-        #For now leave this one here, but it requires auth
-        if path == f"/excel/todos-los-activos/":
-            rp:Response = self.activos_do.get_excel_all_activos()
-            return rp
         return Response({"data": "did not match an endpoint for a HTTP GET Method"}, status= status.HTTP_404_NOT_FOUND)
 
 class ObservacionesView(APIView):
@@ -310,7 +317,7 @@ class UbicacionesView(APIView):
         super().__init__(**kwargs)
         self.ubicaciones_do = UbicacionesActions()
 
-    def get(self, request, pk:int = None):
+    def get(self, request, pk:int = None, funcionario_id:int = None):
         path = request.path
 
         if f"/ubicacion/{pk}/" == path:
@@ -319,6 +326,10 @@ class UbicacionesView(APIView):
         
         if path == "/ubicaciones-excel/":
             return self.ubicaciones_do.ubicaciones_excel()
+        
+        if path == f"/ubicacion/funcionario-id/{funcionario_id}/":
+            rp:Response = self.ubicaciones_do.ubicacion_by_funcionario_id(funcionario_id)
+            return rp 
             
     def post(self, request):
         path = request.path
@@ -340,6 +351,7 @@ class UbicacionesView(APIView):
             rp:Response = self.ubicaciones_do.delete_ubicacion(pk)
             return rp
         pass
+
 class FuncionariosView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
     # authentication_classes = [JWTAuthentication]
