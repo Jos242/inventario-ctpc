@@ -195,9 +195,6 @@ class Docs(models.Model):
     def __str__(self):
         return f"Title: {self.titulo}, Path: {self.ruta}" 
 
-   
-
-
 class CierreInventario(models.Model):
     VALID_REVISIONES = {
         "PRINCIPIO": "PRINCIPIO",
@@ -261,3 +258,5 @@ class Plantillas(models.Model):
     class Meta:
         db_table = 'plantillas'
 
+class HistorialAcceso(models.Model):
+    pass

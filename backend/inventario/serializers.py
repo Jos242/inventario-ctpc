@@ -24,6 +24,7 @@ class UpdateActivoSerializer(serializers.ModelSerializer):
     
 class ReadActivoSerializerComplete(serializers.ModelSerializer):
     ubicacion_original = serializers.CharField(required = False)
+    ubicacion_actual = serializers.CharField(required = False)
     modo_adquisicion = serializers.CharField(required = False)
 
     class Meta:
