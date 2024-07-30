@@ -43,7 +43,7 @@ class AuthUser(TokenViewBase):
             if user.is_staff == 1 and user.is_superuser == 0:
                 tipo_usuario = 'Funcionario'
 
-            if user.is_staff == 1 and user.is_superuser == 1:
+            if user.is_staff == 0 and user.is_superuser == 1:
                 tipo_usuario = 'Administrador'
 
             historial_de_acceso = HistorialDeAcceso(usuario = user,
