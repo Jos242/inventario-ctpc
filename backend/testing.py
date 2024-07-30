@@ -242,7 +242,7 @@ def load_funcionarios(): #MODIFICAR EL PATH DE ACA CUANDO SE EJECUTE EN WINDOWS
             "puesto": None
           }
 
-    df = pd.read_csv('/home/david/Documents/tarea_de_hoy/funcionarios_diurno.csv')
+    df = pd.read_csv('F:\\Documentos\\Documents\\2024\\inventario-ctpc\\backend\\funcionarios_diurno.csv')
     print(df)
     workbook = xlsxwriter.Workbook('aqui.xlsx') 
     worksheet = workbook.add_worksheet()

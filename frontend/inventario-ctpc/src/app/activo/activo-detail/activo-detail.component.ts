@@ -129,6 +129,9 @@ export class ActivoDetailComponent implements OnInit{
       
     // }
 
+    onEdit(): void {
+      this.router.navigate([`/activos/${this.activoId}/edit`]);
+    }
    
 onSubmit() {
   if (this.myForm.valid) {
@@ -188,6 +191,7 @@ onSubmit() {
           const formData = new FormData();
           formData.append('descripcion', chunk);
           formData.append('activo', activo);
+          console.log(formData)
           return this.gService.create('nueva-observacion/', formData);
         }),
         takeUntil(this.destroy$)

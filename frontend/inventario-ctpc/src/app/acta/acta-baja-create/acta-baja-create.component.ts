@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ViewChild,  ElementRef, Renderer2} from '@angular/core';
 import {MatPaginator, MatPaginatorModule} from '@angular/material/paginator';
 import {MatSort, MatSortModule} from '@angular/material/sort';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
@@ -62,7 +62,7 @@ export class ActaBajaCreateComponent {
 
  
   dataSource = new MatTableDataSource<any>();
-  displayedColumns: string[] = ['no_identificacion', 'descripcion', 'marca', 'modelo', 'serie', 'estado'];
+  displayedColumns: string[] = ['no_identificacion', 'descripcion', 'marca', 'modelo', 'serie'];
 
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -70,7 +70,11 @@ export class ActaBajaCreateComponent {
 
   destroy$:Subject<boolean>=new Subject<boolean>();
 
-  selectedActivos: string[] = []; // Array to store selected activos
+  selectedActivos: any[] = []; // Array to store selected activos
+
+  @ViewChild('contentToConvert') contentToConvert!: ElementRef;
+  @ViewChild('firstTable') firstTable!: ElementRef;
+  @ViewChild('secondTable') secondTable!: ElementRef;
 
   
 
@@ -81,7 +85,9 @@ export class ActaBajaCreateComponent {
     private httpClient:HttpClient,
     private sanitizer: DomSanitizer,
     private formBuilder: FormBuilder,
-    private authService: AuthService,) {
+    private authService: AuthService,
+    private renderer: Renderer2
+  ) {
     
       moment.locale('es'); // Set locale to Spanish
   }
@@ -117,14 +123,49 @@ export class ActaBajaCreateComponent {
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
+  resetActa(): void {
+    this.myForm.reset(); 
+    this.selectedActivos = []; 
+  }
+
   selectActivo(activo: any): void {
-    // Add the activo to the array if it's not already present
-    if (!this.selectedActivos.includes(activo.no_identificacion)) {
-      this.selectedActivos.push(activo.no_identificacion);
+
+    let heightTabla = 0;
+    const selectedRazon = this.myForm.get('razon').value;
+
+    // Add the activo with the selected reason to the array if it's not already present
+    if (!this.selectedActivos.some(a => a.no_identificacion === activo.no_identificacion)) {
+      this.selectedActivos.push({ ...activo, razon: selectedRazon });
+      console.log(this.selectedActivos);
+      heightTabla = this.calculateHeightPercentage();
+      if(heightTabla>51){
+        
+        
+      }
+
     }
     // Update the form control with the array
     this.myForm.patchValue({ activo: this.selectedActivos.join(', ') });
   }
+
+  calculateHeightPercentage(): number {
+    const contentHeight = this.contentToConvert.nativeElement.offsetHeight;
+
+    const secondTableHeight = this.secondTable.nativeElement.offsetHeight;
+
+
+    const secondTableHeightPercentage = (secondTableHeight / contentHeight) * 100;
+
+    console.log(`Second table height percentage: ${secondTableHeightPercentage}%`);
+
+    // Use Renderer2 to dynamically set styles or handle further logic
+
+    
+    return secondTableHeightPercentage;
+
+
+  }
+
 
   listaDocs(){
     
@@ -166,18 +207,30 @@ export class ActaBajaCreateComponent {
     html2canvas(data, { scale: 2, allowTaint: true }).then(canvas => {
      let HTML_Width = canvas.width;
      let HTML_Height = canvas.height;
+     console.log(HTML_Height +"h " + HTML_Width +"w ")
      let top_left_margin = 15;
-     let PDF_Width = HTML_Width + (top_left_margin * 2);
-     let PDF_Height = (PDF_Width * 1.5) + (top_left_margin * 2);
-     let canvas_image_width = HTML_Width;
-     let canvas_image_height = HTML_Height;
+    //  let PDF_Width = HTML_Width + (top_left_margin * 2);
+    //  let PDF_Height = (PDF_Width * 1.5) + (top_left_margin * 2);
+    let PDF_Width = 612;
+    let PDF_Height = 792;
+    //  let canvas_image_width = HTML_Width;
+    //  let canvas_image_height = HTML_Height;
+    let ratio = HTML_Width / HTML_Height;
+    console.log(ratio)
+    let canvas_image_width = PDF_Width - (top_left_margin * 2);
+    let canvas_image_height = canvas_image_width / ratio;
+
      let totalPDFPages = Math.ceil(HTML_Height / PDF_Height) - 1;
+
+     console.log(totalPDFPages+"paginas")
      canvas.getContext('2d');
      let imgData = canvas.toDataURL("image/jpeg", 3.0);
-     let pdf = new jspdf('p', 'pt', [PDF_Width, PDF_Height]);
+    //  let pdf = new jspdf('p', 'pt', [PDF_Width, PDF_Height]);
+    let pdf = new jspdf('p', 'pt', 'letter');
      pdf.addImage(imgData, 'jpg', top_left_margin, top_left_margin, canvas_image_width, canvas_image_height);
      for (let i = 1; i <= totalPDFPages; i++) {
-       pdf.addPage([PDF_Width, PDF_Height], 'p');
+      //  pdf.addPage([PDF_Width, PDF_Height], 'p');
+      pdf.addPage('letter'); // Add a new page of 'letter' size
        pdf.addImage(imgData, 'jpg', top_left_margin, -(PDF_Height * i) + (top_left_margin * 4), canvas_image_width, canvas_image_height);
      }
 
@@ -190,6 +243,7 @@ export class ActaBajaCreateComponent {
       formData.append('titulo', 'pdf-one');
       formData.append('tipo', 'PDF');
       formData.append('archivo', pdfBlob, 'document.pdf');
+      formData.append('impreso', '0');
 
       console.log(formData);
       // const formData = this.myForm.value;

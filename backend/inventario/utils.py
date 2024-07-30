@@ -287,7 +287,8 @@ class ActivosActions():
         remaining_fields = get_remaining_fields() 
         serializer = ActivoSerializer(data = request.data | remaining_fields)
 
-        if serializer.is_valid():          
+        if serializer.is_valid():     
+            print("nelxd")     
             activo:Activos = serializer.create(serializer.validated_data)
             print(activo)
             return Response(ReadActivoSerializerIncomplete(instance = activo).data,

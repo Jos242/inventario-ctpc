@@ -1,0 +1,28 @@
+.row{ 
+    margin: 0 auto;
+    margin-top:50px ;
+    width: 80%;
+}
+
+mat-card{
+
+    text-align: justify;
+    min-height:200px;
+    margin-bottom: 10px;
+}
+
+.card-subtitle{
+    text-align: left;
+}
+
+h1{
+    margin-top: 25px;
+    font-size: xx-large;
+}
+
+@media (max-width: 1435px) {
+    .row{
+        width: 90%;
+    }
+  }
+

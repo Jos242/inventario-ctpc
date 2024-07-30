@@ -3,8 +3,12 @@
    
 }
 
-img{
-    // max-width: 150px;
+.btnWarning{
+    width: 100%; 
+}
+
+.btnAgregar{
+    width: 100%;
 }
 
 .tabla{
@@ -78,10 +82,16 @@ h1{
 
 .firmas{
     width: 78.5889%;
+    margin-top: 10%;
 }
 
 .footer{
     width: 80.981%;
+    // display: block;
+    // position: fixed;
+    // bottom:0 ;
+    // margin-top:10in ;
+    // margin-bottom: 5px;
 }
 
 .espacios{

@@ -14,18 +14,18 @@
             <mat-card class="example-card">
                 <mat-card-header>
                   <mat-card-subtitle>Activos</mat-card-subtitle>
-                  <mat-card-title>Listado de Activos</mat-card-title>
+                  <mat-card-title>Activos Nuevos Sin Placa</mat-card-title>
                 </mat-card-header>
                 
                 <mat-card-content>
                     <br>
-                  <p>Mediante esta seccion usted puede ver el listado completo de los activos del colegio, asi como ver su información, modificarlos y agregarles anotaciones.</p>
-                  <p></p>
+                  <p>Cantidad de activos que han sido agregados al sistema cuya placa fisica todavia no ha sido impresa.</p>
+                  <h2 style="color: red;">57</h2>
                   <mat-divider></mat-divider>
                 </mat-card-content>
                 <mat-card-actions>
-                  <button mat-button [routerLink]="['/activos']" >Entrar</button>
-                  <button mat-button>Como Usar</button>
+                  <button mat-button [routerLink]="['/Index']" >Ver Activos</button>
+                  <!-- <button mat-button>Como Usar</button> -->
                 </mat-card-actions>
                 <mat-card-footer>
                   
@@ -36,18 +36,18 @@
             <mat-card class="example-card">
                 <mat-card-header>
                   <mat-card-subtitle>Actas</mat-card-subtitle>
-                  <mat-card-title>Impresion de Actas</mat-card-title>
+                  <mat-card-title>Actas No Impresas</mat-card-title>
                 </mat-card-header>
                 
                 <mat-card-content>
                     <br>
-                  <p>Mediante esta seccion usted puede ver todas las actas que han sido generadas para impresion, incluyendo crear Excel para impresion y actas de bajas.</p>
-                  <p></p>
+                  <p>Cantidad de Actas de bajas o de traslado que han sido generadas pero todavia no han sido impresas.</p>
+                  <h2 style="color: orange;">9</h2>
                   <mat-divider></mat-divider>
                 </mat-card-content>
                 <mat-card-actions>
-                  <button mat-button [routerLink]="['/actas']" >Entrar</button>
-                  <button mat-button>Como Usar</button>
+                  <button mat-button [routerLink]="['/index']" >Ver Actas</button>
+                  <!-- <button mat-button>Como Usar</button> -->
                 </mat-card-actions>
                 <mat-card-footer>
                   
@@ -58,19 +58,19 @@
         <div class="col-xxl-3  col-md-6">
             <mat-card class="example-card">
                 <mat-card-header>
-                  <mat-card-subtitle>Activos</mat-card-subtitle>
-                  <mat-card-title>Crear Nuevo Activo</mat-card-title>
+                  <mat-card-subtitle>Actas</mat-card-subtitle>
+                  <mat-card-title>Excels Para Impresion</mat-card-title>
                 </mat-card-header>
                 
                 <mat-card-content>
                     <br>
-                  <p>Mediante esta seccion usted puede crear un nuevo activo para el colegio, rellenando un formulario con la infromacion requerida del mismo, automaticamente se agrega el inventario.</p>
-                  <p></p>
+                  <p>Cantidad de Excels de listado de registro listos para ser generados e impresos.</p>
+                  <h2 style="color: green;">1</h2>
                   <mat-divider></mat-divider>
                 </mat-card-content>
                 <mat-card-actions>
-                  <button mat-button [routerLink]="['/activos/crear']" >Entrar</button>
-                  <button mat-button>Como Usar</button>
+                  <button mat-button [routerLink]="['/index']" >Ver Excels</button>
+                  <!-- <button mat-button>Como Usar</button> -->
                 </mat-card-actions>
                 <mat-card-footer>
                   
@@ -80,19 +80,19 @@
         <div class="col-xxl-3 col-md-6">
             <mat-card class="example-card">
                 <mat-card-header>
-                  <mat-card-subtitle>Configuracion</mat-card-subtitle>
-                  <mat-card-title>Administracion</mat-card-title>
+                  <mat-card-subtitle>Revisiones</mat-card-subtitle>
+                  <mat-card-title>Activos Con Problemas</mat-card-title>
                 </mat-card-header>
                 
                 <mat-card-content>
                     <br>
-                  <p>Mediante esta seccion usted puede configurar y editar diferentes aspectos de la aplicacion, como editar usuarios o modificar los valores disponibles para nuevos activos</p>
-                  <p></p>
+                  <p>Cantidad de activos que fueron reportados con problemas en las revisiones del cierre de inventario.</p>
+                  <h2 style="color: green;">0</h2>
                   <mat-divider></mat-divider>
                 </mat-card-content>
                 <mat-card-actions>
-                  <button mat-button [routerLink]="['/admin']" >Entrar</button>
-                  <button mat-button>Como Usar</button>
+                  <button mat-button [routerLink]="['/index']" >Ver Activos</button>
+                  <!-- <button mat-button>Como Usar</button> -->
                 </mat-card-actions>
                 <mat-card-footer>
                   

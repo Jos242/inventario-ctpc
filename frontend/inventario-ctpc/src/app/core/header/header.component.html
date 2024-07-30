@@ -15,36 +15,36 @@
             <span>Escanear</span> 
           </button>
         </li>
-        <li class="nav-item"> 
+        <li class="nav-item" *ngIf="logged"> 
           <button mat-button [routerLink]="'/activos'" >
             <mat-icon>list</mat-icon>
             <span>Listado de Activos</span>
           </button>
         </li>
-        <li class="nav-item"> 
+        <li class="nav-item" *ngIf="logged"> 
           <button mat-button [routerLink]="'/actas'" >
             <mat-icon>description</mat-icon>
             <span>Impresion de Actas</span>
           </button>
         </li>
-        <li class="nav-item"> 
+        <li class="nav-item" *ngIf="logged"> 
           <button mat-button [routerLink]="'/activos/crear'" >
             <mat-icon>add_box</mat-icon>
             <span>Crear Activos</span>
           </button>
         </li>
-        <li class="nav-item"> 
+        <li class="nav-item" *ngIf="logged"> 
           <button mat-button [routerLink]="'/admin'" >
             <mat-icon>settings</mat-icon>
             <span>Administracion</span>
           </button>
         </li>
-        <!-- <li class="nav-item"> 
+        <li class="nav-item" *ngIf="logged"> 
           <button mat-button (click)="logout()" >
             <mat-icon>logout</mat-icon>
             <span>Cerrar Sesion</span>
           </button>
-        </li> -->
+        </li>
       </ul>
     </div>
   </div>

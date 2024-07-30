@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
@@ -14,6 +15,8 @@ export class AuthService {
   private baseURL = environment.apiURL; 
   private currentUserKey = 'currentUser';
 
+  private loggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
+
 
   constructor(private http: HttpClient, private router: Router) { 
 
@@ -21,10 +24,11 @@ export class AuthService {
 
   login(credentials: { username: string; password: string }): Observable<any> {
     // return this.http.post(`${this.baseURL}iniciar-sesion/`, credentials, { withCredentials: true })
-    return this.http.post(`${this.baseURL}api/token/`, credentials)
+    return this.http.post<any>(`${this.baseURL}login/`, credentials)
       .pipe(
         tap(response => {
-
+          localStorage.setItem('authToken', response.access);
+          this.loggedInSubject.next(true);
           console.log("login")
           this.router.navigate(['/index']);
         }),
@@ -36,23 +40,20 @@ export class AuthService {
       );
   }
 
-  // logout(): void {
-  //   this.http.post(`${this.baseURL}salir/`, {})
-  //     .subscribe(
-  //       () => {
-  //         console.log("logout1")
-  //         localStorage.clear(); 
-  //         sessionStorage.clear();
+ 
+  getToken(): string | null {
+    return localStorage.getItem('authToken');
+  }
 
-  //         // Clear cookies
-  //         document.cookie = 'csrftoken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-  //         document.cookie = 'sessionid=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+  isLoggedIn$(): Observable<boolean> {
+    return this.loggedInSubject.asObservable();
+  }
 
-  //         this.router.navigate(['/login']);
-  //         console.log("logout2")
-  //       }
-  //     );
-  // }
+  logout(): void {
+    localStorage.removeItem('authToken');
+    this.loggedInSubject.next(false);
+    this.router.navigate(['/login']);
+  }
   
 
   setCurrentUser(user: any): void {
@@ -64,7 +65,9 @@ export class AuthService {
     return userString ? JSON.parse(userString) : null;
   }
 
-  isAuthenticated(): boolean {
-    return this.getCurrentUser() !== null;
+  private hasToken(): boolean {
+    return !!localStorage.getItem("authToken");
   }
+
+  
 }

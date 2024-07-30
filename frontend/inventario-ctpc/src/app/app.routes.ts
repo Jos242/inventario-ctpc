@@ -11,24 +11,29 @@ import { ActaBajaCreateComponent } from './acta/acta-baja-create/acta-baja-creat
 import { ActaMoverCreateComponent } from './acta/acta-mover-create/acta-mover-create.component';
 import { ActivoScanComponent } from './activo/activo-scan/activo-scan.component';
 import { AdminIndexComponent } from './admin/admin-index/admin-index.component';
+import { ActaListadoComponent } from './acta/acta-listado/acta-listado.component';
+import { ActivoUpdateComponent } from './activo/activo-update/activo-update.component';
 
 
 export const routes: Routes = [
-    { path:'activos', component: ActivoIndexComponent  },
-    { path:'index', component: HomeIndexComponent },
+    { path:'activos', component: ActivoIndexComponent, canActivate: [authGuard]  },
+    { path:'index', component: HomeIndexComponent, canActivate: [authGuard] },
     // { path:'index', component: HomeIndexComponent , canActivate: [authGuard] },
     { path: 'login', component: LoginIndexComponent },
 
-    { path:'admin/index', component: AdminIndexComponent },
+    { path:'admin', component: AdminIndexComponent, canActivate: [authGuard] },
 
-    { path:'actas', component: ActaIndexComponent},
-    { path:'actas/baja', component: ActaBajaCreateComponent},
-    { path:'actas/traslado', component: ActaMoverCreateComponent},
+    { path:'actas', component: ActaIndexComponent, canActivate: [authGuard]},
+    { path:'actas/baja', component: ActaBajaCreateComponent, canActivate: [authGuard]},
+    { path:'actas/traslado', component: ActaMoverCreateComponent, canActivate: [authGuard]},
+    { path:'actas/lista', component: ActaListadoComponent, canActivate: [authGuard]},
     
-    { path:'activos/crear', component: ActivoCreateComponent},
+    { path:'activos/crear', component: ActivoCreateComponent, canActivate: [authGuard]},
     { path:'activos/scan', component: ActivoScanComponent },
 
+    { path:'activos/:id/edit', component: ActivoUpdateComponent },
     { path:'activos/:id', component: ActivoDetailComponent },
+    
     
 
     //en caso de que el link no tenga nada, se redirige a /home

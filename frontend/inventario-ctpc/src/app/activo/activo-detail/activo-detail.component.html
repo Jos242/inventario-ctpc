@@ -4,27 +4,36 @@
                 <div>
                     <h1>Detalles del Activo {{ datos.no_identificacion }}</h1>
                     <div class="row">
-                        <div class="col-sm-3">
-                            <h2>Detalles</h2>
+                        <div class="col-sm-4">
+                            <h2>Detalles Generales</h2>
                             <p><strong>ID Registro:</strong> {{ datos.id_registro }}</p>
-                            <p><strong>Asiento:</strong> {{ datos.asiento }}</p>
                             <p><strong>No. Identificación:</strong> {{ datos.no_identificacion }}</p>
                             <p><strong>Descripción:</strong> {{ datos.descripcion }}</p>
                             <p><strong>Marca:</strong> {{ datos.marca }}</p>
                             <p><strong>Modelo:</strong> {{ datos.modelo }}</p>
                             <p><strong>Serie:</strong> {{ datos.serie }}</p>
                             <p><strong>Estado:</strong> {{ datos.estado }}</p>
-                            <p><strong>Ubicación:</strong> {{ datos.ubicacion }}</p>
+                            <p><strong>Ubicación Original:</strong> {{ datos.ubicacion_original }}</p>
+                            <p><strong>Ubicación Actual:</strong> {{ datos.ubicacion_actual }}</p>
                             <p><strong>Modo Adquisición:</strong> {{ datos.modo_adquisicion }}</p>
                             <p><strong>Precio:</strong> {{ datos.precio }}</p>
                             <p><strong>Creado El:</strong> {{ datos.creado_el }}</p>
                         </div>
-                        <div class="col-sm-6">
+                        <div class="col-sm-4">
+                            <h2>Detalles Especificos</h2>
+                            <p><strong>Es Conectividad:</strong> {{ datos.conectividad }}</p>
+                            <p><strong>Es Seguridad:</strong> {{ datos.seguridad }}</p>
+                            <p><strong>Placa ha Sido Impresa:</strong> {{ datos.placa_impresa }}</p>
+                            <p><strong>Dado de Baja:</strong> {{ datos.de_baja }}</p>
+                        </div>
+                        <div class="col-sm-4">
                             <h2>Observaciones</h2>
                             <p [innerHTML]="datos.combinedDescripcion"></p>
-                        </div>
-                        <div class="col-sm-3">
+                            <br>
                             <h2>Acciones</h2>
+                            <p>
+                                <button mat-flat-button color="primary" (click)="onEdit()">Editar Activo</button>  
+                            </p>  
                             <p>
                                 <button mat-flat-button color="primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Agregar Anotacion</button>  
                             </p>   
@@ -34,6 +43,7 @@
                             <p>
                                 <button mat-flat-button color="primary">Crear Acta de Traslado</button>  
                             </p>  
+                            
                                              
                         </div>
                     </div>    

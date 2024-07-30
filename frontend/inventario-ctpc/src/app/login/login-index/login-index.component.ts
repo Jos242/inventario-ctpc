@@ -52,7 +52,7 @@ export class LoginIndexComponent implements OnInit{
     }
 
     ngOnInit(): void {
-      if(this.authService.isAuthenticated){
+      if(this.authService.isLoggedIn$()){
         // this.router.navigate(['/index']);
         console.log("hay usaurio")
       }

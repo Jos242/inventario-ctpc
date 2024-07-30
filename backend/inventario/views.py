@@ -66,6 +66,7 @@ class ActivosView(APIView):
         path = request.path
 
         if path == "/agregar-activo/":
+            print(request.data)
             resp = self.activos_do.add_activo(request)  
             return resp
         
@@ -148,6 +149,7 @@ class ObservacionesView(APIView):
         path = request.path
         
         if path == "/nueva-observacion/":
+            print(request.data)
             return self.observaciones_do.add_new_observacion(request)
 
 class UserView(APIView):

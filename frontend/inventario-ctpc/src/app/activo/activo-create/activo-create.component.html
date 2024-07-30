@@ -9,23 +9,52 @@
                 <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">
                     <div class="container">
                         <div class="row">
-                            <mat-form-field appearance="outline" class="inputsForm">
-                                <mat-label>Descripcion</mat-label>
-                                <input matInput formControlName="descripcion" placeholder="Monitor">
-                                <mat-hint>Descripcion del activo</mat-hint>
-                            </mat-form-field>
-                    
-                            <mat-form-field appearance="outline" class="inputsForm">
-                                <mat-label>Ubicacion</mat-label>
-                                <input matInput formControlName="ubicacion" placeholder="Aula 01">
-                                <mat-hint>Ubicacion fisica del activo en el colegio</mat-hint>
-                            </mat-form-field>
+                            <div class="col-lg-8">   
+                                <mat-form-field appearance="outline" class="inputsForm">
+                                    <mat-label>Descripcion</mat-label>
+                                    <input matInput formControlName="descripcion" placeholder="Monitor">
+                                    <mat-hint>Descripcion del activo</mat-hint>
+                                </mat-form-field> 
+                            </div>
                             
-                            <mat-form-field appearance="outline" class="inputsForm">
-                                <mat-label>Modo de Adquisicion</mat-label>
-                                <input matInput formControlName="modo_adquisicion" placeholder="Donacion">
-                                <mat-hint>Manera mediante la cual se obtuvo el activo</mat-hint>
-                            </mat-form-field>
+                            <div class="col-lg-2">
+                                <mat-checkbox id="conectividad" class="checks" formControlName="conectividad">Es Conectividad?</mat-checkbox>
+                            </div>
+                            <div class="col-lg-2">
+                                  <mat-checkbox id="seguridad" class="checks" formControlName="seguridad">Es Seguridad?</mat-checkbox>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg">
+    
+                                <mat-form-field appearance="outline" class="inputsForm">
+                                    <mat-label>Ubicacion</mat-label>
+                                    <mat-select formControlName="ubicacion_original" placeholder="Seleccione una ubicacion">
+                                        <mat-option *ngFor="let ubicacion of ubicaciones" [value]="ubicacion.id">{{ ubicacion.nombre_oficial }}</mat-option>
+                                    </mat-select>
+                                    <mat-hint>Ubicacion fisica del activo en el colegio</mat-hint>
+                                </mat-form-field>
+                            </div>
+
+                            
+                            <div class="col-lg">
+                                
+                                <mat-form-field appearance="outline" class="inputsForm">
+                                    <mat-label>Modo de Adquisicion</mat-label>
+                                    <mat-select formControlName="modo_adquisicion" placeholder="Donacion">
+                                        <mat-option *ngFor="let modo of modosAdquisicion" [value]="modo.id">{{ modo.descripcion }}</mat-option>
+                                    </mat-select>
+                                    <mat-hint>Manera mediante la cual se obtuvo el activo</mat-hint>
+                                </mat-form-field>
+                            </div>
+                            <div class="col-lg">
+                                <mat-form-field appearance="outline" class="inputsForm">
+                                    <mat-label>Precio</mat-label>
+                                    <input matInput formControlName="precio" placeholder="100000.99">
+                                    <mat-hint>Precio en Colones del Producto, utilizando puntos para las decimas</mat-hint>
+                                </mat-form-field> 
+                            </div>
+
                         </div>
                         <div class="row">
                             <div class="col-lg">
@@ -52,19 +81,15 @@
                             <div class="col-lg">
                                 <mat-form-field appearance="outline" class="inputsForm">
                                     <mat-label>Estado</mat-label>
-                                    <input matInput formControlName="estado" placeholder="Bueno">
+                                    <mat-select formControlName="estado" placeholder="BUENO">
+                                        <mat-option *ngFor="let estado of estados" [value]="estado.id">{{ estado.descripcion }}</mat-option>
+                                    </mat-select>
                                     <mat-hint>Estado actual del activo</mat-hint>
                                 </mat-form-field>
                             </div>
 
                         </div>
-                        <div class="row">
-                            <mat-form-field appearance="outline" class="inputsForm">
-                                <mat-label>Precio</mat-label>
-                                <input matInput formControlName="precio" placeholder="100000.99">
-                                <mat-hint>Precio en Colones del Producto, utilizando puntos para las decimas</mat-hint>
-                            </mat-form-field>   
-                        </div>
+
                         <div class="row">
                             <button mat-flat-button color="primary" type="submit" [disabled]="!myForm.valid">Agregar Activo</button>
                         </div>
