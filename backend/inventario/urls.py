@@ -45,6 +45,7 @@ urlpatterns = [
     path("delete-revision/<int:pk>/", views.RevisionesView.as_view()),
 
     #Endpoints relacionados a la ubicaciones----------------------------------
+    path("all-ubicaciones/", views.UbicacionesView.as_view()),
     path("ubicacion/<int:pk>/", views.UbicacionesView.as_view()),
     path("ubicacion/funcionario-id/<int:funcionario_id>/", views.UbicacionesView.as_view()),
     path("nueva-ubicacion/", views.UbicacionesView.as_view()),

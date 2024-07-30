@@ -1082,6 +1082,19 @@ class RevisionesActions():
 class UbicacionesActions():
 
    #Metodos para el HTTP GET---------------------------------
+   def all_ubicaciones(self) -> Response:
+        try:
+            ubicaciones = Ubicaciones.objects.all()
+            serializer = UbicacionesSerializer(instance = ubicaciones,
+                                              many = True)
+        except Ubicaciones.DoesNotExist:
+            return Response({"error": "there are not 'ubicaciones'"},
+                            status = status.HTTP_404_NOT_FOUND)
+
+        return Response(serializer.data,
+                        status = status.HTTP_200_OK)
+
+    
    def ubicacion_by_id(self, pk:int) -> Response:
         try: 
             ubicacion = Ubicaciones.objects.get(id = pk)

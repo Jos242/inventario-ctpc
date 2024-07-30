@@ -329,7 +329,11 @@ class UbicacionesView(APIView):
         
         if path == f"/ubicacion/funcionario-id/{funcionario_id}/":
             rp:Response = self.ubicaciones_do.ubicacion_by_funcionario_id(funcionario_id)
-            return rp 
+            return rp
+
+        if path == "/all-ubicaciones/":
+            rp:Response = self.ubicaciones_do.all_ubicaciones() 
+            return rp
             
     def post(self, request):
         path = request.path
