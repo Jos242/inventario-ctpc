@@ -72,6 +72,7 @@ urlpatterns = [
 
 
     #Endpoints relaciondos a el historial de acceso----------------------------
-    path("all/historial-acceso/", views.HistorialDeAccesoView.as_view())
+    path("all/historial-acceso/", views.HistorialDeAccesoView.as_view()),
+    path("historial-acceso/<int:user_id>/", views.HistorialDeAccesoView.as_view())
 
 ]

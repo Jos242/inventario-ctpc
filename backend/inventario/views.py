@@ -465,8 +465,21 @@ class HistorialDeAccesoView(APIView):
     permission_classes = []
 
     def get(self, request, *args, **kwargs):
+        user_id = kwargs.get('user_id')
         path = request.path
 
+        if path == f'/historial-acceso/{user_id}/':
+            try:
+                historial_acceso = HistorialDeAcceso.objects.filter(usuario = user_id)
+                serializer = HistorialDeAccesoSerializer(instance = historial_acceso,
+                                                         many = True)
+                return Response(serializer.data,
+                                status = status.HTTP_200_OK)
+
+            except HistorialDeAcceso.DoesNotExist:
+                return Response({"error": "Historial de Acceso Does Not Exist"})
+
+        
         if  path == '/all/historial-acceso/':
             historial_acceso = HistorialDeAcceso.objects.all()
             serializer = HistorialDeAccesoSerializer(instance = historial_acceso,
