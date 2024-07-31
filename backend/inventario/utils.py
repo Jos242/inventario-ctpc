@@ -293,7 +293,7 @@ class ActivosActions():
             print(activo)
             return Response(ReadActivoSerializerIncomplete(instance = activo).data,
                             status= status.HTTP_200_OK)
-        
+        print(f"This are the serializer errors: \n\n{serializer.errors}") 
         return Response(serializer.errors,
                         status = status.HTTP_400_BAD_REQUEST)
 
