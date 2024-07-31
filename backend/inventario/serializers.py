@@ -206,4 +206,4 @@ class HistorialDeAccesoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HistorialDeAcceso
-        fields = ''
+        fields = '__all__'
