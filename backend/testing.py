@@ -242,7 +242,7 @@ def load_funcionarios(): #MODIFICAR EL PATH DE ACA CUANDO SE EJECUTE EN WINDOWS
             "puesto": None
           }
 
-    df = pd.read_csv('F:\\Documentos\\Documents\\2024\\inventario-ctpc\\backend\\funcionarios_diurno.csv')
+    df = pd.read_csv('/home/david/Desktop/projects/inventario-ctpc/backend/funcionarios_diurno.csv')
     print(df)
     workbook = xlsxwriter.Workbook('aqui.xlsx') 
     worksheet = workbook.add_worksheet()
@@ -264,11 +264,6 @@ def load_funcionarios(): #MODIFICAR EL PATH DE ACA CUANDO SE EJECUTE EN WINDOWS
         counter += 1
 
     workbook.close()
-    #  for i in range(20):
-    #     x = requests.post(
-    #         url = url,
-    #         json = data
-    #     )
 
 def load_modo_adquisicion():
     MODOS_DE_ADQUISICION = get_unique_adquisition_mode() 
@@ -375,10 +370,10 @@ def add_foreign_keys():
     cursor.close()
     db.close()
 
+
 load_funcionarios()
-load_modo_adquisicion()
-load_ubicaciones()
+#load_modo_adquisicion()
+#load_ubicaciones()
 modify_activos()
 add_foreign_keys()
-
 

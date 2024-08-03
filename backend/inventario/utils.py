@@ -176,12 +176,12 @@ class ActivosActions():
         pass
 
     #Metodos para el HTTP GET-------------------------------
-    def all_activos(self) -> Response: 
-        activos:ReadActivos = ReadActivos.objects.all().order_by('-id')
-        serializer = ReadActivoSerializerComplete(instance = activos,
-                                                  many = True)
-        print(serializer)
-        return Response(serializer.data, status = status.HTTP_200_OK)
+    # def all_activos(self) -> Response: 
+    #     activos:ReadActivos = ReadActivos.objects.all().order_by('-id')
+    #     serializer = ReadActivoSerializerComplete(instance = activos,
+    #                                               many = True)
+    #     print(serializer)
+    #     return Response(serializer.data, status = status.HTTP_200_OK)
 
     def activos_filter_column(self) -> Response: 
         filter_all_activos = Activos.objects.only('id', 'id_registro', 'no_identificacion',

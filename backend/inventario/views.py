@@ -49,8 +49,8 @@ class ActivosView(APIView):
         """
         path = request.path
 
-        if path == "/todos-los-activos/":
-            return self.activos_do.all_activos()
+        # if path == "/todos-los-activos/":
+        #     return self.activos_do.all_activos()
         
         if path == "/activos-filtrados-columna/":
             return self.activos_do.activos_filter_column()   
