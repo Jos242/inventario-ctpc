@@ -13,7 +13,7 @@ const routes: Routes = [
   { path:'activos/scan', component: ActivoScanComponent },
   // { path:'actas', component: ActaIndexComponent},
 
-  { path:'activos/:id', component: ActivoDetailComponent }
+  { path:'activos/:id', component: ActivoDetailComponent },
   { path:'activos/:id/edit', component: ActivoUpdateComponent }
 ];
 
