@@ -6,9 +6,7 @@ class ActivoSerializer(serializers.ModelSerializer):
     id_registro = serializers.CharField(required = False)
     asiento = serializers.IntegerField(required = False)
     no_identificacion = serializers.CharField(required = False) 
-    creado_el = serializers.CharField(required = False)
-    modo_adquisicion = serializers.PrimaryKeyRelatedField(queryset=ModoAdquisicion.objects.all())
-
+    
     class Meta:
         model = Activos
         fields = '__all__' 
@@ -179,9 +177,9 @@ class DynamicReadActivosSerializer(serializers.ModelSerializer):
             'no_identificacion', 'descripcion', 'marca',
             'modelo', 'serie', 'estado',
             'ubicacion_original_alias', 'modo_adquisicion_desc', 'precio',
-            'creado_el', 'observacion', 'impreso',
+            'fecha', 'observacion', 'impreso',
             'ubicacion_actual_alias', 'conectividad', 'seguridad',
-            'placa_impresa', 'de_baja'
+            'placa', 'baja'
         ]
 
     def __init__(self, *args, **kwargs):

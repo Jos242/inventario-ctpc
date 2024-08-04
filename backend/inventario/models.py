@@ -28,7 +28,6 @@ class Plantillas(models.Model):
     class Meta:
         db_table = 'plantillas'
 
-
 class Departamentos(models.Model):
     id = models.AutoField(primary_key = True)
     descripcion = models.CharField(unique=True, max_length=240)

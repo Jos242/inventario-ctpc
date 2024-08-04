@@ -104,9 +104,12 @@ def get_remaining_fields():
             "no_identificacion": None
     }
     latest_activo_entry = Activos.objects.values("id", "id_registro", "no_identificacion").latest("id") 
+    print("Llegue auqi?") 
+
     latest_observacion_entry = Observaciones.objects.values("id", "id_registro").latest("id")
     activo_registro = int(latest_activo_entry.get("id_registro").replace(",", ""))
-    observacion_registro = int(latest_observacion_entry.get("id_registro").replace(",", "")) 
+    observacion_registro = int(latest_observacion_entry.get("id_registro").replace(",", ""))
+
     if activo_registro > observacion_registro:
         split_registro  = latest_activo_entry.get("id_registro").split(",", 3)
     else:
@@ -287,12 +290,15 @@ class ActivosActions():
         remaining_fields = get_remaining_fields() 
         serializer = ActivoSerializer(data = request.data | remaining_fields)
 
-        if serializer.is_valid():     
-            print("nelxd")     
-            activo:Activos = serializer.create(serializer.validated_data)
-            print(activo)
-            return Response(ReadActivoSerializerIncomplete(instance = activo).data,
-                            status= status.HTTP_200_OK)
+        if serializer.is_valid():      
+            # activo:Activos = serializer.create(serializer.validated_data)
+            a_ver = Activos(**serializer.validated_data)
+            a_ver.save()
+            print(f"a_ver:Activos id: {a_ver.id}") 
+            # print(f"activo:Activos id: {activo.id}")
+            # return Response(ReadActivoSerializerIncomplete(instance = activo).data,
+                            # status= status.HTTP_200_OK)
+            return Response("A ver")
         print(f"This are the serializer errors: \n\n{serializer.errors}") 
         return Response(serializer.errors,
                         status = status.HTTP_400_BAD_REQUEST)
