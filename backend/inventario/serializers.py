@@ -30,7 +30,7 @@ class ReadActivoSerializerComplete(serializers.ModelSerializer):
         fields = ['id', 'id_registro', 'asiento', 'no_identificacion',
                   'descripcion', 'marca', 'modelo', 'serie', 'estado',
                   'ubicacion_original', 'ubicacion_actual', 'modo_adquisicion',
-                  'precio', 'conectividad', 'seguridad', 'placa_impresa','de_baja', 'creado_el']
+                  'precio', 'conectividad', 'seguridad', 'placa','baja', 'fecha']
 
 class ReadActivoSerializerIncomplete(serializers.ModelSerializer):
     ubicacion_original = serializers.CharField(required = False) 
