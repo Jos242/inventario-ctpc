@@ -276,7 +276,7 @@ def load_modo_adquisiciones(*args, **kwargs):
             LOAD DATA INFILE '{file_path}'
             INTO TABLE modoadquisicion 
             FIELDS TERMINATED BY ';' 
-            ENCLOSED BY ''
+            ENCLOSED BY '"'
             LINES TERMINATED BY '\\n'
             (id, descripcion);
             """
@@ -299,7 +299,7 @@ def load_ubicaciones(*args, **kwargs):
             LOAD DATA INFILE '{file_path}'
             INTO TABLE ubicaciones 
             FIELDS TERMINATED BY ';' 
-            ENCLOSED BY ''
+            ENCLOSED BY '"'
             LINES TERMINATED BY '\\n'
             (id, nombre_oficial, alias, img_path);
             """
