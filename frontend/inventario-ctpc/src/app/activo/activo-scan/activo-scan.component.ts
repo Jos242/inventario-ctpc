@@ -16,6 +16,7 @@ export class ActivoScanComponent {
   private isScanning: boolean = false;
   private timeout: any;
   private readonly barcodePattern = /^\d{4}-\d{4}$/; // Regex pattern for 4 numbers, a dash, and 4 numbers
+  private readonly separatorPattern = /[^0-9]/g;
 
   constructor(private router: Router, private el: ElementRef, private renderer: Renderer2) {}
 
@@ -48,10 +49,16 @@ export class ActivoScanComponent {
 
     if (event.key === 'Enter') {
       if (this.barcodePattern.test(this.barcode)) {
+        this.barcode = this.barcode.replace(this.separatorPattern, '-');
+        console.log("1 "+this.barcode)
         this.redirectToItem(this.barcode);
       }
+      this.barcode = this.barcode.replace(this.separatorPattern, '-');
+      console.log("2 "+this.barcode)
       this.barcode = ''; // Reset the barcode after attempting to redirect
     } else {
+      this.barcode = this.barcode.replace(this.separatorPattern, '-');
+      console.log("3 "+this.barcode)
       this.barcode += event.key;
     }
 
@@ -60,6 +67,8 @@ export class ActivoScanComponent {
       this.barcode = '';
     }, 1000);
   }
+
+  
 
   redirectToItem(barcode: string) {
     this.router.navigate(['/activos/', barcode]);

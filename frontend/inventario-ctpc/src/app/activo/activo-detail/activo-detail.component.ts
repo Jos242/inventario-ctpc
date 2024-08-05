@@ -25,6 +25,7 @@ import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { MatTooltip } from '@angular/material/tooltip';
 import { FormGroup, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { BooleanToYesNoPipe } from '../../share/boolean-to-yes-no.pipe';
 
 
 @Component({
@@ -36,7 +37,7 @@ import { FormGroup, ReactiveFormsModule, FormBuilder, Validators } from '@angula
     MatMenuModule,
     RouterLink, 
     CommonModule,ReactiveFormsModule,
-    MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, MatTooltip
+    MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, MatTooltip, BooleanToYesNoPipe
   ],
   templateUrl: './activo-detail.component.html',
   styleUrl: './activo-detail.component.scss'

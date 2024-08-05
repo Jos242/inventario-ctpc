@@ -10,34 +10,34 @@
     <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
         <li class="nav-item"> 
-          <button mat-button [routerLink]="'/activos/scan'" >
+          <a mat-button [routerLink]="'/activos/scan'" >
             <mat-icon>barcode_reader</mat-icon>
-            <span>Escanear</span> 
-          </button>
+            <span>Escanear</span>
+          </a>
         </li>
         <li class="nav-item" *ngIf="logged"> 
-          <button mat-button [routerLink]="'/activos'" >
+          <a mat-button [routerLink]="'/activos'" >
             <mat-icon>list</mat-icon>
             <span>Listado de Activos</span>
-          </button>
+          </a>
         </li>
         <li class="nav-item" *ngIf="logged"> 
-          <button mat-button [routerLink]="'/actas'" >
+          <a mat-button [routerLink]="'/actas'" >
             <mat-icon>description</mat-icon>
             <span>Impresion de Actas</span>
-          </button>
+          </a>
         </li>
         <li class="nav-item" *ngIf="logged"> 
-          <button mat-button [routerLink]="'/activos/crear'" >
+          <a mat-button [routerLink]="'/activos/crear'" >
             <mat-icon>add_box</mat-icon>
             <span>Crear Activos</span>
-          </button>
+          </a>
         </li>
         <li class="nav-item" *ngIf="logged"> 
-          <button mat-button [routerLink]="'/admin'" >
+          <a mat-button [routerLink]="'/admin'" >
             <mat-icon>settings</mat-icon>
             <span>Administracion</span>
-          </button>
+          </a>
         </li>
         <li class="nav-item" *ngIf="logged"> 
           <button mat-button (click)="logout()" >

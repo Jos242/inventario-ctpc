@@ -13,8 +13,9 @@
                 Iniciar Sesion
             </mat-card-title>
         </mat-card-header>
+        <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">
         <mat-card-content>
-            <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">
+            
                 <div class="container">
                     <div class="row">
                         <mat-form-field appearance="outline" class="inputsForm">
@@ -30,12 +31,13 @@
                 </div>
 
               
-            </form>
+            
         </mat-card-content>
 
         <mat-card-actions align="end">
-          <button mat-raised-button color="primary">Limpiar</button>
-          <button mat-raised-button color="primary" (click)="onSubmit()">Entrar</button>
+          <button mat-raised-button color="primary" (click)="limpiar()">Limpiar</button>
+          <button mat-raised-button color="primary" type="submit">Entrar</button>
         </mat-card-actions>
+    </form>
       </mat-card>
 </div>

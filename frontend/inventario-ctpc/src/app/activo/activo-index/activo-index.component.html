@@ -44,9 +44,9 @@
                           <p><mat-checkbox formControlName="seguridad">Es "Seguridad"</mat-checkbox></p>
                         </div>
                         <div class="col-lg-3">
-                          <p><mat-checkbox formControlName="placa_impresa">Con Placa Impresa</mat-checkbox></p>
-                          <p><mat-checkbox formControlName="de_baja">Dado de Baja</mat-checkbox></p>
-                          <p><mat-checkbox formControlName="creado_el">Fecha de Creacion</mat-checkbox></p>
+                          <p><mat-checkbox formControlName="placa">Con Placa Impresa</mat-checkbox></p>
+                          <p><mat-checkbox formControlName="baja">Dado de Baja</mat-checkbox></p>
+                          <p><mat-checkbox formControlName="fecha">Fecha de Creacion</mat-checkbox></p>
                           <p><button mat-flat-button color="primary" class="confirmar" (click)="checks()">Confirmar</button></p>
                         </div>
                       </div>
@@ -136,19 +136,19 @@
                     <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.seguridad | booleanToYesNo}} </td>
                   </ng-container>
 
-                  <ng-container *ngIf="displayedColumns.includes('placa_impresa')" matColumnDef="placa_impresa">
+                  <ng-container *ngIf="displayedColumns.includes('placa')" matColumnDef="placa">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header> Placa Impresa </th>
-                    <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.placa_impresa | booleanToYesNo}} </td>
+                    <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.placa | booleanToYesNo}} </td>
                   </ng-container>
 
-                  <ng-container *ngIf="displayedColumns.includes('de_baja')" matColumnDef="de_baja">
+                  <ng-container *ngIf="displayedColumns.includes('baja')" matColumnDef="baja">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header> Baja </th>
-                    <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.de_baja}} </td>
+                    <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.baja}} </td>
                   </ng-container>
 
-                  <ng-container *ngIf="displayedColumns.includes('creado_el')" matColumnDef="creado_el">
+                  <ng-container *ngIf="displayedColumns.includes('fecha')" matColumnDef="fecha">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha de Creacion </th>
-                    <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.creado_el | date:"short" }} </td>
+                    <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.fecha | date:"short" }} </td>
                   </ng-container>
               
                   

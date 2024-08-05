@@ -9,6 +9,17 @@
                 <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">
                     <div class="container">
                         <div class="row">
+                            
+                                <div class="col-lg">
+                                    <mat-form-field appearance="outline" class="inputsForm">
+                                        <mat-label>Cantidad de Activos Iguales</mat-label>
+                                        <input matInput formControlName="cantidadActivosIguales" [(ngModel)]="cantidadActivosIguales" (ngModelChange)="checkCantidadActivosIguales()" type="number" min="1" value="1">
+                                        <mat-hint>Cantidad de activos que desea crear con la misma información</mat-hint>
+                                    </mat-form-field>
+                                </div>
+                            
+                        </div>
+                        <div class="row">
                             <div class="col-lg-8">   
                                 <mat-form-field appearance="outline" class="inputsForm">
                                     <mat-label>Descripcion</mat-label>
@@ -50,8 +61,8 @@
                             <div class="col-lg">
                                 <mat-form-field appearance="outline" class="inputsForm">
                                     <mat-label>Precio</mat-label>
-                                    <input matInput formControlName="precio" placeholder="100000.99">
-                                    <mat-hint>Precio en Colones del Producto, utilizando puntos para las decimas</mat-hint>
+                                    <input matInput formControlName="precio" type="text" placeholder="Formato correcto: 100000.99" (keyup)="formatearPrecio()">
+                                    <mat-hint>Precio en colones, utilizando puntos para las decimas</mat-hint>
                                 </mat-form-field> 
                             </div>
 
@@ -72,11 +83,12 @@
                                 </mat-form-field>
                             </div>
                             <div class="col-lg">
-                                <mat-form-field appearance="outline" class="inputsForm">
+                                <!-- <mat-form-field appearance="outline" class="inputsForm">
                                     <mat-label>Serie</mat-label>
-                                    <input matInput formControlName="serie" placeholder="32647728384">
+                                    <input matInput formControlName="serie" placeholder="32647728384" [disabled]="cantidadActivosIguales > 1">
                                     <mat-hint>Numero de serie del activo</mat-hint>
-                                </mat-form-field>
+                                </mat-form-field> -->
+                                <mat-checkbox formControlName="hasNumeroSerie">¿Tiene número de serie?</mat-checkbox>
                             </div>
                             <div class="col-lg">
                                 <mat-form-field appearance="outline" class="inputsForm">
@@ -88,6 +100,13 @@
                                 </mat-form-field>
                             </div>
 
+                        </div>
+                        <div class="row">
+                            <div class="col-lg">
+                                <mat-checkbox formControlName="mantener">
+                                    No limpiar información del formulario al crear el activo
+                                </mat-checkbox>
+                            </div>
                         </div>
 
                         <div class="row">

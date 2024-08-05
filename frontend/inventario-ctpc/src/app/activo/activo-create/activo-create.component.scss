@@ -41,7 +41,13 @@ button{
   margin-top: 22px;
 }
 
-@media (max-width: 769px) {
+@media (max-width: 1450px) {
+  .formAgregar{
+    max-width: 80%;
+  }
+}
+
+@media (max-width: 1300px) {
   .formAgregar{
     max-width: 90%;
   }

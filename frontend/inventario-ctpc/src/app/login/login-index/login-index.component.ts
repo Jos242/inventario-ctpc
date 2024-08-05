@@ -72,4 +72,8 @@ export class LoginIndexComponent implements OnInit{
       
     }
 
+    limpiar(){
+      this.myForm.reset();
+    }
+
 }

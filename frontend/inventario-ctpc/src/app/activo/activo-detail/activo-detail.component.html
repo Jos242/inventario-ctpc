@@ -17,14 +17,14 @@
                             <p><strong>Ubicación Actual:</strong> {{ datos.ubicacion_actual }}</p>
                             <p><strong>Modo Adquisición:</strong> {{ datos.modo_adquisicion }}</p>
                             <p><strong>Precio:</strong> {{ datos.precio }}</p>
-                            <p><strong>Creado El:</strong> {{ datos.creado_el }}</p>
+                            <p><strong>Creado El:</strong> {{ datos.fecha }}</p>
                         </div>
                         <div class="col-sm-4">
                             <h2>Detalles Especificos</h2>
-                            <p><strong>Es Conectividad:</strong> {{ datos.conectividad }}</p>
-                            <p><strong>Es Seguridad:</strong> {{ datos.seguridad }}</p>
-                            <p><strong>Placa ha Sido Impresa:</strong> {{ datos.placa_impresa }}</p>
-                            <p><strong>Dado de Baja:</strong> {{ datos.de_baja }}</p>
+                            <p><strong>Es Conectividad:</strong> {{ datos.conectividad | booleanToYesNo}}</p>
+                            <p><strong>Es Seguridad:</strong> {{ datos.seguridad | booleanToYesNo }}</p>
+                            <p><strong>Placa ha Sido Impresa:</strong> {{ datos.placa | booleanToYesNo }}</p>
+                            <p><strong>Dado de Baja:</strong> {{ datos.baja }}</p>
                         </div>
                         <div class="col-sm-4">
                             <h2>Observaciones</h2>

@@ -19,7 +19,10 @@ import { HttpClient } from '@angular/common/http';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AuthService } from '../../share/auth.service';
 import {MatCheckboxModule} from '@angular/material/checkbox';
+import { MatDialog } from '@angular/material/dialog';
 import Swal from 'sweetalert2';
+import { firstValueFrom } from 'rxjs';
+import { ActivoSerieDialogComponent } from '../activo-serie-dialog/activo-serie-dialog.component';
 
 @Component({
   selector: 'app-activo-create',
@@ -38,6 +41,8 @@ export class ActivoCreateComponent {
   modosAdquisicion: any;
   isLoadingResults: boolean = false;
 
+  cantidadActivosIguales: number = 1; // Add this property
+
   estados: { id: string, descripcion: string }[] = [
     { id: 'BUENO', descripcion: 'Bueno' },
     { id: 'MALO', descripcion: 'Malo' },
@@ -51,6 +56,7 @@ export class ActivoCreateComponent {
     private sanitizer: DomSanitizer,
     private formBuilder: FormBuilder,
     private authService: AuthService,
+    private dialog: MatDialog // Add this
   ) {
 
     this.loadUbicaciones();
@@ -61,18 +67,33 @@ export class ActivoCreateComponent {
   
 
   ngOnInit(){
+    this.initForm();
+  }
+
+  initForm(){
     this.myForm = this.formBuilder.group({
       descripcion: ['', Validators.required],
       ubicacion_original: ['', Validators.required],
       modo_adquisicion: ['', Validators.required],
       marca: ['', ],
       modelo: ['', ],
-      serie:['', ],
+      // serie:['', ],
+      hasNumeroSerie: [false], // New control for "Has numero de serie?"
       estado:['', Validators.required ],
-      precio:['', ],
+      precio: ['', Validators.pattern(/^\d+(\.\d{1,2})?$/)],
       conectividad: [false],
-      seguridad: [false, ]
+      seguridad: [false, ],
+      cantidadActivosIguales: [1, [Validators.min(1), Validators.required]],
+      mantener: [false, ],
     });
+  }
+
+  checkCantidadActivosIguales() {
+    // if (this.cantidadActivosIguales > 1) {
+    //   this.myForm.get('serie').disable();
+    // } else {
+    //   this.myForm.get('serie').enable();
+    // }
   }
 
   loadUbicaciones(): void {
@@ -143,22 +164,18 @@ export class ActivoCreateComponent {
       });
   }
 
-  onSubmit() {
-    if (this.myForm.valid) {
-      // this.myForm.value.pimgspath=this.logo;
-      const formData = new FormData();
-      // const formData = this.myForm.value;
-      // formData.append('descripcion', this.myForm.value.descripcion);
-      // formData.append('ubicacion', this.myForm.value.ubicacion_original);
-      // formData.append('modo_adquisicion', this.myForm.value.modo_adquisicion);
-      // formData.append('marca', this.myForm.value.marca);
-      // formData.append('modelo', this.myForm.value.modelo);
-      // formData.append('serie', this.myForm.value.serie);
-      // formData.append('estado', this.myForm.value.estado);
-      // formData.append('precio', this.myForm.value.precio);
+  formatearPrecio(): void {
+    const precio = this.myForm.get('precio');
 
-      // formData.append('conectividad', this.myForm.value.conectividad);
-      // formData.append('seguridad', this.myForm.value.seguridad);
+    const digitos = precio.value.replace(/\D/g, '');
+
+    precio.setValue(digitos);
+  }
+
+  async onSubmit() {
+    if (this.myForm.valid) {
+
+      const formData = new FormData();
 
       const datas = {
         descripcion: this.myForm.value.descripcion,
@@ -166,43 +183,83 @@ export class ActivoCreateComponent {
         modo_adquisicion: this.myForm.value.modo_adquisicion,
         marca: this.myForm.value.marca,
         modelo: this.myForm.value.modelo,
-        serie: this.myForm.value.serie,
+        // serie: this.myForm.value.serie,
         estado: this.myForm.value.estado,
         precio: this.myForm.value.precio,
         conectividad: this.myForm.value.conectividad,
-        seguridad: this.myForm.value.seguridad
+        seguridad: this.myForm.value.seguridad,
+        // serie: '' // Default to empty string
+        serie: 'N/A' // Para probar antes de hacer pull
       };
 
       
 
 
   
+      console.log("data a enviar: ");
       console.log(datas);
-      // const formData = this.myForm.value;
-      this.gService.create('agregar-activo/', datas)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data: any) => {
-          console.log(data);
-          this.myForm.reset();
-          Swal.fire({
-            icon: 'success',
-            title: 'Exito',
-            text: 'Se ha creado el activo correctamente',
-          });
+      console.log("-----------------------");
 
-        },
-        error: (error) => {
+      const tieneSerie = this.myForm.value.hasNumeroSerie;
+      this.cantidadActivosIguales=this.myForm.value.cantidadActivosIguales;
+      let exitosos = 0;
+
+      for (let i = 0; i < this.cantidadActivosIguales; i++) {
+        if (tieneSerie) {
+          const dialogRef = this.dialog.open(ActivoSerieDialogComponent, {
+            width: '300px',
+            data: { index: i + 1, total: this.cantidadActivosIguales }
+          });
+  
+          const result = await firstValueFrom(dialogRef.afterClosed());
+          if (result) {
+            datas['serie'] = result.serie;
+          } else {
+            Swal.fire({
+              icon: 'info',
+              title: 'Cancelado',
+              text: 'Proceso cancelado por el usuario',
+            });
+            return;
+          }
+        }
+  
+        try {
+          const data = await firstValueFrom(this.gService.create('agregar-activo/', datas));
+          console.log(`Activo ${i + 1} creado:`, data);
+          exitosos++;
+        } catch (error) {
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: 'Hubo un error de servidor al crear el activo, por favor intente otra vez o contacte a su administrador si el problema persiste.',
+            text: `Hubo un error de servidor al crear el activo ${i + 1}, por favor intente otra vez o contacte a su administrador si el problema persiste.`,
+          });
+          return;
+        }
+      }
+  
+      // TypeScript Code Change in onSubmit method
+        if (exitosos === this.cantidadActivosIguales) {
+          if (!this.myForm.value.mantener) {
+            this.myForm.reset();
+            this.initForm();
+          }
+          this.cantidadActivosIguales = 1;
+          Swal.fire({
+            icon: 'success',
+            title: 'Éxito',
+            text: 'Se han creado los activos correctamente',
+          });
+        } else {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Parcialmente exitoso',
+            text: `Se han creado ${exitosos} del total de ${this.cantidadActivosIguales} activos correctamente. Por favor revise la tabla de activos y agregue los faltantes nuevamente. `,
           });
         }
-      } 
-    );
-
       
+      console.log("completo el proceso");
+
     }
   }
 }

@@ -43,9 +43,9 @@ export interface ActivoData {
   precio: string;
   conectividad: string;
   seguridad: string;
-  placa_impresa: string;
-  de_baja: string;
-  creado_el: string;
+  placa: string;
+  baja: string;
+  fecha: string;
 }
 
 @Component({
@@ -108,9 +108,9 @@ export class ActivoIndexComponent implements AfterViewInit  {
         precio: false,
         conectividad: false,
         seguridad: false,
-        placa_impresa: false,
-        de_baja: false,
-        creado_el: false,
+        placa: false,
+        baja: false,
+        fecha: false,
       });
   
       // Load cached filters if available
