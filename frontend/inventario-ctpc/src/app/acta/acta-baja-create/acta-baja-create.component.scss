@@ -25,10 +25,12 @@
     font-weight: normal;
 }
 
-td, th {
+td, th, #text-measure {
     border: 1px solid #000000;
     text-align: left;
     padding: 5px;
+    line-height: normal; 
+    box-sizing: border-box;
   }
 
   .cont {
@@ -63,7 +65,7 @@ h1{
     margin-top: 10px;
 }
 
-.tabla2{
+.tabla-container {
     width: 82.425%;
 }
 
@@ -101,7 +103,7 @@ h1{
 
 
 .specific-div {
-    width:8.5in;  
+    width: 8.5in;  
     height: 11in;  
  
     border: 1px solid #000; /* Just to visualize the parent div */
@@ -126,4 +128,12 @@ h1{
     font-family: Calibri;
     font-size: 14pt;
     font-weight: bolder;
+  }
+
+  .noHeight {
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    padding: 0;
+    margin: 0;
   }
