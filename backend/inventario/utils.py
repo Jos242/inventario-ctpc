@@ -16,6 +16,7 @@ from django.http import Http404
 from django.core.exceptions import FieldDoesNotExist
 from django.db.models.functions import Coalesce 
 from django.http import FileResponse, HttpResponse
+from django.db.models.query import QuerySet
 #----------------------------------------------
 
 #Django rest frameworks herramientas-----------
@@ -590,21 +591,11 @@ class DocsActions():
 
         # Combinar las consultas
         resultado = activos_query.union(observaciones_query)
-                
-        print(resultado)
+
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output, {"in_memory": True})
         worksheet = workbook.add_worksheet()
-        related_fields = ["ubicacion_actual", "modo_adquisicion"]
-        annotations = {
-                'ubicacion_actual_alias': F('ubicacion_actual__alias'),
-                'modo_adquisicion_desc': F('modo_adquisicion__descripcion'),
-        }
-        RETRIEVE_FIELDS = ["id_registro", "no_identificacion",
-                           "descripcion", "marca", "modelo",
-                           "serie", "estado", "ubicacion_actual_alias",
-                           "modo_adquisicion_desc", "precio"]
-        
+
         EXCEL_FIELDS = ["", "No.Identificacion", "Descripción",
                         "Marca", "Modelo", "Serie", "Estado",
                         "Ubicación", "Modo de adquisición", "Precio",
@@ -613,9 +604,7 @@ class DocsActions():
         COLUMNS = ["A1", "B1", "C1", "D1",
                    "E1", "F1", "G1", "H1",
                    "I1", "J1"]
-        activos = Activos.objects.select_related(*related_fields)\
-                                 .annotate(**annotations)\
-                                 .values(*RETRIEVE_FIELDS)
+
         [worksheet.write(column, field) for column, field in zip(COLUMNS, EXCEL_FIELDS)] 
 
         for i, activo in enumerate(resultado, start=2):
@@ -645,11 +634,6 @@ class DocsActions():
         return response 
     #--------------------------------------------------------
 
-
-
-
-
-
     #Metodos para el HTTP POST-------------------------------
     def save_acta(self, request:Request) -> Response:
         serializer:DocSerializer = DocSerializer(data = request.data)  
@@ -677,57 +661,52 @@ class DocsActions():
     
     def create_print_doc(self, request) -> Response:
         serializer = WhatTheExcelNameIs(data = request.data)
-        # resultados = (Activos.objects.filter(impreso=0)
-        #       .annotate(origen=Value('activos', output_field=CharField())) 
-        #       .values('id_registro', 'asiento', 'origen')
-        #       .union(
-        #           Observaciones.objects.filter(impreso=0)
-        #           .annotate(origen=Value('observaciones', output_field=CharField())) 
-        #           .values('id_registro', 'asiento', 'origen')
-        #       )
-        #       .order_by('id_registro'))
-        
 
         query_activos = Activos.objects.filter(impreso=0) \
                                .annotate(origen=Value('activos', output_field=CharField())) \
-                               .values('id_registro', 'asiento', 'origen', 'descripcion')
+                               .values('id_registro', 'asiento', 'no_identificacion',
+                                       'descripcion', 'marca', 'modelo', 'serie',
+                                       'origen')
 
         # Query for Observaciones
         query_observaciones = Observaciones.objects.filter(impreso=0) \
-                                                .annotate(origen=Value('observaciones', output_field=CharField())) \
-                                                .values('id_registro', 'asiento', 'origen', 'descripcion')
+                                                .annotate(
+                                                    no_identificacion = Value(None, output_field = CharField()),
+                                                    marca=Value(None, output_field=CharField()),
+                                                    modelo=Value(None, output_field=CharField()),
+                                                    serie=Value(None, output_field=CharField()),
+                                                    estado=Value(None, output_field=CharField()),
+                                                    origen=Value('observaciones', output_field=CharField())) \
+                                                .values('id_registro', 'asiento',
+                                                        'no_identificacion','descripcion',
+                                                        'marca', 'modelo', 'serie',
+                                                        'origen')
 
         # Combine both queries using union
-        resultados = query_activos.union(query_observaciones).order_by('id_registro')
-        
+        resultados:QuerySet = query_activos.union(query_observaciones)\
+                                           .order_by('id_registro')
+  
         only_activos = 1
         only_observaciones = 2
         list_decide = []
 
-        for result in list(resultados[:41]):
+        for result in resultados[:40]:
             if result['origen'] == 'observaciones':
                 list_decide.append(only_observaciones)
             if result['origen'] == 'activos':
                 list_decide.append(only_activos)
+ 
 
-        
-        if(x == 1 for x in list_decide):
+        if (1 in list_decide and 2 not in list_decide):
             print_type = "SoloActivos"
         
-        if(x == 2 for x in list_decide):
+        if (1 not in list_decide and 2 in list_decide):
             print_type = "SoloObservaciones"
-
         count_1 =  list_decide.count(1)
         count_2 =  list_decide.count(2)
 
         if count_1 > 0 and count_2 > 0:
             print_type = "ObservacionesYActivos"
-
-        print(print_type)      
-        print(list_decide) 
-        to_print_values = list(resultados[:41])
-
-
 
         if serializer.is_valid():
             file_name:str = serializer.validated_data.get("file_name")
@@ -743,9 +722,7 @@ class DocsActions():
             font_size = {'font_size': 11}
 
             if print_type == "SoloActivos":
-                activos = Activos.objects.filter(impreso = False).values('id_registro', 'asiento', 'no_identificacion', 
-                                                                         'descripcion', 'marca', 'modelo', 'serie')
-                activos_list = list(activos) 
+                activos_list:QuerySet = resultados[:40] 
                 workbook = xlsxwriter.Workbook(path_to_save)
                 worksheet = workbook.add_worksheet()
                 #Para aumentar el ancho de la columna-------------------------------------
@@ -755,49 +732,58 @@ class DocsActions():
                 worksheet.set_column('D:D', 20.29) 
                 worksheet.set_column('E:E', 11.86) 
                 worksheet.set_column('F:F', 17.57)
-                worksheet.set_column('G:G', 19.71) 
+                worksheet.set_column('G:G', 19.71)
+
                 #Crea un objeto 'Format' para dar formato al texto------------------------
                 bold = workbook.add_format({'bold': True})
                 counter = 1
+                worksheet.write(f'A1', "Registrado en",
+                                workbook.add_format(bold_param | center_text_param |
+                                                    font_type | font_size))
+                worksheet.write(f'B1', "1", 
+                                workbook.add_format(bold_param | center_text_param))
+                                
+                worksheet.write(f'C1', "No. Identificacion", 
+                                workbook.add_format(bold_param | center_text_param))
+                worksheet.write(f'D1', "Descripción", bold)
+                worksheet.write(f'E1', "Marca", bold)
+                worksheet.write(f'F1', "Modelo", bold)
+                worksheet.write(f'G1', "Serie", bold)
+                
+                
+                for i, activo in enumerate(activos_list, start = 2):
+                    in_case = None
+        
+                    if activo["asiento"] == 2 and i > 30:
+                        print("Entre aqui")
+                        id_registro = activo["id_registro"].split(',')
+                        id_registro[2] = "41"
+                        id_registro[1] = f"{int(id_registro[1]) - 1}"
+                        in_case = ",".join(id_registro)  
 
-                for activo in activos_list:
-                    if counter == 1:
-                        worksheet.write(f'A1', "Registrado en",
-                                        workbook.add_format(bold_param | center_text_param |
-                                                            font_type | font_size))
-                        worksheet.write(f'B1', "1", 
-                                        workbook.add_format(bold_param | center_text_param))
-                                        
-                        worksheet.write(f'C1', "No. Identificacion", 
-                                        workbook.add_format(bold_param | center_text_param))
-                        worksheet.write(f'D1', "Descripción", bold)
-                        worksheet.write(f'E1', "Marca", bold)
-                        worksheet.write(f'F1', "Modelo", bold)
-                        worksheet.write(f'G1', "Serie", bold)
-                        counter += 1
-                        continue
+                    row = [
+                        restar_uno(activo["id_registro"]),
+                        activo["asiento"] - 1 if activo["asiento"] != 2 and i <= 41 else 41,
+                        activo["no_identificacion"],
+                        activo["descripcion"],
+                        activo["marca"],
+                        activo["modelo"],
+                        activo["serie"]
+                    ]
+                    if in_case != None:
+                        row[0] = in_case
 
-                    worksheet.write(f'A{counter}', activo['id_registro'], 
-                                    workbook.add_format(center_text_param | font_type | font_size))
-                    worksheet.write(f'B{counter}', activo['asiento'],
-                                    workbook.add_format(bold_param | center_text_param))
-                    worksheet.write(f'C{counter}', activo['no_identificacion'],
-                                    workbook.add_format(center_text_param))
-                    worksheet.write(f'D{counter}', activo['descripcion'])
-                    worksheet.write(f'E{counter}', activo['marca'])
-                    worksheet.write(f'F{counter}', activo['modelo'])
-                    worksheet.write(f'G{counter}', activo['serie'])
-                    counter += 1
+                    worksheet.write_row(f'A{i}', row)
 
                 workbook.close()
-                Activos.objects.filter(impreso = False).update(impreso = True)  
+                # Activos.objects.filter(impreso = False).update(impreso = True)  
                 return Response({"success": f"go to '/media/documentos_de_impresion/{file_name}/' to download the file"},
                                 status = status.HTTP_200_OK)
 
             if print_type == "SoloObservaciones":
                 workbook = xlsxwriter.Workbook(path_to_save) 
                 worksheet = workbook.add_worksheet() 
-                observaciones_list:list = to_print_values 
+                observaciones_list:QuerySet = resultados 
                 
                 if len(observaciones_list) < 41:
                     return Response({"error": "not enough entries to create 'tabla de impresiones'"},
