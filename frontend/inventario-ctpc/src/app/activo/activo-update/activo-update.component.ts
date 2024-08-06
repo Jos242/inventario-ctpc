@@ -44,7 +44,10 @@ export class ActivoUpdateComponent {
     private router: Router,
     private route: ActivatedRoute,
     private formBuilder: FormBuilder
-  ) { }
+  ) {
+
+    
+   }
 
   ngOnInit(): void {
     this.activoId = this.route.snapshot.paramMap.get('id');
@@ -55,8 +58,8 @@ export class ActivoUpdateComponent {
 
     this.myForm = this.formBuilder.group({
       descripcion: ['', Validators.required],
-      ubicacion_original: ['', Validators.required],
-      modo_adquisicion: ['', Validators.required],
+      ubicacion_actual: [Validators.required],
+      modo_adquisicion: [ Validators.required],
       marca: [''],
       modelo: [''],
       serie: [''],
@@ -152,19 +155,26 @@ export class ActivoUpdateComponent {
 
   setDefaultValues() {
     if (this.datos && this.modosAdquisicion.length && this.ubicaciones.length) {
-      // Find the ID for modo_adquisicion
-      const modoAdquisicion = this.modosAdquisicion.find(modo => modo.nombre === this.datos.modo_adquisicion);
-      this.myForm.get('modo_adquisicion').setValue(modoAdquisicion ? modoAdquisicion.id : null);
+      
+      const modoAdquisicion = this.modosAdquisicion.find(modo => modo.descripcion === this.datos.modo_adquisicion);
+      this.selectedModoAdquisicion = modoAdquisicion.id;
+      // console.log(this.selectedModoAdquisicion)
+      // console.log(modoAdquisicion)
+      // console.log(modoAdquisicion.id)
+      // this.myForm.get('modo_adquisicion').setValue(modoAdquisicion ? modoAdquisicion.id : null);
 
-      // Find the ID for ubicacion_original
-      const ubicacion = this.ubicaciones.find(ubic => ubic.nombre === this.datos.ubicacion_original);
-      this.myForm.get('ubicacion_original').setValue(ubicacion ? ubicacion.id : null);
+      
+      const ubicacion = this.ubicaciones.find(ubic => ubic.nombre_oficial === this.datos.ubicacion_original);
+      this.selectedUbicacion = ubicacion.id;
+      // console.log(ubicacion)
+      // this.myForm.get('ubicacion_original').setValue(ubicacion ? ubicacion.id : null);
     }
   }
 
   onSubmit() {
     if (this.myForm.valid) {
       const datas = this.myForm.value;
+      console.log(datas)
       this.gService.patch(`update-activo/${this.activoId}/`, datas)
         .pipe(takeUntil(this.destroy$))
         .subscribe({

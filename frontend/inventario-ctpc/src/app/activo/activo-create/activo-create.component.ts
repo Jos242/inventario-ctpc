@@ -84,7 +84,7 @@ export class ActivoCreateComponent {
       conectividad: [false],
       seguridad: [false, ],
       cantidadActivosIguales: [1, [Validators.min(1), Validators.required]],
-      mantener: [false, ],
+      
     });
   }
 
@@ -177,20 +177,25 @@ export class ActivoCreateComponent {
 
       const formData = new FormData();
 
-      const datas = {
+      let datas: { [key: string]: any } = {
         descripcion: this.myForm.value.descripcion,
         ubicacion_original: this.myForm.value.ubicacion_original,
         modo_adquisicion: this.myForm.value.modo_adquisicion,
-        marca: this.myForm.value.marca,
-        modelo: this.myForm.value.modelo,
-        // serie: this.myForm.value.serie,
         estado: this.myForm.value.estado,
         precio: this.myForm.value.precio,
         conectividad: this.myForm.value.conectividad,
         seguridad: this.myForm.value.seguridad,
-        // serie: '' // Default to empty string
-        serie: 'N/A' // Para probar antes de hacer pull
+
+        
       };
+
+      if (this.myForm.value.marca !== "") {
+        datas = { ...datas, marca: this.myForm.value.marca };
+      }
+      if(this.myForm.value.modelo!==""){
+        datas = { ...datas, modelo: this.myForm.value.modelo };
+      }
+
 
       
 
@@ -207,13 +212,14 @@ export class ActivoCreateComponent {
       for (let i = 0; i < this.cantidadActivosIguales; i++) {
         if (tieneSerie) {
           const dialogRef = this.dialog.open(ActivoSerieDialogComponent, {
-            width: '300px',
+            width: '270px',
+            height: '200px',
             data: { index: i + 1, total: this.cantidadActivosIguales }
           });
   
           const result = await firstValueFrom(dialogRef.afterClosed());
           if (result) {
-            datas['serie'] = result.serie;
+            datas = { ...datas, serie: result.serie };
           } else {
             Swal.fire({
               icon: 'info',

@@ -20,11 +20,11 @@
                 <mat-card-content>
                     <br>
                   <p>Cantidad de activos que han sido agregados al sistema cuya placa fisica todavia no ha sido impresa.</p>
-                  <h2 style="color: red;">57</h2>
+                  <h2 [ngClass]="getColorClass()">{{this.placas}}</h2>
                   <mat-divider></mat-divider>
                 </mat-card-content>
                 <mat-card-actions>
-                  <button mat-button [routerLink]="['/Index']" >Ver Activos</button>
+                  <button mat-flat-button color="primary" [routerLink]="['/activos']" >Ver Activos</button>
                   <!-- <button mat-button>Como Usar</button> -->
                 </mat-card-actions>
                 <mat-card-footer>
@@ -42,11 +42,11 @@
                 <mat-card-content>
                     <br>
                   <p>Cantidad de Actas de bajas o de traslado que han sido generadas pero todavia no han sido impresas.</p>
-                  <h2 style="color: orange;">9</h2>
+                  <h2 [ngClass]="getColorClass()">{{this.actas}}</h2>
                   <mat-divider></mat-divider>
                 </mat-card-content>
                 <mat-card-actions>
-                  <button mat-button [routerLink]="['/index']" >Ver Actas</button>
+                  <button mat-flat-button color="primary" [routerLink]="['/actas/lista']" >Ver Actas</button>
                   <!-- <button mat-button>Como Usar</button> -->
                 </mat-card-actions>
                 <mat-card-footer>
@@ -65,11 +65,11 @@
                 <mat-card-content>
                     <br>
                   <p>Cantidad de Excels de listado de registro listos para ser generados e impresos.</p>
-                  <h2 style="color: green;">1</h2>
+                  <h2 [ngClass]="getColorClass()">{{this.excels}}</h2>
                   <mat-divider></mat-divider>
                 </mat-card-content>
                 <mat-card-actions>
-                  <button mat-button [routerLink]="['/index']" >Ver Excels</button>
+                  <button mat-flat-button color="primary" [routerLink]="['/index']" >Ver Excels</button>
                   <!-- <button mat-button>Como Usar</button> -->
                 </mat-card-actions>
                 <mat-card-footer>
@@ -87,11 +87,11 @@
                 <mat-card-content>
                     <br>
                   <p>Cantidad de activos que fueron reportados con problemas en las revisiones del cierre de inventario.</p>
-                  <h2 style="color: green;">0</h2>
+                  <h2 [ngClass]="getColorClass()">0</h2>
                   <mat-divider></mat-divider>
                 </mat-card-content>
                 <mat-card-actions>
-                  <button mat-button [routerLink]="['/index']" >Ver Activos</button>
+                  <button mat-flat-button color="primary" [routerLink]="['/index']" >Ver Activos</button>
                   <!-- <button mat-button>Como Usar</button> -->
                 </mat-card-actions>
                 <mat-card-footer>

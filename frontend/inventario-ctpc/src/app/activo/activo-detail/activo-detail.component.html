@@ -17,7 +17,7 @@
                             <p><strong>Ubicación Actual:</strong> {{ datos.ubicacion_actual }}</p>
                             <p><strong>Modo Adquisición:</strong> {{ datos.modo_adquisicion }}</p>
                             <p><strong>Precio:</strong> {{ datos.precio }}</p>
-                            <p><strong>Creado El:</strong> {{ datos.fecha }}</p>
+                            <p><strong>Creado El:</strong> {{ datos.fecha | date: "long" }}</p>
                         </div>
                         <div class="col-sm-4">
                             <h2>Detalles Especificos</h2>
@@ -37,12 +37,13 @@
                             <p>
                                 <button mat-flat-button color="primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Agregar Anotacion</button>  
                             </p>   
+                            
                             <p>
-                                <button mat-flat-button color="primary">Crear Acta de Baja</button>  
-                            </p>
-                            <p>
-                                <button mat-flat-button color="primary">Crear Acta de Traslado</button>  
+                                <button mat-flat-button color="primary" (click)="darBaja()">Marcar Placa Como Impresa</button>  
                             </p>  
+                            <p>
+                                <button mat-flat-button style="background-color: red; color: white;" color="primary">Dar de Baja</button>  
+                            </p>
                             
                                              
                         </div>
@@ -54,12 +55,12 @@
 </div>
 
 <!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" #exampleModal id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5" id="exampleModalLabel">Agregar Anotacion</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" id="closeModalButton" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
               <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">

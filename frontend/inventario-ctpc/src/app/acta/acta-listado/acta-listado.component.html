@@ -1,1 +1,61 @@
-<p>acta-listado works!</p>
+<div class="d-flex justify-content-center">
+    <h1>Listado de Actas y Excels</h1>
+</div>
+<div class="row mainCont">
+    <div class="col-md-6">
+        <mat-card>
+          
+            <mat-card-content>
+              <mat-card-title>
+                Documentos
+              </mat-card-title>
+                <div class="tree-container">
+                    <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+                      <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
+                        <button mat-icon-button disabled></button>
+                        <span (click)="onDocumentClick(node)" style="cursor: pointer;">- {{ node.name }}</span>
+                      </mat-tree-node>
+                      <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding>
+                        <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'Toggle ' + node.name">
+                          <mat-icon class="mat-icon-rtl-mirror">
+                            {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
+                          </mat-icon>
+                        </button>
+                        {{ node.name }}
+                      </mat-tree-node>
+                    </mat-tree>
+                  </div>
+                  <h5>Por favor seleccione un documento para ver su informacion</h5>
+            </mat-card-content>
+            
+        </mat-card>
+          
+        
+    </div>
+    <div class="col-md-6">
+        <mat-card>
+            <mat-card-content>
+                <div class="document-details" *ngIf="selectedDocument">
+                    <h2>{{ selectedDocument.titulo }}</h2>
+                    <p><strong>Tipo:</strong> {{ selectedDocument.tipo }}</p>
+                    <p><strong>Creado el:</strong> {{ selectedDocument.creado_el | date:"long"}}</p>
+                    <p><strong>Ha sido Impreso?:</strong> {{ selectedDocument.impreso ? 'Sí' : 'No' }}</p>
+                    <button mat-raised-button color="primary" class="descargar" (click)="downloadDocument(selectedDocument.ruta)">Descargar Documento</button>
+                    <button mat-raised-button color="secondary" class="impreso" (click)="marcarImpreso()" [disabled]="selectedDocument.impreso">Marcar Como Impreso</button>
+                  </div>
+                  <div class="document-details" *ngIf="!selectedDocument">
+                    <h2>Titulo del Documento</h2>
+                    <p><strong>Tipo:</strong></p>
+                    <p><strong>Creado el:</strong> </p>
+                    <p><strong>Impreso:</strong></p>
+                    <button mat-raised-button color="primary" class="descargar" (click)="downloadDocument(selectedDocument.ruta)" [disabled]="true">Descargar Documento</button>
+                    <button mat-raised-button [disabled]="true">Marcar Como Impreso</button>
+                  </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>
+
+
+  
+  

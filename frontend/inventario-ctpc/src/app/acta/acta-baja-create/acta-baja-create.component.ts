@@ -247,13 +247,13 @@ export class ActaBajaCreateComponent {
 
       console.log(formData);
       // const formData = this.myForm.value;
-      console.log("en teoria aqui lo guardaria en el server but comented for andres");
-      // this.gService.create('guardar-acta/', formData)
-      // .pipe(takeUntil(this.destroy$))
-      // .subscribe((data:any)=>{
-      //   console.log(data);
+      // console.log("en teoria aqui lo guardaria en el server but comented for andres");
+      this.gService.create('guardar-acta/', formData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data:any)=>{
+        console.log(data);
 
-      // });
+      });
 
       
    });

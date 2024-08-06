@@ -37,6 +37,18 @@ div div h1{
     text-align: center;
 }
 
+.green {
+    color: green;
+  }
+  
+  .orange {
+    color: orange;
+  }
+  
+  .red {
+    color: red;
+  }
+
 @media (min-width: 912px) and (max-width: 1400px) {
     .example-card{
         min-height:200px;

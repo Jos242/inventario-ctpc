@@ -1,4 +1,4 @@
-import { Component , OnInit} from '@angular/core';
+import { Component , OnInit, ElementRef} from '@angular/core';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
@@ -26,6 +26,10 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { MatTooltip } from '@angular/material/tooltip';
 import { FormGroup, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { BooleanToYesNoPipe } from '../../share/boolean-to-yes-no.pipe';
+import Swal from 'sweetalert2';
+import { DialogRef } from '@angular/cdk/dialog';
+import { Modal } from 'bootstrap'; // Import Modal from Bootstrap
+
 
 
 @Component({
@@ -51,12 +55,16 @@ export class ActivoDetailComponent implements OnInit{
   activoIdRegistro: any;
   myForm: FormGroup;
 
+  @ViewChild('exampleModal', { static: false }) exampleModal: ElementRef;
+
+
   constructor(private gService:GenericService,
     private router:Router,
     private route:ActivatedRoute,
     private httpClient:HttpClient,
     private sanitizer: DomSanitizer,
     private formBuilder: FormBuilder,
+
     ){
       
     }
@@ -102,38 +110,15 @@ export class ActivoDetailComponent implements OnInit{
         });
     }
 
-    // onSubmit() {
-    //   if (this.myForm.valid) {
-    //     // this.myForm.value.pimgspath=this.logo;
-    //     const formData = new FormData();
-    //     // const formData = this.myForm.value;
-    //     formData.append('descripcion', this.myForm.value.descripcion);
-    //     formData.append('activo', this.activoIdRegistro);
-        
-        
-  
-  
-    
-    //     console.log(formData);
-    //     // const formData = this.myForm.value;
-    //     this.gService.create('nueva-observacion/', formData)
-    //     .pipe(takeUntil(this.destroy$))
-    //     .subscribe((data:any)=>{
-    //       console.log(data);
-  
-    //       this.myForm.reset();
-    //     });
-  
-        
-    //   }
+    darBaja(){
 
-      
-    // }
+    }
 
     onEdit(): void {
       this.router.navigate([`/activos/${this.activoId}/edit`]);
     }
    
+
 onSubmit() {
   if (this.myForm.valid) {
     let descripcion = this.myForm.value.descripcion;
@@ -193,6 +178,7 @@ onSubmit() {
           formData.append('descripcion', chunk);
           formData.append('activo', activo);
           console.log(formData)
+
           return this.gService.create('nueva-observacion/', formData);
         }),
         takeUntil(this.destroy$)
@@ -200,12 +186,21 @@ onSubmit() {
       .subscribe(
         (data: any) => {
           console.log(data);
+          Swal.fire({
+            icon: 'success',
+            title: 'Exito',
+            text: 'Se ha agregado la anotacion correctamente.',
+          });
+
+          document.getElementById("closeModalButton").click();
+          this.loadDetails();
+          this.myForm.reset();
         }
   
           
         
       );
-      this.myForm.reset();
+      
   }
 }
 

@@ -1,0 +1,27 @@
+
+.mainCont{
+    width: 70%;
+    margin: 0 auto;
+}
+
+mat-card{
+    min-height: 220px;
+    margin-bottom: 10px;
+}
+
+.impreso{
+    color: white;
+    background-color: rgb(224, 150, 12);
+}
+
+.descargar{
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+.impreso:hover{
+    background-color: rgb(255, 183, 50);
+}
+
+
+

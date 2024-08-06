@@ -1,5 +1,5 @@
 <div class="titulo d-flex justify-content-center">
-    <h1>Editar Activo {{ datos.no_identificacion }}</h1>
+    <h1>Editar Activo {{ activoId }}</h1>
 </div>
 <div class="formEditar">
     <mat-card>
@@ -27,9 +27,9 @@
 
                             <mat-form-field appearance="outline" class="inputsForm">
                                 <mat-label>Ubicacion</mat-label>
-                                <mat-select formControlName="ubicacion_original" placeholder="Seleccione una ubicacion" [(value)]="selectedUbicacion">
+                                <mat-select formControlName="ubicacion_actual" placeholder="Seleccione una ubicacion" [(value)]="selectedUbicacion">
                                     <mat-option *ngFor="let ubicacion of ubicaciones" [value]="ubicacion.id">{{ ubicacion.nombre_oficial }}</mat-option>
-                                </mat-select>
+                                </mat-select> 
                                 <mat-hint>Ubicacion fisica del activo en el colegio</mat-hint>
                             </mat-form-field>
                         </div>
@@ -82,6 +82,14 @@
                                 </mat-select>
                                 <mat-hint>Estado actual del activo</mat-hint>
                             </mat-form-field>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg">
+
+                        </div>
+                        <div class="col-lg">
+
                         </div>
                     </div>
 

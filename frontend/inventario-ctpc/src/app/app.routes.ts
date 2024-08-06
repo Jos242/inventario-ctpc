@@ -13,6 +13,7 @@ import { ActivoScanComponent } from './activo/activo-scan/activo-scan.component'
 import { AdminIndexComponent } from './admin/admin-index/admin-index.component';
 import { ActaListadoComponent } from './acta/acta-listado/acta-listado.component';
 import { ActivoUpdateComponent } from './activo/activo-update/activo-update.component';
+import { ActaExcelComponent } from './acta/acta-excel/acta-excel.component';
 
 
 export const routes: Routes = [
@@ -27,6 +28,7 @@ export const routes: Routes = [
     { path:'actas/baja', component: ActaBajaCreateComponent, canActivate: [authGuard]},
     { path:'actas/traslado', component: ActaMoverCreateComponent, canActivate: [authGuard]},
     { path:'actas/lista', component: ActaListadoComponent, canActivate: [authGuard]},
+    { path:'actas/excels', component: ActaExcelComponent, canActivate: [authGuard]},
     
     { path:'activos/crear', component: ActivoCreateComponent, canActivate: [authGuard]},
     { path:'activos/scan', component: ActivoScanComponent },
