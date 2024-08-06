@@ -93,69 +93,83 @@
 <br>
 <div class="d-flex justify-content-center">
   <div class="parent-component">
-    <div class="specific-div">
-        
-      <div #contentToConvert class="cont"> 
-        <img src="assets/images/header.png" alt="" class="header">
-        <!-- <h1 class="centered">Ministerio de Educacion Publica</h1>
-        <h1 class="centered">Direccion Regional Educacion de Alajuela</h1>
-        <h3 class="centered">Colegio Tecnico Profesional de Carrizal</h3>
-        <br>
-        <br>
-        <h4 class="centered">Info Contacto</h4>
-        <h4 class="centered">Info Contacto</h4> -->
-        <p>&nbsp;</p>
-        <p class="titulos">ACTA DE BAJA DE BIENES N {{numActa}}</p>
-        <p class="titulos">Fecha del Acta: {{fechaActa}}</p>
-        <!-- <img src="assets/images/logocole.png" alt="" class="absolute-img"> -->
-        <br>
-        <table #firstTable class="tabla">
-            <tr>
-              <th colspan="2"><b>Colegio Tecnico Profesional:</b> CARRIZAL</th>
-            </tr>
-            <tr>
-              <td class="half-width"><b>Fecha de baja del bien:</b> {{fechaActa}}</td>
-              <td class="half-width"><b>Curso Lectivo:</b> {{ahno}}</td>
-            </tr>
-            <tr>
-              <td colspan="2"><b>Empresa a la cual se va a entregar para su reciclaje o destruccion. O bien, el metodo que se va a utilizar para desecharlo: </b> {{descActa}}</td>
-            </tr>
-        </table> 
-  
-        <table #secondTable class="tabla2">
-            <thead>
+    <div #specific class="specific-div">
+      <div #contentToConvert class="cont">
+        <div class="cont" *ngFor="let tabla of activoTablas; let i = index">
+          <div #header class="cont">
+            <img src="assets/images/header.png" alt="" class="header">
+            <!-- <h1 class="centered">Ministerio de Educacion Publica</h1>
+            <h1 class="centered">Direccion Regional Educacion de Alajuela</h1>
+            <h3 class="centered">Colegio Tecnico Profesional de Carrizal</h3>
+            <br>
+            <br>
+            <h4 class="centered">Info Contacto</h4>
+            <h4 class="centered">Info Contacto</h4> -->
+            <p>&nbsp;</p>
+           
+            <div class="cont" [ngClass]="{'noHeight': i != 0}">
+              <p class="titulos">ACTA DE BAJA DE BIENES N {{numActa}}</p>
+              <p class="titulos">Fecha del Acta: {{fechaActa}}</p>
+              <!-- <img src="assets/images/logocole.png" alt="" class="absolute-img"> -->
+              <br>
+              <table #firstTable class="tabla">
+                  <tr>
+                    <th colspan="2"><b>Colegio Tecnico Profesional:</b> CARRIZAL</th>
+                  </tr>
+                  <tr>
+                    <td class="half-width"><b>Fecha de baja del bien:</b> {{fechaActa}}</td>
+                    <td class="half-width"><b>Curso Lectivo:</b> {{ahno}}</td>
+                  </tr>
+                  <tr>
+                    <td colspan="2"><b>Empresa a la cual se va a entregar para su reciclaje o destruccion. O bien, el metodo que se va a utilizar para desecharlo: </b> {{descActa}}</td>
+                  </tr>
+              </table> 
+            </div>
+          </div>
+          
+          <div class="tabla-container">
+            <table class="tabla2">
+              <thead>
                 <tr>
-                    <th rowspan="2" style="width: 15.218%;">Número de identificacion del bien</th>
-                    <th rowspan="2" style="width: 22.277%; padding: 0%;">Descripción del bien</th>
-                    <th rowspan="2" style="width: 9.725%;">Marca</th>
-                    <th rowspan="2" style="width: 9.725%;">Modelo</th>
-                    <th rowspan="2" style="width: 11.055%;">Serie</th>
-                    <th colspan="2" style="width: 32%;">Marque con X según corresponda</th>
+                  <th rowspan="2" style="width: 15.218%;">Número de identificacion del bien</th>
+                  <th rowspan="2" style="width: 22.277%; padding: 0%;">Descripción del bien</th>
+                  <th rowspan="2" style="width: 9.725%;">Marca</th>
+                  <th rowspan="2" style="width: 9.725%;">Modelo</th>
+                  <th rowspan="2" style="width: 11.055%;">Serie</th>
+                  <th colspan="2" style="width: 32%;">Marque con X según corresponda</th>
                 </tr>
                 <tr>
-                    <th>Obsolencia</th>
-                    <th>Inservibilidad</th>
+                  <th>Obsolencia</th>
+                  <th>Inservibilidad</th>
                 </tr>
-            </thead>
-            <tr *ngFor="let activo of selectedActivos">
-              <td>{{activo.no_identificacion || ''}}</td>
-              <td>{{activo.descripcion || ''}}</td>
-              <td>{{activo.marca || ''}}</td>
-              <td>{{activo.modelo || ''}}</td>
-              <td>{{activo.serie || ''}}</td>
-              <td>{{activo.razon === 'Obsolencia' ? 'X' : ''}}</td>
-              <td>{{activo.razon === 'Inservibilidad' ? 'X' : ''}}</td>
-            </tr>
+              </thead>
+              <tr *ngFor="let activo of tabla">
+                <td>{{activo.no_identificacion || ''}}</td>
+                <td>{{activo.descripcion || ''}}</td>
+                <td>{{activo.marca || ''}}</td>
+                <td>{{activo.modelo || ''}}</td>
+                <td>{{activo.serie || ''}}</td>
+                <td>{{activo.razon === 'Obsolencia' ? 'X' : ''}}</td>
+                <td>{{activo.razon === 'Inservibilidad' ? 'X' : ''}}</td>
+              </tr>
+            </table>
+    
+            <div class="tabla2 cont">
+              <div id="text-measure" style="position: absolute;visibility: hidden; height:auto; width:22.277%;"></div>
+            </div>
+          </div>
   
-        </table>
-       
-        <img src="assets/images/firmas.png" alt="" class="firmas">
-
-        <img src="assets/images/footer.png" alt="" class="footer">
+          <div #blanco [attr.data-index]="i"></div>
+  
+         
+           
+          <ng-container *ngIf="activoTablas.indexOf(tabla) == activoTablas.length - 1">
+            <img src="assets/images/firmas.png" alt="" class="firmas">
+    
+            <img src="assets/images/footer.png" alt="" class="footer">
+          </ng-container>
+        </div>
       </div>
-  
-      
-  
     </div>
   </div>
 </div>
