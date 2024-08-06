@@ -32,7 +32,7 @@
                       </div>
                   
                       <div class="row">
-                        <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" matSort>
+                        <table mat-table [dataSource]="dataSource" style="cursor: pointer;" class="mat-elevation-z8" matSort>
                           <!-- Columns Definition -->
                           <ng-container matColumnDef="no_identificacion">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Numero de identificacion del bien </th>
@@ -75,6 +75,12 @@
                         </div>
                         
                       </div>
+                      <div class="row">
+                        <div class="col-lg" style="margin-top: 10px;">
+                          <button mat-flat-button color="primary" (click)="generatePdf(contentToConvert)">Guardar y Descargar PDF</button>
+                        </div>  
+                        
+                      </div>
                     </div>
                   </form>
         
@@ -85,7 +91,7 @@
 
 
 <br>
-<button mat-flat-button color="primary" (click)="generatePdf(contentToConvert)">Guardar y Descargar PDF</button>
+
 <br>
 <div class="titulo d-flex justify-content-center">
     <h1>Previsualizacion del Acta</h1>

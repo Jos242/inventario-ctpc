@@ -78,8 +78,7 @@ export class HomeIndexComponent {
   
       const formData = { fields: selectedColumns };
   
-      // Save selected columns to cache
-      localStorage.setItem('selectedColumns', JSON.stringify(this.filtros.value));
+
   
       // Make the request
       this.gService.create('activos/select-columns/', formData)

@@ -1,1 +1,72 @@
-<p>acta-excels works!</p>
+<div class="mainDiv">
+    <div class="row">
+        <div class="col-lg">
+            <mat-card class="example-card">
+                <mat-card-header>
+                  <mat-card-title>Excel Con Formato de Impresion</mat-card-title>
+                </mat-card-header>
+                
+                <mat-card-content>
+                    <br>
+                  <p>Presione el boton "Generar" para generar el excel con formato de impresion, utlizando los ultimos 41 registros todavia no impresos. Actualmente se pueden crear <b>{{this.excels}}</b> nuevos documentos basado en la cantidad de registros nuevos. 
+                     Al presionar el boton de "Generar" se genera 1 excel con los primeros 41 registros en requerir impresion</p>
+                  <p></p>
+                  <mat-divider></mat-divider>
+                </mat-card-content>
+                <mat-card-actions>
+                  <button mat-flat-button color="primary" (click)="excelImpresion()" >Generar</button>
+                </mat-card-actions>
+              </mat-card>
+
+        </div>
+        <div class="col-lg">
+            <mat-card class="example-card">
+                <mat-card-header>
+                  <mat-card-title>Excel Sin Formato</mat-card-title>
+                </mat-card-header>
+                
+                <mat-card-content>
+                    <br>
+                  <p>Presione el boton con respecto al excel que desea generar. Estos Excels tendran la informacion de todos los activos, todas las anotaciones, o todos los activos y anotaciones, sin utilizar el formato de impresion.
+                    Estos contienen todos los registros existen, y toda su informacion respectiva.
+                  </p>
+                  <p></p>
+                  <mat-divider></mat-divider>
+                </mat-card-content>
+                <mat-card-actions>
+                  <button mat-flat-button color="primary" onclick="" style="margin-right:5px;" >Todos los Activos</button>
+                  <button mat-flat-button color="primary" onclick="" style="margin-right:5px;"  >Todos las Anotaciones</button>
+                  <button mat-flat-button color="primary" onclick="" >Todos los Activos y Anotaciones</button>
+                </mat-card-actions>
+              </mat-card>
+
+        </div>
+
+    </div>
+    <div class="row" style="margin-top: 10px;">
+        <div class="col-lg">
+            <mat-card class="example-card">
+                <mat-card-header>
+                  <mat-card-title>Excel De Informacion</mat-card-title>
+                </mat-card-header>
+                
+                <mat-card-content>
+                    <br>
+                  <p>Presione el boton con respecto al excel que desea generar. Estos Excels tendran la informacion de todos los Funcionarios registrados en el sistema, todas las anotaciones, o de todas las ubicaciones registradas en el sistema.
+                    Estos contienen todos la informacion existente acerca de los mismos que este registrada en el sistema.
+                  </p>
+                  <p></p>
+                  <mat-divider></mat-divider>
+                </mat-card-content>
+                <mat-card-actions>
+                  <button mat-flat-button color="primary" onclick="" style="margin-right:5px;" >Todos los Funcionarios</button>
+                  <button mat-flat-button color="primary" onclick="" style="margin-right:5px;"  >Todas las Ubicaciones</button>
+                </mat-card-actions>
+              </mat-card>
+        </div>
+        <div class="col-lg">
+
+        </div>
+
+    </div>
+</div>

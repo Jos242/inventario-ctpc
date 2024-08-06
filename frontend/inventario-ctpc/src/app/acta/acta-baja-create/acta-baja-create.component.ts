@@ -19,6 +19,8 @@ import { HttpClient } from '@angular/common/http';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AuthService } from '../../share/auth.service';
 
+import Swal from 'sweetalert2';
+
 import moment from 'moment';
 import 'moment/locale/es';
 
@@ -60,6 +62,8 @@ export class ActaBajaCreateComponent {
   obs: any;
   ins: any;
 
+  isLoadingResults:any;
+
  
   dataSource = new MatTableDataSource<any>();
   displayedColumns: string[] = ['no_identificacion', 'descripcion', 'marca', 'modelo', 'serie'];
@@ -81,6 +85,7 @@ export class ActaBajaCreateComponent {
   @ViewChild('header') header!: ElementRef;
   @ViewChildren('blanco') blancos: QueryList<ElementRef>;
 
+  filtros: FormGroup;
   
 
 
@@ -93,6 +98,27 @@ export class ActaBajaCreateComponent {
     private authService: AuthService,
     private renderer: Renderer2
   ) {
+    this.filtros = this.formBuilder.group({
+      id_registro: false,
+      no_identificacion: true,
+      descripcion: true,
+      marca: true,
+      modelo: true,
+      serie: true,
+      estado: false,
+      impreso: false,
+      ubicacion_original_alias: false,
+      ubicacion_actual_alias: false,
+      modo_adquisicion_desc: false,
+      precio: false,
+      conectividad: false,
+      seguridad: false,
+      placa: false,
+      baja: false,
+      fecha: false,
+    });
+
+    this.loadActivos();
     
       moment.locale('es'); // Set locale to Spanish
   }
@@ -109,7 +135,6 @@ export class ActaBajaCreateComponent {
     
 
     this.listaDocs();
-    this.listaActivos();
 
     this.myForm.get('search')?.valueChanges
       .pipe(takeUntil(this.destroy$))
@@ -129,8 +154,9 @@ export class ActaBajaCreateComponent {
   }
 
   resetActa(): void {
-    this.myForm.reset(); 
-    this.selectedActivos = []; 
+    // this.myForm.reset(); 
+    // this.selectedActivos = []; 
+    window.location.reload();
   }
 
   selectActivo(activo: any): void {
@@ -241,1142 +267,56 @@ export class ActaBajaCreateComponent {
       });
   }
 
-  listaActivos(){
-    //this.isLoadingResults = true;  // Start loading
-    //this.gService.list('activos-filtrados-columna/')
-    //  .pipe(takeUntil(this.destroy$))
-    //  .subscribe((data:any)=>{
-const data = [
-  {
-    "descripcion": "PROYECTOR",
-    "id": 8241,
-    "id_registro": "1,138,07",
-    "no_identificacion": "6105-4219",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "EXTINTOR",
-    "id": 8240,
-    "id_registro": "1,138,06",
-    "no_identificacion": "6105-4218",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA PROFESOR",
-    "id": 8239,
-    "id_registro": "1,138,05",
-    "no_identificacion": "6105-4217",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8238,
-    "id_registro": "1,138,04",
-    "no_identificacion": "6105-4216",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8237,
-    "id_registro": "1,138,03",
-    "no_identificacion": "6105-4215",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8236,
-    "id_registro": "1,138,02",
-    "no_identificacion": "6105-4214",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8235,
-    "id_registro": "1,137,41",
-    "no_identificacion": "6105-4213",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8234,
-    "id_registro": "1,137,40",
-    "no_identificacion": "6105-4212",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8233,
-    "id_registro": "1,137,39",
-    "no_identificacion": "6105-4211",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8232,
-    "id_registro": "1,137,38",
-    "no_identificacion": "6105-4210",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8231,
-    "id_registro": "1,137,37",
-    "no_identificacion": "6105-4209",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8230,
-    "id_registro": "1,137,36",
-    "no_identificacion": "6105-4208",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8229,
-    "id_registro": "1,137,35",
-    "no_identificacion": "6105-4207",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8228,
-    "id_registro": "1,137,34",
-    "no_identificacion": "6105-4206",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8227,
-    "id_registro": "1,137,33",
-    "no_identificacion": "6105-4205",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8226,
-    "id_registro": "1,137,32",
-    "no_identificacion": "6105-4204",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8225,
-    "id_registro": "1,137,31",
-    "no_identificacion": "6105-4203",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8224,
-    "id_registro": "1,137,30",
-    "no_identificacion": "6105-4202",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8223,
-    "id_registro": "1,137,29",
-    "no_identificacion": "6105-4201",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8222,
-    "id_registro": "1,137,28",
-    "no_identificacion": "6105-4200",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8221,
-    "id_registro": "1,137,27",
-    "no_identificacion": "6105-4199",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8220,
-    "id_registro": "1,137,26",
-    "no_identificacion": "6105-4198",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8219,
-    "id_registro": "1,137,25",
-    "no_identificacion": "6105-4197",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8218,
-    "id_registro": "1,137,24",
-    "no_identificacion": "6105-4196",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8217,
-    "id_registro": "1,137,23",
-    "no_identificacion": "6105-4195",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8216,
-    "id_registro": "1,137,22",
-    "no_identificacion": "6105-4194",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8215,
-    "id_registro": "1,137,21",
-    "no_identificacion": "6105-4193",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8214,
-    "id_registro": "1,137,20",
-    "no_identificacion": "6105-4192",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8213,
-    "id_registro": "1,137,19",
-    "no_identificacion": "6105-4191",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8212,
-    "id_registro": "1,137,18",
-    "no_identificacion": "6105-4190",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8211,
-    "id_registro": "1,137,17",
-    "no_identificacion": "6105-4189",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8210,
-    "id_registro": "1,137,16",
-    "no_identificacion": "6105-4188",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8209,
-    "id_registro": "1,137,15",
-    "no_identificacion": "6105-4187",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8208,
-    "id_registro": "1,137,14",
-    "no_identificacion": "6105-4186",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8207,
-    "id_registro": "1,137,13",
-    "no_identificacion": "6105-4185",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8206,
-    "id_registro": "1,137,12",
-    "no_identificacion": "6105-4184",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8205,
-    "id_registro": "1,137,11",
-    "no_identificacion": "6105-4183",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8204,
-    "id_registro": "1,137,10",
-    "no_identificacion": "6105-4182",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8203,
-    "id_registro": "1,137,09",
-    "no_identificacion": "6105-4181",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8202,
-    "id_registro": "1,137,08",
-    "no_identificacion": "6105-4180",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8201,
-    "id_registro": "1,137,07",
-    "no_identificacion": "6105-4179",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8200,
-    "id_registro": "1,137,06",
-    "no_identificacion": "6105-4178",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8199,
-    "id_registro": "1,137,05",
-    "no_identificacion": "6105-4177",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8198,
-    "id_registro": "1,137,04",
-    "no_identificacion": "6105-4176",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8197,
-    "id_registro": "1,137,03",
-    "no_identificacion": "6105-4175",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8196,
-    "id_registro": "1,137,02",
-    "no_identificacion": "6105-4174",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8195,
-    "id_registro": "1,137,01",
-    "no_identificacion": "6105-4173",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8194,
-    "id_registro": "1,136,41",
-    "no_identificacion": "6105-4172",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8193,
-    "id_registro": "1,136,40",
-    "no_identificacion": "6105-4171",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8192,
-    "id_registro": "1,136,39",
-    "no_identificacion": "6105-4170",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8191,
-    "id_registro": "1,136,38",
-    "no_identificacion": "6105-4169",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8190,
-    "id_registro": "1,136,37",
-    "no_identificacion": "6105-4168",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8189,
-    "id_registro": "1,136,36",
-    "no_identificacion": "6105-4167",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8188,
-    "id_registro": "1,136,35",
-    "no_identificacion": "6105-4166",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8187,
-    "id_registro": "1,136,34",
-    "no_identificacion": "6105-4165",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8186,
-    "id_registro": "1,136,33",
-    "no_identificacion": "6105-4164",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8185,
-    "id_registro": "1,136,32",
-    "no_identificacion": "6105-4163",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8184,
-    "id_registro": "1,136,31",
-    "no_identificacion": "6105-4162",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8183,
-    "id_registro": "1,136,30",
-    "no_identificacion": "6105-4161",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8182,
-    "id_registro": "1,136,29",
-    "no_identificacion": "6105-4160",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8181,
-    "id_registro": "1,136,28",
-    "no_identificacion": "6105-4159",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8180,
-    "id_registro": "1,136,27",
-    "no_identificacion": "6105-4158",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8179,
-    "id_registro": "1,136,26",
-    "no_identificacion": "6105-4157",
-    "ubicacion_original": "Ejecutivo"
-  },{
-    "descripcion": "PROYECTOR",
-    "id": 8241,
-    "id_registro": "1,138,07",
-    "no_identificacion": "6105-4219",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "EXTINTOR",
-    "id": 8240,
-    "id_registro": "1,138,06",
-    "no_identificacion": "6105-4218",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA PROFESOR",
-    "id": 8239,
-    "id_registro": "1,138,05",
-    "no_identificacion": "6105-4217",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8238,
-    "id_registro": "1,138,04",
-    "no_identificacion": "6105-4216",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8237,
-    "id_registro": "1,138,03",
-    "no_identificacion": "6105-4215",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8236,
-    "id_registro": "1,138,02",
-    "no_identificacion": "6105-4214",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8235,
-    "id_registro": "1,137,41",
-    "no_identificacion": "6105-4213",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8234,
-    "id_registro": "1,137,40",
-    "no_identificacion": "6105-4212",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8233,
-    "id_registro": "1,137,39",
-    "no_identificacion": "6105-4211",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8232,
-    "id_registro": "1,137,38",
-    "no_identificacion": "6105-4210",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8231,
-    "id_registro": "1,137,37",
-    "no_identificacion": "6105-4209",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8230,
-    "id_registro": "1,137,36",
-    "no_identificacion": "6105-4208",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8229,
-    "id_registro": "1,137,35",
-    "no_identificacion": "6105-4207",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8228,
-    "id_registro": "1,137,34",
-    "no_identificacion": "6105-4206",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8227,
-    "id_registro": "1,137,33",
-    "no_identificacion": "6105-4205",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8226,
-    "id_registro": "1,137,32",
-    "no_identificacion": "6105-4204",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8225,
-    "id_registro": "1,137,31",
-    "no_identificacion": "6105-4203",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8224,
-    "id_registro": "1,137,30",
-    "no_identificacion": "6105-4202",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8223,
-    "id_registro": "1,137,29",
-    "no_identificacion": "6105-4201",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8222,
-    "id_registro": "1,137,28",
-    "no_identificacion": "6105-4200",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8221,
-    "id_registro": "1,137,27",
-    "no_identificacion": "6105-4199",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8220,
-    "id_registro": "1,137,26",
-    "no_identificacion": "6105-4198",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8219,
-    "id_registro": "1,137,25",
-    "no_identificacion": "6105-4197",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8218,
-    "id_registro": "1,137,24",
-    "no_identificacion": "6105-4196",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8217,
-    "id_registro": "1,137,23",
-    "no_identificacion": "6105-4195",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8216,
-    "id_registro": "1,137,22",
-    "no_identificacion": "6105-4194",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8215,
-    "id_registro": "1,137,21",
-    "no_identificacion": "6105-4193",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8214,
-    "id_registro": "1,137,20",
-    "no_identificacion": "6105-4192",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8213,
-    "id_registro": "1,137,19",
-    "no_identificacion": "6105-4191",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8212,
-    "id_registro": "1,137,18",
-    "no_identificacion": "6105-4190",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8211,
-    "id_registro": "1,137,17",
-    "no_identificacion": "6105-4189",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8210,
-    "id_registro": "1,137,16",
-    "no_identificacion": "6105-4188",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8209,
-    "id_registro": "1,137,15",
-    "no_identificacion": "6105-4187",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8208,
-    "id_registro": "1,137,14",
-    "no_identificacion": "6105-4186",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8207,
-    "id_registro": "1,137,13",
-    "no_identificacion": "6105-4185",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8206,
-    "id_registro": "1,137,12",
-    "no_identificacion": "6105-4184",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8205,
-    "id_registro": "1,137,11",
-    "no_identificacion": "6105-4183",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8204,
-    "id_registro": "1,137,10",
-    "no_identificacion": "6105-4182",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8203,
-    "id_registro": "1,137,09",
-    "no_identificacion": "6105-4181",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8202,
-    "id_registro": "1,137,08",
-    "no_identificacion": "6105-4180",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8201,
-    "id_registro": "1,137,07",
-    "no_identificacion": "6105-4179",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8200,
-    "id_registro": "1,137,06",
-    "no_identificacion": "6105-4178",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8199,
-    "id_registro": "1,137,05",
-    "no_identificacion": "6105-4177",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8198,
-    "id_registro": "1,137,04",
-    "no_identificacion": "6105-4176",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8197,
-    "id_registro": "1,137,03",
-    "no_identificacion": "6105-4175",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8196,
-    "id_registro": "1,137,02",
-    "no_identificacion": "6105-4174",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8195,
-    "id_registro": "1,137,01",
-    "no_identificacion": "6105-4173",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8194,
-    "id_registro": "1,136,41",
-    "no_identificacion": "6105-4172",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8193,
-    "id_registro": "1,136,40",
-    "no_identificacion": "6105-4171",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8192,
-    "id_registro": "1,136,39",
-    "no_identificacion": "6105-4170",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8191,
-    "id_registro": "1,136,38",
-    "no_identificacion": "6105-4169",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8190,
-    "id_registro": "1,136,37",
-    "no_identificacion": "6105-4168",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8189,
-    "id_registro": "1,136,36",
-    "no_identificacion": "6105-4167",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8188,
-    "id_registro": "1,136,35",
-    "no_identificacion": "6105-4166",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8187,
-    "id_registro": "1,136,34",
-    "no_identificacion": "6105-4165",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8186,
-    "id_registro": "1,136,33",
-    "no_identificacion": "6105-4164",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8185,
-    "id_registro": "1,136,32",
-    "no_identificacion": "6105-4163",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8184,
-    "id_registro": "1,136,31",
-    "no_identificacion": "6105-4162",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8183,
-    "id_registro": "1,136,30",
-    "no_identificacion": "6105-4161",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8182,
-    "id_registro": "1,136,29",
-    "no_identificacion": "6105-4160",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8181,
-    "id_registro": "1,136,28",
-    "no_identificacion": "6105-4159",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8180,
-    "id_registro": "1,136,27",
-    "no_identificacion": "6105-4158",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8179,
-    "id_registro": "1,136,26",
-    "no_identificacion": "6105-4157",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8178,
-    "id_registro": "1,136,25",
-    "no_identificacion": "6105-4156",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8177,
-    "id_registro": "1,136,24",
-    "no_identificacion": "6105-4155",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8176,
-    "id_registro": "1,136,23",
-    "no_identificacion": "6105-4154",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8175,
-    "id_registro": "1,136,22",
-    "no_identificacion": "6105-4153",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8174,
-    "id_registro": "1,136,21",
-    "no_identificacion": "6105-4152",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8173,
-    "id_registro": "1,136,20",
-    "no_identificacion": "6105-4151",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8172,
-    "id_registro": "1,136,19",
-    "no_identificacion": "6105-4150",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8171,
-    "id_registro": "1,136,18",
-    "no_identificacion": "6105-4149",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8170,
-    "id_registro": "1,136,17",
-    "no_identificacion": "6105-4148",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8169,
-    "id_registro": "1,136,16",
-    "no_identificacion": "6105-4147",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8168,
-    "id_registro": "1,136,15",
-    "no_identificacion": "6105-4146",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8167,
-    "id_registro": "1,136,14",
-    "no_identificacion": "6105-4145",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8166,
-    "id_registro": "1,136,13",
-    "no_identificacion": "6105-4144",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8165,
-    "id_registro": "1,136,12",
-    "no_identificacion": "6105-4143",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8164,
-    "id_registro": "1,136,11",
-    "no_identificacion": "6105-4142",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8163,
-    "id_registro": "1,136,10",
-    "no_identificacion": "6105-4141",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8162,
-    "id_registro": "1,136,09",
-    "no_identificacion": "6105-4140",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8161,
-    "id_registro": "1,136,08",
-    "no_identificacion": "6105-4139",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8160,
-    "id_registro": "1,136,07",
-    "no_identificacion": "6105-4138",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8159,
-    "id_registro": "1,136,06",
-    "no_identificacion": "6105-4137",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8158,
-    "id_registro": "1,136,05",
-    "no_identificacion": "6105-4136",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8157,
-    "id_registro": "1,136,04",
-    "no_identificacion": "6105-4135",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8156,
-    "id_registro": "1,136,03",
-    "no_identificacion": "6105-4134",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8155,
-    "id_registro": "1,136,02",
-    "no_identificacion": "6105-4133",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8154,
-    "id_registro": "1,136,01",
-    "no_identificacion": "6105-4132",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8153,
-    "id_registro": "1,135,22",
-    "no_identificacion": "6105-4131",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8152,
-    "id_registro": "1,135,21",
-    "no_identificacion": "6105-4130",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8151,
-    "id_registro": "1,135,20",
-    "no_identificacion": "6105-4129",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8150,
-    "id_registro": "1,135,19",
-    "no_identificacion": "6105-4128",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8149,
-    "id_registro": "1,135,18",
-    "no_identificacion": "6105-4127",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8148,
-    "id_registro": "1,135,17",
-    "no_identificacion": "6105-4126",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8147,
-    "id_registro": "1,135,16",
-    "no_identificacion": "6105-4125",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8146,
-    "id_registro": "1,135,15",
-    "no_identificacion": "6105-4124",
-    "ubicacion_original": "Ejecutivo"
-  },
-  {
-    "descripcion": "SILLA EJECUTIVA NEGRA",
-    "id": 8145,
-    "id_registro": "1,135,14",
-    "no_identificacion": "6105-4123",
-    "ubicacion_original": "Ejecutivo"
-  }
-];
 
-        this.datosActivos = data;
-        this.dataSource.data = data;
-        // this.dataSource.data = data;
 
-        this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
-        console.log(this.datosActivos);
-        // this.isLoadingResults = false; // Stop loading
-    //  });
+  loadActivos(){
+    this.isLoadingResults = true;  // Start loading
+
+    const loadingTimeout = setTimeout(() => {
+      if (this.isLoadingResults) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Hay problemas...',
+          text: 'La carga de datos esta durando mas de lo esperado... Por favor intente nuevamente',
+        });
+      }
+    }, 15000); // 15 seconds
+
+    const selectedColumns = Object.keys(this.filtros.value)
+      .filter(key => this.filtros.value[key]);
+
+    const formData = { fields: selectedColumns };
+
+
+    // Make the request
+    this.gService.create('activos/select-columns/', formData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data: any) => {
+          console.log(data);
+          this.datos = data;
+          // Count the number of items where datos.placa is false
+          this.datosActivos = data;
+          this.dataSource.data = data;
+          this.dataSource.data = data;
+
+          this.dataSource.paginator = this.paginator;
+          this.dataSource.sort = this.sort;
+          console.log(this.datosActivos);
+          this.isLoadingResults = false; // Stop loading
+          clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
+
+        },
+        error: (error) => {
+          this.isLoadingResults = false; // Stop loading on error
+          clearTimeout(loadingTimeout); // Clear the timeout if there's an error
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador.',
+          });
+        }
+      });
   }
 
   generatePdf(data) {
@@ -1410,15 +350,15 @@ const data = [
        pdf.addImage(imgData, 'jpg', top_left_margin, -(PDF_Height * i) + (top_left_margin * 4), canvas_image_width, canvas_image_height);
      }
 
-      pdf.save("HTML-Document.pdf");
+      pdf.save(`ACTA DE BAJA DE BIENES N ${this.numActa}.pdf`);
       // Convert PDF to Blob
       const pdfBlob = pdf.output('blob');
 
       // Create FormData and append fields
       const formData = new FormData();
-      formData.append('titulo', 'pdf-one');
+      formData.append('titulo', `ACTA DE BAJA DE BIENES N ${this.numActa}`);
       formData.append('tipo', 'PDF');
-      formData.append('archivo', pdfBlob, 'document.pdf');
+      formData.append('archivo', pdfBlob, `ACTA DE BAJA DE BIENES N ${this.numActa}.pdf`);
       formData.append('impreso', '0');
 
       console.log(formData);
