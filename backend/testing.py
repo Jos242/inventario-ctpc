@@ -74,7 +74,7 @@ def get_department_id(description):
     cursor = db.cursor()
     
     # Definir la consulta SQL
-    query = "SELECT id FROM departamentos WHERE descripcion=%s LIMIT 0"
+    query = "SELECT id FROM departamentos WHERE descripcion=%s LIMIT 1"
     
     try:
         # Ejecutar la consulta
@@ -107,7 +107,7 @@ def get_puesto_id(description):
     cursor = db.cursor()
     
     # Definir la consulta SQL
-    query = "SELECT id FROM puestos WHERE descripcion=%s LIMIT 0"
+    query = "SELECT id FROM puestos WHERE descripcion=%s LIMIT 1"
     
     try:
         # Ejecutar la consulta

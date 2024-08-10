@@ -35,7 +35,7 @@ def count_files_in_directory(directory):
         count += len(files)
     return count
 
-def handle_file_directories(doc_type:str = None) -> list:
+def handle_file_directories(doc_type:str = None, folder_name:str = None) -> list:
     """
         It creates a directory for the file in case that is a new product otherwise
         it returns the path for the specified product
@@ -45,8 +45,8 @@ def handle_file_directories(doc_type:str = None) -> list:
         relative_path:str = f"uploads/actas/"
 
     if doc_type == "ubicacion_img":
-        absolute_path:str = f"{MEDIA_ROOT}/uploads/ubicaciones/"
-        relative_path:str = f"uploads/ubicaciones/"
+        absolute_path:str = f"{MEDIA_ROOT}/uploads/ubicaciones/{folder_name}/"
+        relative_path:str = f"uploads/ubicaciones/{folder_name}/"
  
     if os.path.exists(absolute_path):
         return [relative_path, absolute_path]
@@ -54,13 +54,17 @@ def handle_file_directories(doc_type:str = None) -> list:
     os.makedirs(absolute_path)
     return [relative_path, absolute_path]
 
-def handle_uploaded_file(files: list, doc_type:str = None) -> str:
+def handle_uploaded_file(files: list, doc_type:str = None,
+                         *args, **kwargs) -> str:
     """
         This method is just for saving the file following this structure:
         uploads/{model pk}/{file_name.ext}
     """
-    
-    paths_list = handle_file_directories(doc_type = doc_type)
+    nombre_oficial:str = kwargs.get("nombre_oficial")
+    nombre_oficial = nombre_oficial.replace(" ", "_")
+       
+    paths_list = handle_file_directories(doc_type = doc_type,
+                                         folder_name = nombre_oficial)
     absolute_path = paths_list[1] 
     relative_path = paths_list[0]
 
@@ -78,8 +82,8 @@ def handle_uploaded_file(files: list, doc_type:str = None) -> str:
 
         for file in files:
             ext = str(file).split(".")[1]  
-            relative_path = os.path.join(relative_path, f"{img_name}{count}.{ext}")
-            path_to_write = os.path.join(absolute_path, f"{img_name}{count}.{ext}")  
+            path_to_write = os.path.join(absolute_path,
+                                         f"{img_name}{count}.{ext}")  
             
             with open(path_to_write, 'wb') as destination: 
                 for chunk in file.chunks():
@@ -87,7 +91,7 @@ def handle_uploaded_file(files: list, doc_type:str = None) -> str:
             
             count+=1 
 
-    return relative_path 
+    return relative_path
 
 def calculate_no_identificacion(no_identificacion: str):
     input_str = no_identificacion
@@ -498,10 +502,11 @@ class UserActions():
                 user.save()
 
             if user_type == 'FUNCIONARIO':
+                
                 user.is_staff = True
                 user.is_superuser = False 
                 user.set_password(serializer.validated_data['password'])
-                user.save()
+                user.save() 
                 data = request.data | {"user": user.pk}
                 funcionario_serializer= FuncionariosSerializer(data = data)
 
@@ -514,6 +519,7 @@ class UserActions():
                                     status = status.HTTP_200_OK)
                
                 User.objects.get(pk = user.pk).delete() 
+                print(funcionario_serializer.errors) 
                 return Response(funcionario_serializer.errors)
 
             return Response(serializer.validated_data, 
@@ -1091,7 +1097,7 @@ class UbicacionesActions():
    def ubicacion_by_id(self, pk:int) -> Response:
         try: 
             ubicacion = Ubicaciones.objects.get(id = pk)
-            serializer = UbicacionesSerializer(instance = ubicacion)
+            serializer = ReadUbicacionesSerializer(instance = ubicacion)
 
         except Ubicaciones.DoesNotExist:
             return Response({"error": "ubicacion does not exist"},
@@ -1149,9 +1155,6 @@ class UbicacionesActions():
         return Response(serializer.data, 
                         status = status.HTTP_200_OK)
 
-        return Response("hola")
-        pass
-
    #Metodos para el HTTP POST--------------------------------
    def nueva_ubicacion(self, request) -> Response:
         serializer = UbicacionesSerializer(data = request.data)
@@ -1159,9 +1162,12 @@ class UbicacionesActions():
         if serializer.is_valid():
             nombre_oficial =serializer.validated_data["nombre_oficial"]
             
-            files:list = request.FILES.getlist('img_path') 
-            ruta:str = handle_uploaded_file(files, "ubicacion_img") if files != [] else None 
-            
+            files:list = request.FILES.getlist('img_path')
+            params = {"files": files,
+                      "doc_type": "ubicacion_img",
+                      "nombre_oficial": serializer.data["nombre_oficial"]} 
+
+            ruta:str = handle_uploaded_file(**params)  
 
             if "alias" not in serializer.validated_data:
                 serializer.validated_data["alias"] = nombre_oficial
@@ -1181,30 +1187,48 @@ class UbicacionesActions():
    
    #Metodos para el HTTP PATCH--------------------------------
    def update_ubicacion(self, request:Request, pk:int):
-        data = request.data
+        data = request.data 
         serializer = UbicacionesSerializer(data = data)
 
         try:
             ubicacion = Ubicaciones.objects.get(id = pk)
-
+           
         except Ubicaciones.DoesNotExist:
             return Response({"error": "ubicacion does not exist"},
                             status = status.HTTP_404_NOT_FOUND)
             
+        if not serializer.is_valid(): 
+            return Response(serializer.errors,
+                            status = status.HTTP_400_BAD_REQUEST)
 
-        if serializer.is_valid():
-            print("Llegue auqi?")
-            print(serializer.data)
-            ubicacion:Ubicaciones = serializer.update(instance = ubicacion,
-                                                    validated_data= serializer.validated_data)                        
-            ubicacion.save()
-            serializer = UbicacionesSerializer(instance = ubicacion)  
-            return Response(serializer.data,
-                           status = status.HTTP_200_OK) 
+        old_folder_name:str = ubicacion.nombre_oficial.replace(" ", "_")
+        new_folder_name:str = serializer.validated_data.get('nombre_oficial',
+                                                            ubicacion.nombre_oficial).replace(" ", "_")
 
-        return Response(serializer.errors,
-                        status = status.HTTP_400_BAD_REQUEST)
- 
+        old_dir = os.path.join(MEDIA_ROOT, "uploads", "ubicaciones", old_folder_name)
+        new_dir = os.path.join(MEDIA_ROOT, "uploads", "ubicaciones", new_folder_name) 
+        relative_new_dir =  os.path.join("uploads", "ubicaciones", new_folder_name)
+
+        if not os.path.exists(old_dir):
+            os.makedirs(new_dir)
+            ubicacion.img_path = relative_new_dir
+
+        elif old_folder_name != new_folder_name:
+            os.rename(old_dir, new_dir)
+            ubicacion.img_path = relative_new_dir
+
+        ubicacion:Ubicaciones = serializer.update(instance = ubicacion,
+                                                  validated_data = serializer.validated_data) 
+        files:list = request.FILES.getlist("img_path")
+        handle_uploaded_file(**{
+                       "files": files,
+                       "doc_type": "ubicacion_img",
+                       "nombre_oficial": ubicacion.nombre_oficial
+                       })
+
+        return Response(ReadUbicacionesSerializer(instance = ubicacion).data,
+                        status = status.HTTP_200_OK) 
+
     #Metodos para el HTTP DELETE-------------------------------
    def delete_ubicacion(self, pk:int):
         try: 

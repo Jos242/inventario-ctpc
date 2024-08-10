@@ -147,6 +147,9 @@ class UbicacionesSerializer(serializers.ModelSerializer):
         fields = ['id', 'nombre_oficial',
                   'alias', 'funcionario_id',
                   'img_path']
+    def update(self, instance, validated_data):
+        validated_data.pop('img_path', None)
+        return super().update(instance, validated_data)
 
 class ReadUbicacionesSerializer(serializers.ModelSerializer):
     img_path = serializers.CharField(required = False)

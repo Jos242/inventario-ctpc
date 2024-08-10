@@ -53,14 +53,7 @@ class Funcionarios(models.Model):
 class Ubicaciones(models.Model):
 
     id = models.AutoField(primary_key = True)
-    # WHEN RUNNING testing.py they have to look like this:
-    # nombre_oficial = models.CharField(unique=True, max_length=240,
-    #                                  blank = True)
-    
-    #alias = models.CharField(unique = True, max_length = 240,
-    #                         null = True, blank = True)
-    
-    # When done, like this:
+
     nombre_oficial = models.CharField(unique=True, max_length=240,
                                       blank = True)
     
