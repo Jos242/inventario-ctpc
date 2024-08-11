@@ -73,7 +73,9 @@ class Ubicaciones(models.Model):
         return self.alias
 
 class ModoAdquisicion(models.Model):
+
     id = models.AutoField(primary_key = True)
+    #TODO:
     descripcion = models.CharField(max_length = 240, unique = True,
                                    blank = True) #IN PRODUCTION THIS ONE IS FALSE
 
