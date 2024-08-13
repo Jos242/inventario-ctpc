@@ -208,3 +208,7 @@ class HistorialDeAccesoSerializer(serializers.ModelSerializer):
     class Meta:
         model = HistorialDeAcceso
         fields = '__all__'
+
+class IdsSerializer(serializers.Serializer):
+    ids = serializers.ListField(child = serializers.IntegerField(),
+                                min_length = 1)

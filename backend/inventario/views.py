@@ -58,7 +58,7 @@ class ActivosView(APIView):
         if path == f"/excel/todos-los-activos/":
             rp:Response = self.activos_do.get_excel_all_activos()
             return rp
-        
+       
         return Response({"data": "did not match an endpoint for a HTTP GET Method"},
                          status= status.HTTP_404_NOT_FOUND)
 
@@ -74,6 +74,10 @@ class ActivosView(APIView):
             rp:Response = self.activos_do.select_columns_to_filter(request)
             return rp
 
+        if path == "/excel/by-ids/":
+            rp:Response = self.activos_do.create_excel_by_ids(request)
+            return rp
+  
         return Response({"data": "did not match an endpoint for a HTTP POST Method"},
                          status = status.HTTP_404_NOT_FOUND)
     

@@ -75,7 +75,7 @@ class Ubicaciones(models.Model):
 class ModoAdquisicion(models.Model):
 
     id = models.AutoField(primary_key = True)
-    #TODO:
+    #TODO set param blank to false in production
     descripcion = models.CharField(max_length = 240, unique = True,
                                    blank = True) #IN PRODUCTION THIS ONE IS FALSE
 

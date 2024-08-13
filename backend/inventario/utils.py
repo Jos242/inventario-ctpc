@@ -1,4 +1,4 @@
-#Python clases incorporadas and others---------
+#std python classes and others-----------------
 from io import StringIO
 import io
 import os
@@ -287,8 +287,8 @@ class ActivosActions():
         response['Content-Disposition'] = "attachment; filename=excel_activos.xlsx"
         output.close()
 
-        return response 
-    #--------------------------------------------------------
+        return response
+  #--------------------------------------------------------
     
     #Metodos para el HTTP POST-------------------------------
     def add_activo(self, request) -> Response: #Working
@@ -358,10 +358,68 @@ class ActivosActions():
         return Response(serializer.errors, 
                         status = status.HTTP_400_BAD_REQUEST )
 
+    def create_excel_by_ids(self, request:Request) -> Response:
+        serializer = IdsSerializer(data = request.data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors,
+                            status = status.HTTP_400_BAD_REQUEST)
+
+        ids_to_fetch = serializer.validated_data["ids"]
+
+        activos = Activos.objects.filter(id__in=ids_to_fetch).annotate(
+            _ubicacion_actual=Coalesce(F('ubicacion_actual__nombre_oficial'), Value('')),
+            _modo_adquisicion=Coalesce(F('modo_adquisicion__descripcion'), Value(''))
+        ).values(
+            'id_registro', 'no_identificacion', 'descripcion', 'marca', 'modelo', 'serie',
+            'estado', '_ubicacion_actual', '_modo_adquisicion', 'precio'
+        )
+        if not activos:
+            return Response({"data": "no valid ids in activos"},
+                            status = status.HTTP_400_BAD_REQUEST) 
+
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {"in_memory": True})
+        worksheet = workbook.add_worksheet()
+        
+        EXCEL_FIELDS = ["", "No.Identificacion", "Descripción",
+                        "Marca", "Modelo", "Serie", "Estado",
+                        "Ubicación", "Modo de adquisición", "Precio",
+                        ]
+
+        COLUMNS = ["A1", "B1", "C1", "D1",
+                   "E1", "F1", "G1", "H1",
+                   "I1", "J1"]
+
+        [worksheet.write(column, field) for column, field in zip(COLUMNS, EXCEL_FIELDS)] 
+
+        for i, activo in enumerate(activos, start=2):
+            row = [
+                activo["id_registro"],
+                activo["no_identificacion"],
+                activo["descripcion"],
+                activo["marca"],
+                activo["modelo"],
+                activo["serie"],
+                activo["estado"],
+                activo["_ubicacion_actual"],
+                activo["_modo_adquisicion"],
+                activo["precio"]
+            ]
+            worksheet.write_row(f'A{i}', row)
+            
+        workbook.close()
+        output.seek(0)
+
+        response = HttpResponse(output.read(), 
+                            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response['Content-Disposition'] = "attachment; filename=excel_activos.xlsx"
+        output.close()
+
+        return response 
+
     #Metodos para el HTTP DELETE------------------------------
-    def delete_last_id_registro(self):
-       
- 
+    def delete_last_id_registro(self):  
        resultado = Activos.objects.values('id_registro')\
                                   .annotate(tipo = Value('Activo', output_field= CharField()))\
                                   .union(Observaciones.objects.values('id_registro')\

@@ -11,6 +11,7 @@ urlpatterns = [
     path("activo/ubicacion-actual/<int:ubicacion_actual>/", views.ActivosViewNoAuth.as_view()),
     path("excel/todos-los-activos/", views.ActivosView.as_view()),
     path("agregar-activo/", views.ActivosView.as_view()),
+    path("excel/by-ids/", views.ActivosView.as_view()),
     path("activos/select-columns/", views.ActivosView.as_view()),
     path("update-activo/<int:pk>/", views.ActivosView.as_view()),
     path("delete/last/id-registro/", views.ActivosView.as_view()),
