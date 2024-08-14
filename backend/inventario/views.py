@@ -74,7 +74,7 @@ class ActivosView(APIView):
             rp:Response = self.activos_do.select_columns_to_filter(request)
             return rp
 
-        if path == "/excel/by-ids/":
+        if path == "/activos/excel/by-ids/":
             rp:Response = self.activos_do.create_excel_by_ids(request)
             return rp
   
@@ -383,6 +383,10 @@ class FuncionariosView(APIView):
         
         if f"/all-funcionarios/" == path:
             rp:Response = self.funcionarios_do.all_funcionarios()
+            return rp
+        
+        if f"/funcionarios/as-excel-file/" == path:
+            rp = self.funcionarios_do.funcionarios_as_excel_file()
             return rp
 
 class ModoAdquisicionView(APIView):

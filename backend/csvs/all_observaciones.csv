@@ -1252,5 +1252,5 @@
 "1,136,39";39;"El activo con placa N°6105-0096, el cual corresponde a un CPU y que consta en el";"1,004,17";1
 "1,136,40";40;"Folio 004 y asiento 17, del tomo 1 del Libro de Inventario, fue trasladado del";"1,004,17";1
 "1,136,41";41;"Laboratorio Institucional N°6 a Laboratorio Institucional N°7, a partir del 04 de diciembre del 2023.";"1,004,17";1
-"1,137,01";1;"Las placas N°6105-4080 y 4081 por un error involuntario no se utilizaron en";"1,124,31";1
-"1,137,02";2;"el seguimiento de este inventario. Los números de placa son retirados del sistema.";"1,124,31";1
+"1,137,01";1;"Las placas N°6105-4080 y 4081 por un error involuntario no se utilizaron en el seguimiento de este inventario. Los números de placa de detallan a continuación con el bien que representan:  IDENTIFICACIÓN 6105-4080  DESCRIPCIÓN Aire acondicionado MARCA xxxxx MODELO xxxxx SERIE xxxxxx ESTADO Bueno  UBICACIÓN";"1,124,31";1
+"1,137,02";2;"xxxxx MODO DE ADQUISICIÓN Ley 7372  PRECIO xxxxx     6105-4081  DESCRIPCIÓN Aire acondicionado MARCA xxxxx MODELO xxxxx SERIE xxxxxx ESTADO Bueno  UBICACIÓN xxxxx MODO DE ADQUISICIÓN Ley 7372  PRECIO xxxxx";"1,124,31";1

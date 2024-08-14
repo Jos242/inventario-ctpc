@@ -10,11 +10,10 @@ from django.contrib.auth import logout, login
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from sgica.settings import MEDIA_ROOT
-from django.db.models import F, Value, CharField, IntegerField
-from django.db.models.functions import Cast
+from django.db.models import F, Value, CharField, IntegerField, OuterRef, Subquery, Func
 from django.http import Http404
 from django.core.exceptions import FieldDoesNotExist
-from django.db.models.functions import Coalesce 
+from django.db.models.functions import Coalesce, Cast
 from django.http import FileResponse, HttpResponse
 from django.db.models.query import QuerySet
 #----------------------------------------------
@@ -1217,32 +1216,31 @@ class UbicacionesActions():
    def nueva_ubicacion(self, request) -> Response:
         serializer = UbicacionesSerializer(data = request.data)
 
-        if serializer.is_valid():
-            nombre_oficial =serializer.validated_data["nombre_oficial"]
-            
-            files:list = request.FILES.getlist('img_path')
-            params = {"files": files,
-                      "doc_type": "ubicacion_img",
-                      "nombre_oficial": serializer.data["nombre_oficial"]} 
-
-            ruta:str = handle_uploaded_file(**params)  
-
-            if "alias" not in serializer.validated_data:
-                serializer.validated_data["alias"] = nombre_oficial
-
-            if "img_path" in serializer.validated_data:
-                serializer.validated_data["img_path"] = ruta
-
-            
-            ubicacion = serializer.create(serializer.validated_data)
-            serializer = ReadUbicacionesSerializer(instance = ubicacion)
-
-            return Response(serializer.data, 
-                            status = status.HTTP_200_OK)
-
-        return Response(serializer.errors,
+        if not serializer.is_valid():
+            return Response(serializer.errors,
                         status = status.HTTP_400_BAD_REQUEST)
    
+        nombre_oficial = serializer.validated_data["nombre_oficial"]
+
+        if "alias" not in serializer.validated_data:
+            serializer.validated_data["alias"] = nombre_oficial 
+
+        files:list = request.FILES.getlist('img_path')
+        params = {"files": files,
+                    "doc_type": "ubicacion_img",
+                    "nombre_oficial": serializer.data["nombre_oficial"]} 
+
+        ruta:str = handle_uploaded_file(**params)  
+
+        if "img_path" in serializer.validated_data:
+            serializer.validated_data["img_path"] = ruta
+
+        ubicacion = serializer.create(serializer.validated_data)
+        serializer = ReadUbicacionesSerializer(instance = ubicacion)
+
+        return Response(serializer.data, 
+                        status = status.HTTP_200_OK)
+
    #Metodos para el HTTP PATCH--------------------------------
    def update_ubicacion(self, request:Request, pk:int):
         data = request.data 
@@ -1326,9 +1324,93 @@ class FuncionariosActions():
 
         return Response(serializer.data,
                         status = status.HTTP_200_OK)
+   
+   def funcionarios_as_excel_file(self):
+        funcionarios = Funcionarios.objects.annotate(
+            username=Subquery(
+                User.objects.filter(id=OuterRef('user_id')).values('username')[:1]
+            ),
+            departamento_desc=Subquery(
+                Departamentos.objects.filter(id=OuterRef('departamento')).values('descripcion')[:1]
+            ),
+            puesto_desc=Subquery(
+                Puestos.objects.filter(id=OuterRef('puesto')).values('descripcion')[:1]
+            ),
+            ubicacion=Coalesce(
+              Subquery(
+                        Ubicaciones.objects.filter(funcionario_id=OuterRef('id'))
+                            .values('funcionario_id')
+                            .annotate(ubicaciones_str=Func(
+                                F('nombre_oficial'),
+                                function='GROUP_CONCAT',
+                                distinct=True,
+                                separator=', '
+                            ))
+                            .values('ubicaciones_str')[:1]
+                    ),
+                    Value('Aun no asignada'),
+                    output_field=CharField()
+                ) 
+            )\
+            .values(
+            'id',
+            'username',
+            'nombre_completo',
+            'departamento_desc',
+            'puesto_desc',
+            'ubicacion'
+            )
+        total_ubicaciones = max(
+            (len(funcionario["ubicacion"].split(","))
+            for funcionario in funcionarios
+            if funcionario["ubicacion"] != 'Aun no asignada'),
+            default= 1)
+        # funcionario:dict = funcionarios[30] 
+        # a_ver = funcionario.get("ubicacion").split(",")
+        # print(a_ver[0])
+        # return Response("Hola")
+        
+        excel_fields = ["Username", "Nombre Completo", "Departamento",
+                        "Puesto", "Ubicacion"]
+             
+        if total_ubicaciones > 1:
+            excel_fields = ["Username", "Nombre Completo",
+                            "Departamento", "Puesto"]
+            
+            for i in range(0, total_ubicaciones):
+                excel_fields.append(f"Ubicacion_{i + 1}")
+                
+                 
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {"in_memory": True})
+        worksheet = workbook.add_worksheet()
+        worksheet.write_row('A1', excel_fields)
+        for i, funcionario in enumerate(funcionarios, start=2):
+            row = [
+                funcionario["username"],
+                funcionario["nombre_completo"],
+                funcionario["departamento_desc"],
+                funcionario["puesto_desc"]
+            ]
+            ubicaciones:list = funcionario["ubicacion"].split(",")
+            
+            if len(ubicaciones) < total_ubicaciones:
+                ubicaciones.extend(['Aun no asignada'] * (total_ubicaciones - len(ubicaciones)))
+
+            for ubicacion in ubicaciones:
+                row.append(ubicacion)
+
+            worksheet.write_row(f'A{i}', row)
+        workbook.close()
+        output.seek(0)
+        response = HttpResponse(output.read(), 
+                            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response['Content-Disposition'] = "attachment; filename=excel_activos.xlsx"
+        output.close()
+
+        return response
 
 class ModoAdquisicionActions():
-
 
     #Metodos para el HTTP GET---------------------------------
     def modo_adquisicion_by_id(self, pk:int):

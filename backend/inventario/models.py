@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models.functions import Now
+from django.db.models import UniqueConstraint
 from django.contrib.auth.models import User
 
 # Create your models here.
@@ -54,19 +55,22 @@ class Ubicaciones(models.Model):
 
     id = models.AutoField(primary_key = True)
 
-    nombre_oficial = models.CharField(unique=True, max_length=240,
+    nombre_oficial = models.CharField(max_length=240,
                                       blank = True)
     
-    alias = models.CharField(unique = True, max_length = 240,
-                             null = True, blank = True)
-    
+    alias = models.CharField(max_length = 240,
+                             null = True, blank = True) 
     
     funcionario_id = models.ForeignKey(Funcionarios, models.DO_NOTHING,
                                        db_column= "funcionario_id", null = True,
                                        blank = True)
+
     img_path = models.CharField(max_length = 250, blank = True)
 
-    class Meta: 
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['nombre_oficial', 'alias'], name='unique_nombre_oficial_alias')
+        ]
         db_table = 'ubicaciones'
 
     def __str__(self) -> str:
