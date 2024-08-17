@@ -182,14 +182,6 @@ class ActivosActions():
     def __init__(self) -> None:
         pass
 
-    #Metodos para el HTTP GET-------------------------------
-    # def all_activos(self) -> Response: 
-    #     activos:ReadActivos = ReadActivos.objects.all().order_by('-id')
-    #     serializer = ReadActivoSerializerComplete(instance = activos,
-    #                                               many = True)
-    #     print(serializer)
-    #     return Response(serializer.data, status = status.HTTP_200_OK)
-
     def activos_filter_column(self) -> Response: 
         filter_all_activos = Activos.objects.only('id', 'id_registro', 'no_identificacion',
                                                   'descripcion', 'ubicacion_original').order_by('-id')
@@ -440,7 +432,6 @@ class ActivosActions():
                        status = status.HTTP_200_OK) 
 
 #--------------------------------------------------------
-
 class ObservacionesActions():
     
     def __init__(self) -> None:
@@ -515,8 +506,8 @@ class ObservacionesActions():
             return Response(serializer.data, status = status.HTTP_200_OK)
  
         return Response(serializer.errors, status = status.HTTP_200_OK)
-#----------------------------------------------------------
-   
+
+#---------------------------------------------------------- 
 class UserActions():
      
     def __init__(self) -> None:
@@ -583,8 +574,8 @@ class UserActions():
                             status = status.HTTP_200_OK) 
    
         return Response(serializer.errors,
-                         status = status.HTTP_200_OK)
-      
+                         status = status.HTTP_200_OK)    
+
 #-------------------------------------------------------------
 class DocsActions():
 
@@ -724,15 +715,14 @@ class DocsActions():
     
     def create_print_doc(self, request) -> Response:
         serializer = WhatTheExcelNameIs(data = request.data)
-
-        query_activos = Activos.objects.filter(impreso=0) \
+        entries_activos = Activos.objects.filter(impreso=0) \
                                .annotate(origen=Value('activos', output_field=CharField())) \
                                .values('id_registro', 'asiento', 'no_identificacion',
                                        'descripcion', 'marca', 'modelo', 'serie',
                                        'origen')
 
         # Query for Observaciones
-        query_observaciones = Observaciones.objects.filter(impreso=0) \
+        entries_observaciones = Observaciones.objects.filter(impreso=0) \
                                                 .annotate(
                                                     no_identificacion = Value(None, output_field = CharField()),
                                                     marca=Value(None, output_field=CharField()),
@@ -746,7 +736,7 @@ class DocsActions():
                                                         'origen')
 
         # Combine both queries using union
-        resultados:QuerySet = query_activos.union(query_observaciones)\
+        resultados:QuerySet = entries_activos.union(entries_observaciones)\
                                            .order_by('id_registro')
   
         only_activos = 1
@@ -765,184 +755,228 @@ class DocsActions():
         
         if (1 not in list_decide and 2 in list_decide):
             print_type = "SoloObservaciones"
-        count_1 =  list_decide.count(1)
-        count_2 =  list_decide.count(2)
+        count_1 = list_decide.count(1)
+        count_2 = list_decide.count(2)
 
         if count_1 > 0 and count_2 > 0:
             print_type = "ObservacionesYActivos"
 
-        if serializer.is_valid():
-            file_name:str = serializer.validated_data.get("file_name")
+        if not serializer.is_valid():
+            return Response(serializer.errors,
+                            status = status.HTTP_200_OK)
+        file_name = serializer.validated_data.get("file_name")
+        path_to_save = os.path.join(MEDIA_ROOT, 'documentos_de_impresion' ,
+                                    file_name)
+
+        bold_param        = {'bold': True}
+        center_text_param = {'align': 'center'}
+        font_type         = {'font_name': 'Arial'}
+        font_size         = {'font_size': 11}
+
+        if print_type == "SoloActivos":
+            activos_list:QuerySet = resultados[:40] 
+            workbook = xlsxwriter.Workbook(path_to_save)
+            worksheet = workbook.add_worksheet()
+            #Para aumentar el ancho de la columna-------------------------------------
+            worksheet.set_column('A:A', 14.57) 
+            worksheet.set_column('B:B', 2.29) 
+            worksheet.set_column('C:C', 16.86) 
+            worksheet.set_column('D:D', 20.29) 
+            worksheet.set_column('E:E', 11.86) 
+            worksheet.set_column('F:F', 17.57)
+            worksheet.set_column('G:G', 19.71)
+
+            #Crea un objeto 'Format' para dar formato al texto------------------------
+            bold = workbook.add_format({'bold': True})
+            counter = 1
+            worksheet.write(f'A1', "Registrado en",
+                            workbook.add_format(bold_param | center_text_param |
+                                                font_type | font_size))
+            worksheet.write(f'B1', "1", 
+                            workbook.add_format(bold_param | center_text_param))
+                            
+            worksheet.write(f'C1', "No. Identificacion", 
+                            workbook.add_format(bold_param | center_text_param))
+            worksheet.write(f'D1', "Descripción", bold)
+            worksheet.write(f'E1', "Marca", bold)
+            worksheet.write(f'F1', "Modelo", bold)
+            worksheet.write(f'G1', "Serie", bold)
             
-            if '.xlsx' not in file_name:
-                return Response({"error": "add file extension '.xlsx' to the 'file_name' value"},
-                                status = status.HTTP_400_BAD_REQUEST)
- 
-            path_to_save = os.path.join(MEDIA_ROOT, 'documentos_de_impresion' ,file_name)
-            bold_param = {'bold': True}
-            center_text_param = {'align': 'center'}
-            font_type = {'font_name': 'Arial'}
-            font_size = {'font_size': 11}
-
-            if print_type == "SoloActivos":
-                activos_list:QuerySet = resultados[:40] 
-                workbook = xlsxwriter.Workbook(path_to_save)
-                worksheet = workbook.add_worksheet()
-                #Para aumentar el ancho de la columna-------------------------------------
-                worksheet.set_column('A:A', 14.57) 
-                worksheet.set_column('B:B', 2.29) 
-                worksheet.set_column('C:C', 16.86) 
-                worksheet.set_column('D:D', 20.29) 
-                worksheet.set_column('E:E', 11.86) 
-                worksheet.set_column('F:F', 17.57)
-                worksheet.set_column('G:G', 19.71)
-
-                #Crea un objeto 'Format' para dar formato al texto------------------------
-                bold = workbook.add_format({'bold': True})
-                counter = 1
-                worksheet.write(f'A1', "Registrado en",
-                                workbook.add_format(bold_param | center_text_param |
-                                                    font_type | font_size))
-                worksheet.write(f'B1', "1", 
-                                workbook.add_format(bold_param | center_text_param))
-                                
-                worksheet.write(f'C1', "No. Identificacion", 
-                                workbook.add_format(bold_param | center_text_param))
-                worksheet.write(f'D1', "Descripción", bold)
-                worksheet.write(f'E1', "Marca", bold)
-                worksheet.write(f'F1', "Modelo", bold)
-                worksheet.write(f'G1', "Serie", bold)
-                
-                
-                for i, activo in enumerate(activos_list, start = 2):
-                    in_case = None
-        
-                    if activo["asiento"] == 2 and i > 30:
-                        print("Entre aqui")
-                        id_registro = activo["id_registro"].split(',')
-                        id_registro[2] = "41"
-                        id_registro[1] = f"{int(id_registro[1]) - 1}"
-                        in_case = ",".join(id_registro)  
-
-                    row = [
-                        restar_uno(activo["id_registro"]),
-                        activo["asiento"] - 1 if activo["asiento"] != 2 and i <= 41 else 41,
-                        activo["no_identificacion"],
-                        activo["descripcion"],
-                        activo["marca"],
-                        activo["modelo"],
-                        activo["serie"]
-                    ]
-                    if in_case != None:
-                        row[0] = in_case
-
-                    worksheet.write_row(f'A{i}', row)
-
-                workbook.close()
-                # Activos.objects.filter(impreso = False).update(impreso = True)  
-                return Response({"success": f"go to '/media/documentos_de_impresion/{file_name}/' to download the file"},
-                                status = status.HTTP_200_OK)
-
-            if print_type == "SoloObservaciones":
-                workbook = xlsxwriter.Workbook(path_to_save) 
-                worksheet = workbook.add_worksheet() 
-                observaciones_list:QuerySet = resultados 
-                
-                if len(observaciones_list) < 41:
-                    return Response({"error": "not enough entries to create 'tabla de impresiones'"},
-                                    status = status.HTTP_400_BAD_REQUEST)
-                print(observaciones_list) 
-
-                #Para aumentar el ancho de la columna-------------------------------------
-                worksheet.set_column('A:A', 14.57) 
-                worksheet.set_column('B:B', 2.29) 
-                worksheet.set_column('C:C', 86.29) 
-                worksheet.set_column('D:D', 20.29) 
-                worksheet.set_column('E:E', 11.86) 
-                worksheet.set_column('F:F', 17.57)
-                worksheet.set_column('G:G', 19.71)
-                counter:int = 1
-                
-                for observacion in observaciones_list:
-                    obs:Observaciones = Observaciones.objects.get(id_registro = observacion['id_registro']) 
-                    new_id_registro = restar_uno(observacion['id_registro'])
-                    new_asiento = int(observacion['asiento'] -1) 
-         
-                    if int(observacion['asiento']) == 2 and counter > 30:
-                        nums = observacion['id_registro'].split(',') 
-                        nums[2] = "41"
-                        nums[1] = f"{int(nums[1]) - 1}"
-                        result =  ",".join(nums)
-                        print(observacion['id_registro'])
-                        print(nums[1]) 
-                        worksheet.write(f'A{counter}', result,
-                                    workbook.add_format(center_text_param | font_type | font_size)) 
-                        worksheet.write(f'B{counter}', "41",
-                                        workbook.add_format(bold_param | center_text_param))
-                        worksheet.write(f'C{counter}', observacion['descripcion'])
-                        obs.id_registro = result
-                        obs.asiento = 41
-                        obs.impreso = True 
-                        obs.save()
-                        last_id_registro_checked = observacion['id_registro']
-                        print(last_id_registro_checked)
-                        break
-
-                    worksheet.write(f'A{counter}', new_id_registro,
-                                    workbook.add_format(center_text_param | font_type | font_size))
-                    worksheet.write(f'B{counter}', new_asiento,
-                                    workbook.add_format(bold_param | center_text_param))
-
-                    obs.id_registro = new_id_registro
-                    obs.asiento = new_asiento
-                    obs.impreso = True
-                    obs.save()
-                    worksheet.write(f'C{counter}', observacion['descripcion'])
-                    counter += 1
- 
-                workbook.close()
-
-                query_activos = Activos.objects.filter(impreso=0) \
-                                    .annotate(origen=Value('activos', output_field=CharField())) \
-                                    .values('id_registro', 'asiento', 'origen', 'descripcion')
-
-                # Query for Observaciones
-                query_observaciones = Observaciones.objects.filter(impreso=0) \
-                                                        .annotate(origen=Value('observaciones', output_field=CharField())) \
-                                                        .values('id_registro', 'asiento', 'origen', 'descripcion')
-
-                # Combine both queries using union
-                resultados = query_activos.union(query_observaciones).order_by('id_registro')
-                resultados_list = list(resultados)
-                for resultado in resultados_list:
-
-                    if resultado['origen'] == 'activos':                         
-                        activo:Activos = Activos.objects.get(id_registro = resultado['id_registro'])
-                        updated_values = update_id_registro_and_asiento(activo.id_registro)
-                        print("Estoy fallando antes de llegar aca (activos)")
-                        print(resultado['id_registro'])
-                        activo.id_registro = updated_values.get("id_registro")
-                        activo.asiento = updated_values.get("asiento")
-                        activo.save() 
-
-                    if resultado['origen'] == 'observaciones':
-                        observacion:Observaciones = Observaciones.objects.get(id_registro = resultado['id_registro'])
-                        updated_values = update_id_registro_and_asiento(observacion.id_registro)
-                        print("Estoy fallando antes de llegar aca (observaciones)")
-                        print(resultado['id_registro'])
-                        observacion.id_registro = updated_values.get("id_registro")
-                        observacion.asiento = updated_values.get("asiento")
-                        observacion.save()                       
-
-                return Response({"testing": "SoloObservaciones"},
-                                status = status.HTTP_200_OK)
-
-            if print_type == "ObservacionesYActivos": 
-                return Response({"testing": "ObservacionesYActivos"}, 
-                                status = status.HTTP_200_OK)
+            
+            for i, activo in enumerate(activos_list, start = 2):
+                in_case = None
     
-        return Response(serializer.errors,
-                        status = status.HTTP_200_OK)
+                if activo["asiento"] == 2 and i > 30:
+                    print("Entre aqui")
+                    id_registro = activo["id_registro"].split(',')
+                    id_registro[2] = "41"
+                    id_registro[1] = f"{int(id_registro[1]) - 1}"
+                    in_case = ",".join(id_registro)  
+
+                row = [
+                    restar_uno(activo["id_registro"]),
+                    activo["asiento"] - 1 if activo["asiento"] != 2 and i <= 41 else 41,
+                    activo["no_identificacion"],
+                    activo["descripcion"],
+                    activo["marca"],
+                    activo["modelo"],
+                    activo["serie"]
+                ]
+                if in_case != None:
+                    row[0] = in_case
+
+                worksheet.write_row(f'A{i}', row)
+
+            workbook.close()
+            #TODO descomentar esta linea en prod
+            # Activos.objects.filter(impreso = False).update(impreso = True) 
+            msg = f"go to '/media/documento_de_impresion/{file_name}/' to download the file"
+            return Response({"success": msg},
+                   status = status.HTTP_200_OK)
+
+        if print_type == "SoloObservaciones":
+            workbook = xlsxwriter.Workbook(path_to_save) 
+            worksheet = workbook.add_worksheet() 
+            observaciones_list:QuerySet = resultados 
+            
+            if len(observaciones_list) < 41:
+                return Response({"error": "not enough entries to create 'tabla de impresiones'"},
+                                status = status.HTTP_400_BAD_REQUEST)
+            print(observaciones_list) 
+
+            #Para aumentar el ancho de la columna-------------------------------------
+            worksheet.set_column('A:A', 14.57) 
+            worksheet.set_column('B:B', 2.29) 
+            worksheet.set_column('C:C', 86.29) 
+            worksheet.set_column('D:D', 20.29) 
+            worksheet.set_column('E:E', 11.86) 
+            worksheet.set_column('F:F', 17.57)
+            worksheet.set_column('G:G', 19.71)
+            counter:int = 1
+            
+            for observacion in observaciones_list:
+                obs:Observaciones = Observaciones.objects.get(id_registro = observacion['id_registro']) 
+                new_id_registro = restar_uno(observacion['id_registro'])
+                new_asiento = int(observacion['asiento'] -1) 
+        
+                if int(observacion['asiento']) == 2 and counter > 30:
+                    nums = observacion['id_registro'].split(',') 
+                    nums[2] = "41"
+                    nums[1] = f"{int(nums[1]) - 1}"
+                    result =  ",".join(nums)
+                    print(observacion['id_registro'])
+                    print(nums[1]) 
+                    worksheet.write(f'A{counter}', result,
+                                workbook.add_format(center_text_param | font_type | font_size)) 
+                    worksheet.write(f'B{counter}', "41",
+                                    workbook.add_format(bold_param | center_text_param))
+                    worksheet.write(f'C{counter}', observacion['descripcion'])
+                    obs.id_registro = result
+                    obs.asiento = 41
+                    obs.impreso = True 
+                    obs.save()
+                    last_id_registro_checked = observacion['id_registro']
+                    print(last_id_registro_checked)
+                    break
+
+                worksheet.write(f'A{counter}', new_id_registro,
+                                workbook.add_format(center_text_param | font_type | font_size))
+                worksheet.write(f'B{counter}', new_asiento,
+                                workbook.add_format(bold_param | center_text_param))
+
+                obs.id_registro = new_id_registro
+                obs.asiento = new_asiento
+                obs.impreso = True
+                obs.save()
+                worksheet.write(f'C{counter}', observacion['descripcion'])
+                counter += 1
+
+            workbook.close()
+
+            query_activos = Activos.objects.filter(impreso=0) \
+                                .annotate(origen=Value('activos', output_field=CharField())) \
+                                .values('id_registro', 'asiento', 'origen', 'descripcion')
+
+            # Query for Observaciones
+            query_observaciones = Observaciones.objects.filter(impreso=0) \
+                                                    .annotate(origen=Value('observaciones', output_field=CharField())) \
+                                                    .values('id_registro', 'asiento', 'origen', 'descripcion')
+
+            # Combine both queries using union
+            resultados = query_activos.union(query_observaciones).order_by('id_registro')
+            resultados_list = list(resultados)
+            for resultado in resultados_list:
+
+                if resultado['origen'] == 'activos':                         
+                    activo:Activos = Activos.objects.get(id_registro = resultado['id_registro'])
+                    updated_values = update_id_registro_and_asiento(activo.id_registro)
+                    print("Estoy fallando antes de llegar aca (activos)")
+                    print(resultado['id_registro'])
+                    activo.id_registro = updated_values.get("id_registro")
+                    activo.asiento = updated_values.get("asiento")
+                    activo.save() 
+
+                if resultado['origen'] == 'observaciones':
+                    observacion:Observaciones = Observaciones.objects.get(id_registro = resultado['id_registro'])
+                    updated_values = update_id_registro_and_asiento(observacion.id_registro)
+                    print("Estoy fallando antes de llegar aca (observaciones)")
+                    print(resultado['id_registro'])
+                    observacion.id_registro = updated_values.get("id_registro")
+                    observacion.asiento = updated_values.get("asiento")
+                    observacion.save()                       
+
+            return Response({"testing": "SoloObservaciones"},
+                            status = status.HTTP_200_OK)
+
+        if print_type == "ObservacionesYActivos":
+            activos_observaciones_list:QuerySet = resultados[:40]
+            workbook = xlsxwriter.Workbook(path_to_save)
+            worksheet = workbook.add_worksheet()
+            #Para aumentar el ancho de la columna-------------------------------------
+            worksheet.set_column('A:A', 14.57) 
+            worksheet.set_column('B:B', 2.29) 
+            worksheet.set_column('C:C', 16.86) 
+            worksheet.set_column('D:D', 20.29) 
+            worksheet.set_column('E:E', 11.86) 
+            worksheet.set_column('F:F', 17.57)
+            worksheet.set_column('G:G', 19.71)
+
+            #Crea un objeto 'Format' para dar formato al texto------------------------
+            bold = workbook.add_format({'bold': True}) 
+            worksheet.write(f'A1', "Registrado en",
+                            workbook.add_format(bold_param | center_text_param |
+                                                font_type | font_size))
+            worksheet.write(f'B1', "1", 
+                            workbook.add_format(bold_param | center_text_param))
+                            
+            worksheet.write(f'C1', "No. Identificacion", 
+                            workbook.add_format(bold_param | center_text_param))
+            worksheet.write(f'D1', "Descripción", bold)
+            worksheet.write(f'E1', "Marca", bold)
+            worksheet.write(f'F1', "Modelo", bold)
+            worksheet.write(f'G1', "Serie", bold)
+
+            for i, element in enumerate(activos_observaciones_list, start = 2):
+                row = [
+                    element["id_registro"],
+                    element["asiento"],
+                    element["no_identificacion"],
+                    element["descripcion"],
+                    element["marca"],
+                    element["modelo"],
+                    element["serie"]
+                ]
+
+                worksheet.write_row(f'A{i}', row)
+
+        
+            workbook.close()
+            #TODO descomentar esta linea en prod
+            # Activos.objects.filter(impreso = False).update(impreso = True)  
+            msg = f"go to '/media/documento_de_impresion/{file_name}/' to download the file"
+            return Response({"success": msg},
+                   status = status.HTTP_200_OK) 
+    
 
     def update_doc_info(self, request:Request, pk:int) -> Response: 
         data = request.data
@@ -965,8 +999,8 @@ class DocsActions():
         context = ReadDocSerializer(instance = doc)
 
         return Response(context.data,
-                        status = status.HTTP_200_OK)      
-    
+                        status = status.HTTP_200_OK)          
+
 #--------------------------------------------------------    
 class CierreInventarioActions():
 
@@ -1045,6 +1079,7 @@ class CierreInventarioActions():
 
         return Response({"status": "entry was deleted"}, 
                         status = status.HTTP_200_OK)
+
 #--------------------------------------------------------    
 class RevisionesActions():
 
@@ -1134,6 +1169,7 @@ class RevisionesActions():
 
         return Response({"status": "revision has been deleted"}, 
                         status = status.HTTP_200_OK)
+#--------------------------------------------------------    
 
 class UbicacionesActions():
 
@@ -1297,6 +1333,7 @@ class UbicacionesActions():
 
         return Response({"status": "ubicacion has been deleted"}, 
                         status = status.HTTP_200_OK)
+#--------------------------------------------------------    
        
 class FuncionariosActions():
 
@@ -1365,12 +1402,8 @@ class FuncionariosActions():
             for funcionario in funcionarios
             if funcionario["ubicacion"] != 'Aun no asignada'),
             default= 1)
-        # funcionario:dict = funcionarios[30] 
-        # a_ver = funcionario.get("ubicacion").split(",")
-        # print(a_ver[0])
-        # return Response("Hola")
-        
-        excel_fields = ["Username", "Nombre Completo", "Departamento",
+
+        excel_fields = ["Cedula", "Nombre Completo", "Departamento",
                         "Puesto", "Ubicacion"]
              
         if total_ubicaciones > 1:
@@ -1405,10 +1438,11 @@ class FuncionariosActions():
         output.seek(0)
         response = HttpResponse(output.read(), 
                             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-        response['Content-Disposition'] = "attachment; filename=excel_activos.xlsx"
+        response['Content-Disposition'] = "attachment; filename=.xlsx"
         output.close()
 
         return response
+#--------------------------------------------------------    
 
 class ModoAdquisicionActions():
 

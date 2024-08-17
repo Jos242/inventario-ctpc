@@ -138,6 +138,21 @@ class RevisionesSerializer(serializers.ModelSerializer):
      
 class WhatTheExcelNameIs(serializers.Serializer):
     file_name = serializers.CharField()
+    
+    def is_valid(self, *args, **kwargs):
+        valid = super().is_valid(*args, **kwargs)        
+        init_vals:dict = self.get_initial()
+        file_name:str = init_vals.get("file_name") 
+
+        if valid: 
+            file_name = self.validated_data.get('file_name', '')
+            if not file_name.lower().endswith('.xlsx'):
+                self._errors['file_name'] = ['El archivo debe tener la extensión .xlsx']
+                return False
+
+        return valid
+
+
 
 class UbicacionesSerializer(serializers.ModelSerializer):
     img_path = serializers.FileField(required = False)
