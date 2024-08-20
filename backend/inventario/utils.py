@@ -607,7 +607,8 @@ class UserActions():
         user = serializer.update(instance = user,
                                  validated_data = serializer.validated_data)
         
-        return Response("Update user testing")
+        return Response({"success": "user was updated"},
+                         status = status.HTTP_200_OK )
 
 #-------------------------------------------------------------
 class DocsActions():

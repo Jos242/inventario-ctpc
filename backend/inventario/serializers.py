@@ -83,7 +83,7 @@ class UpdateUserSerializer(serializers.Serializer):
     password = serializers.CharField(required = False, max_length = 128)
 
     #funcionarios fields
-    user = serializers.PrimaryKeyRelatedField(queryset = User.objects.all(),
+    user_id = serializers.PrimaryKeyRelatedField(queryset = User.objects.all(),
                                                  required = False)
     nombre_completo = serializers.CharField(required = False)
     departamento = serializers.PrimaryKeyRelatedField(queryset = Departamentos.objects.all(),
@@ -101,12 +101,17 @@ class UpdateUserSerializer(serializers.Serializer):
         funcionarios_keys = ['nombre_completo', "user_id",
                              "departamento", "puesto"] 
         check_for_password = validated_data.get("password", None)
-        instance.username = validated_data.get("username", instance.username)  
+        new_username = validated_data.get("username", instance.username)
+
+        if new_username != instance.username and User.objects.filter(username = new_username).exists():
+            raise ValidationError({"error": "username already in use by another user"})
+
+        instance.username = new_username 
 
         if check_for_password is not None:
             instance.set_password(check_for_password)
 
-        instance.save()
+        
 
         update_funcionario = self.check_keys(dictionary = validated_data,
                                              required_keys = funcionarios_keys)
@@ -115,19 +120,19 @@ class UpdateUserSerializer(serializers.Serializer):
             try: 
                 funcionario:Funcionarios    = Funcionarios.objects.get(user_id = instance.id)
                 new_user_id = validated_data.get("user_id", funcionario.user_id)
-                
-                if new_user_id != funcionario.user_id and Funcionarios.objects.filter(user_id = new_user_id).exists() and\
-                   User.objects.filter(id = new_user_id).exists():
-                    raise ValidationError({"error": "user_id already in use by another funcionario or user does not exist"})
 
-                funcionario.user = User.objects.get(id = new_user_id)
+                if new_user_id != funcionario.user_id and Funcionarios.objects.filter(user_id = new_user_id).exists():
+                    raise ValidationError({"error": "user_id already in use by another funcionario"})
+
+                funcionario.user = new_user_id
                 funcionario.nombre_completo = validated_data.get("nombre_completo", funcionario.nombre_completo) 
                 funcionario.departamento    = validated_data.get("departamento", funcionario.departamento)
                 funcionario.puesto          = validated_data.get("puesto", funcionario.puesto) 
                 funcionario.save() 
             except Funcionarios.DoesNotExist:
-                raise ValidationError({"error": "funcionario does not exist"})
-            
+                raise ValidationError({"error": "funcionario does not exist, delete extra fields"})
+
+        instance.save()  
         return instance
 
     def check_keys(self, dictionary:dict, required_keys:list) -> bool:
