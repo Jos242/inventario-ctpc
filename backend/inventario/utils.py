@@ -575,6 +575,39 @@ class UserActions():
    
         return Response(serializer.errors,
                          status = status.HTTP_200_OK)    
+    #Metodos para el HTTP DELETE-----------------------------
+    def delete_user(self, request:Request, pk:int) -> Response:
+
+        try: 
+            user = User.objects.get(id = pk)
+            user.delete()
+
+        except User.DoesNotExist:
+            return Response({"error": "user does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+
+        return Response({"status": "user deleted"}, 
+                        status = status.HTTP_200_OK)
+    
+    #Metodos para el HTTP PATCH----------------------------------
+    def update_user(self, request:Request, pk:int) -> Response: 
+        serializer:UpdateUserSerializer = UpdateUserSerializer(data = request.data)
+        
+        if not serializer.is_valid():
+            return Response(serializer.errors, 
+                            status = status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(id = pk)
+
+        except User.DoesNotExist:
+            return Response({"error": "user does not exist"},
+                            status = status.HTTP_400_BAD_REQUEST)
+
+        user = serializer.update(instance = user,
+                                 validated_data = serializer.validated_data)
+        
+        return Response("Update user testing")
 
 #-------------------------------------------------------------
 class DocsActions():

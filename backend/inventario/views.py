@@ -169,6 +169,20 @@ class UserView(APIView):
         path = request.path
         if path == "/crear-usuario/":  
             return self.user_do.new_usuario(request)
+    
+    def patch(self, request:Request, pk:int) -> Response:
+        path = request.path
+
+        if path == f"/actualizar-usuario/{pk}/":
+            rp:Response = self.user_do.update_user(request, pk)
+            return rp
+
+        
+    def delete(self, request:Request, pk:int) -> Response:
+        path = request.path
+        if path == f"/borrar-usuario/{pk}/":
+            return self.user_do.delete_user(request, pk)
+        
 
 class DocsView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)

@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from inventario.models import *
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 class ActivoSerializer(serializers.ModelSerializer):
     id_registro = serializers.CharField(required = False)
@@ -60,12 +61,79 @@ class UserSerializer(serializers.ModelSerializer):
         model  = User
         fields = ['username', 'password']
 
+    def update(self, instance, validated_data):
+        return 1
+    
+class UpdateUserSerializer(serializers.Serializer):
+    username = serializers.CharField(required = False)
+    password = serializers.CharField(required = False)
+    nombre_completo = serializers.CharField(required = False)
+
 class FuncionariosSerializer(serializers.ModelSerializer):
    
     class Meta:
         model = Funcionarios 
         fields = ['user', 'nombre_completo', 'departamento',
                   'puesto']
+
+class UpdateUserSerializer(serializers.Serializer):
+    #auth_user fields
+    username = serializers.CharField(required = False, max_length = 150)
+
+    password = serializers.CharField(required = False, max_length = 128)
+
+    #funcionarios fields
+    user = serializers.PrimaryKeyRelatedField(queryset = User.objects.all(),
+                                                 required = False)
+    nombre_completo = serializers.CharField(required = False)
+    departamento = serializers.PrimaryKeyRelatedField(queryset = Departamentos.objects.all(),
+                                                      required = False)
+    puesto = serializers.PrimaryKeyRelatedField(queryset = Puestos.objects.all(),
+                                                required = False)
+ 
+
+    def validate(self, attrs):
+        if not attrs:
+            raise ValidationError("no data or not valid fields")  
+        return attrs 
+
+    def update(self, instance:User, validated_data:dict) -> User:
+        funcionarios_keys = ['nombre_completo', "user_id",
+                             "departamento", "puesto"] 
+        check_for_password = validated_data.get("password", None)
+        instance.username = validated_data.get("username", instance.username)  
+
+        if check_for_password is not None:
+            instance.set_password(check_for_password)
+
+        instance.save()
+
+        update_funcionario = self.check_keys(dictionary = validated_data,
+                                             required_keys = funcionarios_keys)
+
+        if update_funcionario: 
+            try: 
+                funcionario:Funcionarios    = Funcionarios.objects.get(user_id = instance.id)
+                new_user_id = validated_data.get("user_id", funcionario.user_id)
+                
+                if new_user_id != funcionario.user_id and Funcionarios.objects.filter(user_id = new_user_id).exists() and\
+                   User.objects.filter(id = new_user_id).exists():
+                    raise ValidationError({"error": "user_id already in use by another funcionario or user does not exist"})
+
+                funcionario.user = User.objects.get(id = new_user_id)
+                funcionario.nombre_completo = validated_data.get("nombre_completo", funcionario.nombre_completo) 
+                funcionario.departamento    = validated_data.get("departamento", funcionario.departamento)
+                funcionario.puesto          = validated_data.get("puesto", funcionario.puesto) 
+                funcionario.save() 
+            except Funcionarios.DoesNotExist:
+                raise ValidationError({"error": "funcionario does not exist"})
+            
+        return instance
+
+    def check_keys(self, dictionary:dict, required_keys:list) -> bool:
+        return any([key in dictionary for key in required_keys])
+
+
 
 class ReadFuncionariosSerializer(serializers.Serializer):
     user = serializers.CharField(max_length = 240, required = False)
@@ -151,8 +219,6 @@ class WhatTheExcelNameIs(serializers.Serializer):
                 return False
 
         return valid
-
-
 
 class UbicacionesSerializer(serializers.ModelSerializer):
     img_path = serializers.FileField(required = False)

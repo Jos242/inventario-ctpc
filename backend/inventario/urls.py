@@ -1,10 +1,13 @@
 from django.urls import path
 from . import views
 urlpatterns = [
+
+    #Endpoints relacionados a los usuarios
     path("crear-usuario/", views.UserView.as_view()),
+    path("actualizar-usuario/<int:pk>/", views.UserView.as_view()),
+    path("borrar-usuario/<int:pk>/", views.UserView.as_view()),
 
     #Endpoints relacionados a los activos------------------------------------
-    # path("todos-los-activos/", views.ActivosView.as_view()),
     path("activos-filtrados-columna/", views.ActivosView.as_view()),
     path("activo/<int:pk>/", views.ActivosViewNoAuth.as_view()),
     path("activo/<str:no_identificacion>/", views.ActivosViewNoAuth.as_view()),
