@@ -1,8 +1,7 @@
 # HELLO GUYS MY NAME IS SCRIPTY AND I WILL DO EVERYTHING FOR YOU :)
 import requests
 import pandas
-import platform
-
+import os
 import platform
 
 

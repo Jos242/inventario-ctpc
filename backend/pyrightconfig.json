@@ -1,0 +1,10 @@
+{
+    "typeCheckingMode": "basic",
+    "pythonPlatform": "Linux",
+    "autoImportCompletions": true,
+    "diagnosticMode": "workspace",
+    "useLibraryCodeForTypes": true,
+    "venvPath": "/home/david/Desktop/venvs",
+    "venv": "inventario-ctpc"
+}
+

@@ -295,6 +295,6 @@ class HistorialDeAccesoSerializer(serializers.ModelSerializer):
         model = HistorialDeAcceso
         fields = '__all__'
 
-class IdsSerializer(serializers.Serializer):
-    ids = serializers.ListField(child = serializers.IntegerField(),
+class NoIdentificacionSerializer(serializers.Serializer):
+    nos_identificacion = serializers.ListField(child = serializers.CharField(),
                                 min_length = 1)

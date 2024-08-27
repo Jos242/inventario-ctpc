@@ -1,20 +1,16 @@
 #std python classes and others-----------------
-from io import StringIO
 import io
 import os
+from typing import Any
 import xlsxwriter
 #----------------------------------------------
 
 #Django herramientas---------------------------
-from django.contrib.auth import logout, login
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
 from sgica.settings import MEDIA_ROOT
-from django.db.models import F, Value, CharField, IntegerField, OuterRef, Subquery, Func
-from django.http import Http404
-from django.core.exceptions import FieldDoesNotExist
-from django.db.models.functions import Coalesce, Cast
-from django.http import FileResponse, HttpResponse
+from django.db.models import F, Value, CharField, OuterRef, Subquery, Func
+from django.db.models.functions import Coalesce
+from django.http import HttpResponse
 from django.db.models.query import QuerySet
 #----------------------------------------------
 
@@ -53,8 +49,7 @@ def handle_file_directories(doc_type:str = None, folder_name:str = None) -> list
     os.makedirs(absolute_path)
     return [relative_path, absolute_path]
 
-def handle_uploaded_file(files: list, doc_type:str = None,
-                         *args, **kwargs) -> str:
+def handle_uploaded_file(files: list, doc_type:str = None, **kwargs) -> str:
     """
         This method is just for saving the file following this structure:
         uploads/{model pk}/{file_name.ext}
@@ -184,7 +179,8 @@ class ActivosActions():
 
     def activos_filter_column(self) -> Response: 
         filter_all_activos = Activos.objects.only('id', 'id_registro', 'no_identificacion',
-                                                  'descripcion', 'ubicacion_original').order_by('-id')
+                                                  'descripcion','ubicacion_original')\
+                                                   .order_by('-id')
 
         serializer = ReadActivoSerializerIncomplete(instance = filter_all_activos,
                                                     many = True)
@@ -350,15 +346,15 @@ class ActivosActions():
                         status = status.HTTP_400_BAD_REQUEST )
 
     def create_excel_by_ids(self, request:Request) -> Response:
-        serializer = IdsSerializer(data = request.data)
+        serializer = NoIdentificacionSerializer(data = request.data)
 
         if not serializer.is_valid():
             return Response(serializer.errors,
                             status = status.HTTP_400_BAD_REQUEST)
 
-        ids_to_fetch = serializer.validated_data["ids"]
+        nos_iden_to_fetch = serializer.validated_data["nos_identificacion"]
 
-        activos = Activos.objects.filter(id__in=ids_to_fetch).annotate(
+        activos = Activos.objects.filter(no_identificacion__in = nos_iden_to_fetch).annotate(
             _ubicacion_actual=Coalesce(F('ubicacion_actual__nombre_oficial'), Value('')),
             _modo_adquisicion=Coalesce(F('modo_adquisicion__descripcion'), Value(''))
         ).values(
@@ -366,7 +362,7 @@ class ActivosActions():
             'estado', '_ubicacion_actual', '_modo_adquisicion', 'precio'
         )
         if not activos:
-            return Response({"data": "no valid ids in activos"},
+            return Response({"data": "no valid no_identificacion in activos"},
                             status = status.HTTP_400_BAD_REQUEST) 
 
         output = io.BytesIO()
@@ -581,11 +577,11 @@ class UserActions():
         try: 
             user = User.objects.get(id = pk)
             user.delete()
-
+        
         except User.DoesNotExist:
             return Response({"error": "user does not exist"},
                             status = status.HTTP_404_NOT_FOUND)
-
+          
         return Response({"status": "user deleted"}, 
                         status = status.HTTP_200_OK)
     
@@ -619,8 +615,8 @@ class DocsActions():
     #Metodos para el HTTP GET------------------------------- 
     def get_all_docs(self) -> Response:
         docs:Docs = Docs.objects.all()
-        serializer:ReadDocSerializer= ReadDocSerializer(instance = docs,
-                                               many = True)  
+        serializer:Any =  ReadDocSerializer(instance = docs,
+                                                        many = True)  
         return Response(serializer.data,
                         status = status.HTTP_200_OK)
 
@@ -632,7 +628,7 @@ class DocsActions():
 
         except Docs.DoesNotExist:
             return Response({"error": "document does not exist"},
-                            status = status.HTTP_404_NOT_FOUND)
+                        status = status.HTTP_404_NOT_FOUND)
 
         return Response(serializer.data, 
                         status = status.HTTP_200_OK)
@@ -708,9 +704,10 @@ class DocsActions():
                 activo["modo_adquisicion_desc"],
                 activo["precio"]
             ]
-            worksheet.write_row(f'A{i}', row)
+            worksheet.write_row(row = f'A{i}',
+                                col = 0,
+                                data =  row)
 
-        print(i)    
         workbook.close()
         output.seek(0)
 
@@ -737,7 +734,7 @@ class DocsActions():
             return Response({"error": "field 'impreso' is required"},
                             status = status.HTTP_400_BAD_REQUEST)
         
-        files:list = request.FILES.getlist('archivo')
+        files:Any = request.FILES.getlist(key = 'archivo', default = [])
         ruta:str = handle_uploaded_file(files)
         doc:Docs = serializer.create(serializer.validated_data)
         doc.ruta = ruta
@@ -756,7 +753,7 @@ class DocsActions():
                                        'origen')
 
         # Query for Observaciones
-        entries_observaciones = Observaciones.objects.filter(impreso=0) \
+        entries_observaciones:QuerySet = Observaciones.objects.filter(impreso=0) \
                                                 .annotate(
                                                     no_identificacion = Value(None, output_field = CharField()),
                                                     marca=Value(None, output_field=CharField()),
@@ -771,7 +768,7 @@ class DocsActions():
 
         # Combine both queries using union
         resultados:QuerySet = entries_activos.union(entries_observaciones)\
-                                           .order_by('id_registro')
+                                             .order_by('id_registro')
   
         only_activos = 1
         only_observaciones = 2
@@ -798,6 +795,7 @@ class DocsActions():
         if not serializer.is_valid():
             return Response(serializer.errors,
                             status = status.HTTP_200_OK)
+
         file_name = serializer.validated_data.get("file_name")
         path_to_save = os.path.join(MEDIA_ROOT, 'documentos_de_impresion' ,
                                     file_name)
@@ -808,6 +806,7 @@ class DocsActions():
         font_size         = {'font_size': 11}
 
         if print_type == "SoloActivos":
+           
             activos_list:QuerySet = resultados[:40] 
             workbook = xlsxwriter.Workbook(path_to_save)
             worksheet = workbook.add_worksheet()
@@ -846,7 +845,7 @@ class DocsActions():
                     id_registro[2] = "41"
                     id_registro[1] = f"{int(id_registro[1]) - 1}"
                     in_case = ",".join(id_registro)  
-
+            
                 row = [
                     restar_uno(activo["id_registro"]),
                     activo["asiento"] - 1 if activo["asiento"] != 2 and i <= 41 else 41,
@@ -963,7 +962,8 @@ class DocsActions():
                             status = status.HTTP_200_OK)
 
         if print_type == "ObservacionesYActivos":
-            activos_observaciones_list:QuerySet = resultados[:40]
+
+            activos_observaciones_list:Any = resultados[:40]
             workbook = xlsxwriter.Workbook(path_to_save)
             worksheet = workbook.add_worksheet()
             #Para aumentar el ancho de la columna-------------------------------------
@@ -974,17 +974,24 @@ class DocsActions():
             worksheet.set_column('E:E', 11.86) 
             worksheet.set_column('F:F', 17.57)
             worksheet.set_column('G:G', 19.71)
+            outer_borders_black ={'top': 1,
+                                  'left': 1,
+                                  'bottom': 1,
+                                  'right': 1}
 
             #Crea un objeto 'Format' para dar formato al texto------------------------
-            bold = workbook.add_format({'bold': True}) 
+            bold = workbook.add_format({'bold': True})
+
             worksheet.write(f'A1', "Registrado en",
                             workbook.add_format(bold_param | center_text_param |
-                                                font_type | font_size))
+                                                font_type | font_size | outer_borders_black))
             worksheet.write(f'B1', "1", 
-                            workbook.add_format(bold_param | center_text_param))
+                            workbook.add_format(bold_param | center_text_param |
+                                                outer_borders_black))
                             
             worksheet.write(f'C1', "No. Identificacion", 
-                            workbook.add_format(bold_param | center_text_param))
+                            workbook.add_format(bold_param | center_text_param |
+                                                outer_borders_black))
             worksheet.write(f'D1', "Descripción", bold)
             worksheet.write(f'E1', "Marca", bold)
             worksheet.write(f'F1', "Modelo", bold)
@@ -1001,7 +1008,10 @@ class DocsActions():
                     element["serie"]
                 ]
 
-                worksheet.write_row(f'A{i}', row)
+                worksheet.write_row(row = i,
+                                    col = 0,
+                                    data = row,
+                                    cell_format = workbook.add_format(outer_borders_black))
 
         
             workbook.close()

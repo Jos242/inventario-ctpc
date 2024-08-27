@@ -73,8 +73,8 @@ class ActivosView(APIView):
         if path == "/activos/select-columns/":
             rp:Response = self.activos_do.select_columns_to_filter(request)
             return rp
-
-        if path == "/activos/excel/by-ids/":
+        
+        if path == "/activos/excel/by/nos-identificacion/":
             rp:Response = self.activos_do.create_excel_by_ids(request)
             return rp
   

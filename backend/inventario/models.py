@@ -12,7 +12,8 @@ class Puestos(models.Model):
         db_table = 'puestos'
 
     def __str__(self) -> str:
-        return self.descripcion
+        value_to_return:str = self.descripcion.__str__()
+        return value_to_return  
 
 class Plantillas(models.Model):
     TIPOS_PLANTILLA = {
@@ -71,8 +72,8 @@ class Ubicaciones(models.Model):
 
     class Meta:
         constraints = [
-            UniqueConstraint(fields=['nombre_oficial', 'alias'], name='unique_nombre_oficial_alias')
-        ]
+            UniqueConstraint(fields=['nombre_oficial', 'alias'],
+                             name='unique_nombre_oficial_alias')]
         db_table = 'ubicaciones'
 
     def __str__(self) -> str:
@@ -128,7 +129,7 @@ class Activos(models.Model):
     placa = models.BooleanField(default = False)
     baja = models.CharField(max_length = 25 ,choices = DE_BAJA_TYPES, default = "NO DADO DE BAJA")
     plcNvStm = models.BooleanField(default = False)
-
+    objects = models.Manager()
     class Meta: 
         db_table = 'activos'
 
@@ -144,7 +145,7 @@ class Observaciones(models.Model):
     descripcion = models.TextField()
     activo = models.ForeignKey(Activos, to_field='id_registro', on_delete = models.CASCADE)
     impreso = models.BooleanField(default = False) 
-
+    objects = models.Manager()
     class Meta:
         db_table = 'observaciones'
 
@@ -159,6 +160,7 @@ class Docs(models.Model):
     ruta = models.CharField(max_length = 250)
     impreso  = models.BooleanField(default = False)
     creado_el = models.DateTimeField(db_default = Now())
+    objects = models.Manager()
 
     class Meta:
         db_table = "docs"
@@ -233,3 +235,5 @@ class HistorialDeAcceso(models.Model):
 
     def __str__(self):
         return f"{self.usuario.username} - {self.tipo_usuario} - {self.fecha_hora_acceso}" 
+
+
