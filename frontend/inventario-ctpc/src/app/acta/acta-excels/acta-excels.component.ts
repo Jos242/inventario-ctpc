@@ -10,11 +10,13 @@ import { DomSanitizer } from '@angular/platform-browser';
 import Swal from 'sweetalert2';
 import { MatButtonModule } from '@angular/material/button';
 import { environment } from '../../../environments/environment';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+
 
 @Component({
   selector: 'app-acta-excels',
   standalone: true,
-  imports: [MatCardModule, MatDividerModule, RouterLink, MatButtonModule],
+  imports: [MatCardModule, MatDividerModule, RouterLink, MatButtonModule, MatProgressSpinner],
   templateUrl: './acta-excels.component.html',
   styleUrl: './acta-excels.component.scss'
 })
@@ -109,7 +111,7 @@ export class ActaExcelsComponent {
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: 'Hubo un error, por favor recargue la página para intentar otra vez o contacte a su administrador.',
+            text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. Descripcion del error: ${error.message}`,
           });
         }
       });
@@ -156,10 +158,78 @@ export class ActaExcelsComponent {
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: 'Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador.',
+            text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. Descripcion del error: ${error.message}`,
           });
         }
       });
   }
 
+    downloadExcel(endpoint: string, fileName: string): void {
+      this.isLoadingResults = true;
+
+      const loadingTimeout = setTimeout(() => {
+          if (this.isLoadingResults) {
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Hay problemas...',
+                  text: 'La carga de datos esta durando más de lo esperado... Por favor intente nuevamente',
+              });
+          }
+      }, 15000);
+
+      this.gService.excelGet(endpoint)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+              next: (blob: Blob) => {
+
+                  // Create a link element
+                  const link = document.createElement('a');
+                  const url = window.URL.createObjectURL(blob);
+
+                  // Set the file name and attributes
+                  link.href = url;
+                  link.download = fileName;  // Set the file name for download
+
+                  // Append to the DOM and click
+                  document.body.appendChild(link);
+                  link.click();
+
+                  // Clean up
+                  window.URL.revokeObjectURL(url);
+                  document.body.removeChild(link);
+
+                  this.isLoadingResults = false;
+                  clearTimeout(loadingTimeout);
+              },
+              error: (error) => {
+                  this.isLoadingResults = false;
+                  clearTimeout(loadingTimeout);
+                  Swal.fire({
+                      icon: 'error',
+                      title: 'Error',
+                      text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. Descripción del error: ${error.message}`,
+                  });
+              }
+          });
+  }
+
+    printFuncs() {
+      this.downloadExcel('funcionarios/as-excel-file/', 'funcionarios.xlsx');
+  }
+
+  printUbis() {
+      this.downloadExcel('ubicaciones-excel/', 'ubicaciones.xlsx');
+  }
+
+  printActivos() {
+      this.downloadExcel('excel/todos-los-activos/', 'activos_completo.xlsx');
+  }
+
+  printObs() {
+      this.downloadExcel('observaciones-excel/', 'anotaciones_completo.xlsx');
+  }
+
+  printObsYAct() {
+      this.downloadExcel('excel/activos-observaciones/', 'registro_completo.xlsx');
+  }
 }

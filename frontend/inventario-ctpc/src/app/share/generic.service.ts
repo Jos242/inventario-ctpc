@@ -31,6 +31,17 @@ export class GenericService {
     // return this.http.post<any | any[]>(this.urlAPI + endopoint, objCreate, { withCredentials: true });
   } 
 
+  excel(endpoint: string, objCreate: any): Observable<Blob> {
+    return this.http.post<Blob>(this.urlAPI + endpoint, objCreate, { responseType: 'blob' as 'json' });
+  }
+
+  excelGet(endopoint: string): Observable<Blob> {
+    return this.http.get<Blob>(this.urlAPI + endopoint, { responseType: 'blob' as 'json' });
+    // return this.http.get<any>(this.urlAPI + endopoint, { withCredentials: true });
+  }
+
+  
+
   //patch crear objeto
   patch(endopoint: string, objCreate: any | any): Observable<any | any[]> {    
     

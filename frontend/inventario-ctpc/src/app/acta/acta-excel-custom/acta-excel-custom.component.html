@@ -1,0 +1,311 @@
+
+<div class="outerDiv">
+    <div class="row">
+        <div class="col-sm-7">
+            <mat-card appearance="outlined" style="margin-top: 15px;">
+                <mat-card-header>
+                  <mat-card-title> Agregar todos los activos por...</mat-card-title>
+                  <mat-card-subtitle>Para agregar grupos de activos similares</mat-card-subtitle>
+                </mat-card-header>
+                <br style="margin-bottom:10px ;">
+                <mat-card-content>
+                    <section class="example-section" [formGroup]="agregar">
+                       <p>Agregar todos los activos de la ubicacion: </p> 
+
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <mat-form-field appearance="outline" class="inputsForm">
+                                    <mat-label>Ubicacion</mat-label>
+                                    <mat-select formControlName="ubicacion_original" placeholder="Seleccione una ubicacion">
+                                        <mat-option *ngFor="let ubicacion of ubicaciones" [value]="ubicacion.nombre_oficial">{{ ubicacion.nombre_oficial }}</mat-option>
+                                    </mat-select>
+
+                                </mat-form-field>
+                            </div>
+                            <div class="col-sm-4">
+                                <button mat-flat-button color="primary" class="confirmar" (click)="agregarXUbi()" >Agregar Activos de Esta Ubicacion</button>
+                            </div>
+
+                        </div>
+                    
+                    
+                    </section>
+
+                    
+                </mat-card-content>
+              </mat-card>
+              <br>
+
+            
+            <div style="margin-bottom: 50px;">
+                <h1>Agregar Activos Individuales</h1>
+                <div class="example-container mat-elevation-z8">
+                    @if (isLoadingResults) {
+                      <div class="example-loading-shade">
+                        @if (isLoadingResults) {
+                          <mat-spinner></mat-spinner>
+                        }
+                      </div>
+                    }   
+                  
+                    <div class="example-table-container">
+                      <div class="categorias">
+            
+                        <div class="accordion accordion-flush" id="accordionFlushExample">
+                          <div class="accordion-item">
+                            <h2 class="accordion-header">
+                              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                                <div class="textFiltros">
+                                  Mostrar Filtros Adicionales
+                                </div>
+                              </button>
+                            </h2>
+                            <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                              <div class="accordion-body">
+                                <section class="example-section" [formGroup]="filtros">
+                                  <h4>Seleccione las columnas que desea que sean visibles</h4>
+                                  <div class="row">
+                                    <div class="col-lg-3">
+                                      <p><mat-checkbox formControlName="id_registro">ID de Registro</mat-checkbox></p>
+                                      <p><mat-checkbox formControlName="no_identificacion">No de Placa</mat-checkbox></p>
+                                      <p><mat-checkbox formControlName="descripcion">Descripcion</mat-checkbox></p>
+                                      <p><mat-checkbox formControlName="marca">Marca</mat-checkbox></p>
+                                    </div>
+                                    <div class="col-lg-3">
+                                      <p><mat-checkbox formControlName="modelo">Modelo</mat-checkbox></p>
+                                      <p><mat-checkbox formControlName="serie">No de Serie</mat-checkbox></p>
+                                      <p><mat-checkbox formControlName="estado">Estado</mat-checkbox></p>
+                                      <p><mat-checkbox formControlName="ubicacion_original_alias">Ubicacion Original</mat-checkbox></p>
+                                    </div>
+                                    <div class="col-lg-3">
+                                      <p><mat-checkbox formControlName="ubicacion_actual_alias">Ubicacion Actual</mat-checkbox></p>
+                                      <p><mat-checkbox formControlName="modo_adquisicion_desc">Modo de Adquisicion</mat-checkbox></p>
+                                      <p><mat-checkbox formControlName="conectividad">Es "Conectividad"</mat-checkbox></p>
+                                      <p><mat-checkbox formControlName="seguridad">Es "Seguridad"</mat-checkbox></p>
+                                    </div>
+                                    <div class="col-lg-3">
+                                      <p><mat-checkbox formControlName="placa">Con Placa Impresa</mat-checkbox></p>
+                                      <p><mat-checkbox formControlName="baja">Dado de Baja</mat-checkbox></p>
+                                      <p><mat-checkbox formControlName="fecha">Fecha de Creacion</mat-checkbox></p>
+                                      <p><button mat-flat-button color="primary" class="confirmar" (click)="checks()">Confirmar</button></p>
+                                    </div>
+                                  </div>
+                                  
+                                </section>
+                                <div *ngIf="displayMessage" class="mt-2 mensaje">
+                                  <h2>Por favor precione el botón de confirmar para actualizar los datos</h2>
+                                </div>
+                              </div>
+                            </div>
+                          </div> 
+                        </div>
+                      </div>
+                        <mat-form-field>
+                            <mat-label>Buscar...</mat-label>
+                            <input matInput (keyup)="applyFilter($event)" placeholder="Ej. Monitor, Aula 01, 6105-1234" #input>
+                          </mat-form-field>
+                          
+                          <div class="mat-elevation-z8">
+                            <table mat-table [dataSource]="dataSource" matSort>
+                              <!-- ID Registro Column -->
+                              <ng-container *ngIf="displayedColumns.includes('id_registro')" matColumnDef="id_registro">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> ID de Registro </th>
+                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.id_registro}} </td>
+                              </ng-container>
+                          
+                              <!-- No. Identificacion Column -->
+                              <ng-container *ngIf="displayedColumns.includes('no_identificacion')" matColumnDef="no_identificacion">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> No. Placa </th>
+                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.no_identificacion}} </td>
+                              </ng-container>
+                          
+                              <!-- Descripcion Column -->
+                              <ng-container *ngIf="displayedColumns.includes('descripcion')" matColumnDef="descripcion">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Descripcion </th>
+                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.descripcion}} </td>
+                              </ng-container>
+            
+                              <ng-container *ngIf="displayedColumns.includes('marca')" matColumnDef="marca">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Marca </th>
+                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.marca}} </td>
+                              </ng-container>
+            
+                              <ng-container *ngIf="displayedColumns.includes('modelo')" matColumnDef="modelo">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Modelo </th>
+                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.modelo}} </td>
+                              </ng-container>
+                          
+                              <!-- Ubicacion Column -->
+                              <ng-container *ngIf="displayedColumns.includes('ubicacion_original_alias')" matColumnDef="ubicacion_original_alias">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Ubicacion Original </th>
+                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.ubicacion_original_alias}} </td>
+                              </ng-container>
+            
+                              <ng-container *ngIf="displayedColumns.includes('ubicacion_actual_alias')" matColumnDef="ubicacion_actual_alias">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Ubicacion Actual </th>
+                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.ubicacion_actual_alias}} </td>
+                              </ng-container>
+            
+                              <ng-container *ngIf="displayedColumns.includes('serie')" matColumnDef="serie">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Serie </th>
+                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.serie}} </td>
+                              </ng-container>
+            
+                              <ng-container *ngIf="displayedColumns.includes('estado')" matColumnDef="estado">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.estado}} </td>
+                              </ng-container>
+            
+                              <ng-container *ngIf="displayedColumns.includes('modo_adquisicion_desc')" matColumnDef="modo_adquisicion_desc">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Modo de Adquisicion</th>
+                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.modo_adquisicion_desc}} </td>
+                              </ng-container>
+            
+                              <ng-container *ngIf="displayedColumns.includes('precio')" matColumnDef="precio">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Precio </th>
+                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.precio}} </td>
+                              </ng-container>
+            
+                              <ng-container *ngIf="displayedColumns.includes('conectividad')" matColumnDef="conectividad">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Es Conectividad </th>
+                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.conectividad | booleanToYesNo}} </td>
+                              </ng-container>
+            
+                              <ng-container *ngIf="displayedColumns.includes('seguridad')" matColumnDef="seguridad">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Es Seguridad </th>
+                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.seguridad | booleanToYesNo}} </td>
+                              </ng-container>
+            
+                              <ng-container *ngIf="displayedColumns.includes('placa')" matColumnDef="placa">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Placa Impresa </th>
+                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.placa | booleanToYesNo}} </td>
+                              </ng-container>
+            
+                              <ng-container *ngIf="displayedColumns.includes('baja')" matColumnDef="baja">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Baja </th>
+                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.baja}} </td>
+                              </ng-container>
+            
+                              <ng-container *ngIf="displayedColumns.includes('fecha')" matColumnDef="fecha">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha de Creacion </th>
+                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.fecha | date:"short" }} </td>
+                              </ng-container>
+                          
+                              
+                            
+                              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                              <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="agregarExcel(row.no_identificacion)"></tr>
+                            
+                              <!-- Row shown when there is no matching data. -->
+                              <tr class="mat-row" *matNoDataRow>
+                                <td class="mat-cell" colspan="4">No se han encontrado datos para "{{input.value}}"</td>
+                              </tr>
+                            </table>
+                          
+                            <mat-paginator [pageSizeOptions]="pageSizeOptions"  showFirstLastButtons [pageSize]="5" aria-label="Seleccione pagina de activos" ></mat-paginator>
+                          </div>
+                      
+                  
+                    
+                    </div>
+                </div>
+                  
+                  
+            
+            </div>
+        </div>
+        <div class="col-sm-5">
+            <h1 class="titulo">Activos que seran parte del Excel</h1>
+            <div class="example-container2 mat-elevation-z8">
+                
+                <table mat-table [dataSource]="dataSource2" class="mat-elevation-z8">
+                    <!-- No. Identificacion Column -->
+                    <ng-container matColumnDef="no_identificacion">
+                        <th mat-header-cell *matHeaderCellDef> No. Placa </th>
+                        <td mat-cell *matCellDef="let element" matTooltip="Presione para remover este activo al excel"> {{element.no_identificacion}} </td>
+                    </ng-container>
+            
+                    <!-- Descripcion Column -->
+                    <ng-container matColumnDef="descripcion">
+                        <th mat-header-cell *matHeaderCellDef> Descripcion </th>
+                        <td mat-cell *matCellDef="let element" matTooltip="Presione para remover este activo al excel"> {{element.descripcion}} </td>
+                    </ng-container>
+            
+                    <!-- Ubicacion Column -->
+                    <ng-container matColumnDef="ubicacion_original_alias">
+                        <th mat-header-cell *matHeaderCellDef> Ubicacion </th>
+                        <td mat-cell *matCellDef="let element" matTooltip="Presione para remover este activo al excel"> {{element.ubicacion_original_alias}} </td>
+                    </ng-container>
+
+
+  
+                    <ng-container *ngIf="false" matColumnDef="marca">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Marca </th>
+                      <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.marca}} </td>
+                    </ng-container>
+  
+                    <ng-container *ngIf="false" matColumnDef="modelo">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Modelo </th>
+                      <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.modelo}} </td>
+                    </ng-container>
+                
+  
+                    <ng-container *ngIf="false" matColumnDef="ubicacion_actual_alias">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Ubicacion Actual </th>
+                      <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.ubicacion_actual_alias}} </td>
+                    </ng-container>
+  
+                    <ng-container *ngIf="false" matColumnDef="serie">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Serie </th>
+                      <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.serie}} </td>
+                    </ng-container>
+  
+                    <ng-container *ngIf="false" matColumnDef="estado">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+                      <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.estado}} </td>
+                    </ng-container>
+  
+                    <ng-container *ngIf="false" matColumnDef="modo_adquisicion_desc">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Modo de Adquisicion</th>
+                      <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.modo_adquisicion_desc}} </td>
+                    </ng-container>
+  
+                    <ng-container *ngIf="false" matColumnDef="precio">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Precio </th>
+                      <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.precio}} </td>
+                    </ng-container>
+  
+                    <ng-container *ngIf="false" matColumnDef="conectividad">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Es Conectividad </th>
+                      <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.conectividad | booleanToYesNo}} </td>
+                    </ng-container>
+  
+                    <ng-container *ngIf="false" matColumnDef="seguridad">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Es Seguridad </th>
+                      <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.seguridad | booleanToYesNo}} </td>
+                    </ng-container>
+  
+                    <ng-container *ngIf="false" matColumnDef="placa">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Placa Impresa </th>
+                      <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.placa | booleanToYesNo}} </td>
+                    </ng-container>
+  
+                    <ng-container *ngIf="false" matColumnDef="baja">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Baja </th>
+                      <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.baja}} </td>
+                    </ng-container>
+  
+                    <ng-container *ngIf="false" matColumnDef="fecha">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha de Creacion </th>
+                      <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.fecha | date:"short" }} </td>
+                    </ng-container>
+            
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns2"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns2;" (click)="removerExcel(row.no_identificacion)"></tr>
+                </table>
+            </div>
+            <button mat-flat-button color="primary" class="confirmar" (click)="generarExcel()" >Generar Excel Con Estos Activos</button>
+              
+        </div>
+    </div>
+</div>

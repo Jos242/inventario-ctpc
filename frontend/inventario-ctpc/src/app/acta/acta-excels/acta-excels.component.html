@@ -1,4 +1,11 @@
 <div class="mainDiv">
+  @if (isLoadingResults) {
+    <div class="example-loading-shade">
+      @if (isLoadingResults) {
+        <mat-spinner></mat-spinner>
+      }
+    </div>
+  }  
     <div class="row">
         <div class="col-lg">
             <mat-card class="example-card">
@@ -34,9 +41,9 @@
                   <mat-divider></mat-divider>
                 </mat-card-content>
                 <mat-card-actions>
-                  <button mat-flat-button color="primary" onclick="" style="margin-right:5px;" >Todos los Activos</button>
-                  <button mat-flat-button color="primary" onclick="" style="margin-right:5px;"  >Todos las Anotaciones</button>
-                  <button mat-flat-button color="primary" onclick="" >Todos los Activos y Anotaciones</button>
+                  <button mat-flat-button color="primary" (click)="printActivos()" style="margin-right:5px;" >Todos los Activos</button>
+                  <button mat-flat-button color="primary" (click)="printObs()" style="margin-right:5px;"  >Todos las Anotaciones</button>
+                  <button mat-flat-button color="primary" (click)="printObsYAct()" >Todos los Activos y Anotaciones</button>
                 </mat-card-actions>
               </mat-card>
 
@@ -59,12 +66,29 @@
                   <mat-divider></mat-divider>
                 </mat-card-content>
                 <mat-card-actions>
-                  <button mat-flat-button color="primary" onclick="" style="margin-right:5px;" >Todos los Funcionarios</button>
-                  <button mat-flat-button color="primary" onclick="" style="margin-right:5px;"  >Todas las Ubicaciones</button>
+                  <button mat-flat-button color="primary" (click)="printFuncs()" style="margin-right:5px;" >Todos los Funcionarios</button>
+                  <button mat-flat-button color="primary" (click)="printUbis()" style="margin-right:5px;"  >Todas las Ubicaciones</button>
                 </mat-card-actions>
               </mat-card>
         </div>
         <div class="col-lg">
+          <mat-card class="example-card">
+            <mat-card-header>
+              <mat-card-title>Excel Con Informacion Personalizada</mat-card-title>
+            </mat-card-header>
+            
+            <mat-card-content>
+                <br>
+              <p>Mediante este modulo se tiene la capacidad de crear un excel con toda la informacion de los activos que se requieran. Los activos pueden ser agregados al excel manualmente,
+                mediante filtros como aula o numero de placa, completamente personalizable.
+              </p>
+              <p></p>
+              <mat-divider></mat-divider>
+            </mat-card-content>
+            <mat-card-actions>
+              <button mat-flat-button color="primary" [routerLink]="['/actas/excel-custom']" style="margin-right:5px;" >Entrar</button>
+            </mat-card-actions>
+          </mat-card>
 
         </div>
 
