@@ -188,7 +188,7 @@ export class ActaBajaCreateComponent {
     
     const tableHeightLimitPx = (contentheightPx * (this.currentRow == 0 || this.currentRow == this.activoTablas.length - 1 ? 0.51 : 0.75)).toFixed(2);
     
-    if (currentPx > (parseFloat(tableHeightLimitPx) * 0.65) && currentPx < tableHeightLimitPx) {
+    if (currentPx + headerSize > (parseFloat(tableHeightLimitPx) * 0.65) && currentPx + headerSize < tableHeightLimitPx) {
       const heightToSetPx = (contentheightPx - ((this.currentRow == 0 ? this.header.nativeElement.offsetHeight : 99.86  ) + (this.currentHeightPx + 1 + headerSize))).toFixed(2);
 
       const blanco = this.blancos.toArray()[this.currentRow]?.nativeElement;
