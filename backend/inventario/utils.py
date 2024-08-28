@@ -704,9 +704,7 @@ class DocsActions():
                 activo["modo_adquisicion_desc"],
                 activo["precio"]
             ]
-            worksheet.write_row(row = f'A{i}',
-                                col = 0,
-                                data =  row)
+            worksheet.write_row( f'A{i}', row)
 
         workbook.close()
         output.seek(0)
@@ -1244,9 +1242,10 @@ class UbicacionesActions():
                         status = status.HTTP_200_OK)
    
    def ubicaciones_excel(self):
+
     resultado = Ubicaciones.objects.annotate(
                             nombre_completo_funcionario=Coalesce(
-                            F('funcionario_id__funcionarios__nombre_completo'),
+                            F('funcionario_id__nombre_completo'),
                             Value(None)
                         )
                         ).values(
@@ -1254,6 +1253,7 @@ class UbicacionesActions():
                             'alias',
                             'nombre_completo_funcionario'
                         )
+    # return Response("hola", status=status.HTTP_200_OK)
 
     output = io.BytesIO()
     workbook = xlsxwriter.Workbook(output, {"in_memory": True})
