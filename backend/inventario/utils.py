@@ -54,14 +54,15 @@ def handle_uploaded_file(files: list, doc_type:str = None, **kwargs) -> str:
         This method is just for saving the file following this structure:
         uploads/{model pk}/{file_name.ext}
     """
-    nombre_oficial:str = kwargs.get("nombre_oficial")
-    nombre_oficial = nombre_oficial.replace(" ", "_")
+    print(doc_type , "hola ue hace")
+    nombre_oficial:str = kwargs.get("nombre_oficial", "")
+    nombre_oficial = nombre_oficial.replace(" ", "_") if nombre_oficial != "" else ""
        
     paths_list = handle_file_directories(doc_type = doc_type,
                                          folder_name = nombre_oficial)
     absolute_path = paths_list[1] 
     relative_path = paths_list[0]
-
+    
     if doc_type is None: 
         for file in files:
             relative_path = os.path.join(relative_path, str(file))
