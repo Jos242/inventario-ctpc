@@ -75,7 +75,7 @@ class ActivosView(APIView):
             return rp
         
         if path == "/activos/excel/by/nos-identificacion/":
-            rp:Response = self.activos_do.create_excel_by_ids(request)
+            rp:Response = self.activos_do.create_excel_by_nos_identificacion(request)
             return rp
   
         return Response({"data": "did not match an endpoint for a HTTP POST Method"},

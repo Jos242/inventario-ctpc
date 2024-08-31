@@ -322,31 +322,8 @@ class ActivosActions():
 
         return Response(serializer.data, 
                         status= status.HTTP_200_OK)
-    
-    #Metodos para el HTTP PATCH------------------------------
-    def update_activo(self, request, pk:int) -> Response:
-        data = request.data
-        serializer = UpdateActivoSerializer(data = data)
-        print(serializer)
-        try:
-            activo = Activos.objects.get(id = pk)
 
-        except Activos.DoesNotExist:
-            return Response({"error": "activo does not exist"},
-                            status = status.HTTP_404_NOT_FOUND)
-            
-        if serializer.is_valid():
-            activo:Activos = serializer.update(instance = activo,
-                                                        validated_data= serializer.validated_data)
-            activo.save()
-            serializer = ReadActivoSerializerComplete(instance = activo)  
-            return Response(serializer.data,
-                            status = status.HTTP_200_OK) 
-
-        return Response(serializer.errors, 
-                        status = status.HTTP_400_BAD_REQUEST )
-
-    def create_excel_by_ids(self, request:Request) -> Response:
+    def create_excel_by_nos_identificacion(self, request:Request) -> HttpResponse:
         serializer = NoIdentificacionSerializer(data = request.data)
 
         if not serializer.is_valid():
@@ -405,6 +382,30 @@ class ActivosActions():
         output.close()
 
         return response 
+
+    
+    #Metodos para el HTTP PATCH------------------------------
+    def update_activo(self, request, pk:int) -> Response:
+        data = request.data
+        serializer = UpdateActivoSerializer(data = data)
+        print(serializer)
+        try:
+            activo = Activos.objects.get(id = pk)
+   
+        except Activos.DoesNotExist:
+            return Response({"error": "activo does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+            
+        if serializer.is_valid():
+            activo:Activos = serializer.update(instance = activo,
+                                                        validated_data= serializer.validated_data)
+            activo.save()
+            serializer = ReadActivoSerializerComplete(instance = activo)  
+            return Response(serializer.data,
+                            status = status.HTTP_200_OK) 
+
+        return Response(serializer.errors, 
+                        status = status.HTTP_400_BAD_REQUEST )
 
     #Metodos para el HTTP DELETE------------------------------
     def delete_last_id_registro(self):  
@@ -705,7 +706,7 @@ class DocsActions():
                 activo["modo_adquisicion_desc"],
                 activo["precio"]
             ]
-            worksheet.write_row( f'A{i}', row)
+            worksheet.write_row(f'A{i}', row)
 
         workbook.close()
         output.seek(0)
@@ -979,7 +980,7 @@ class DocsActions():
                                   'right': 1}
 
             #Crea un objeto 'Format' para dar formato al texto------------------------
-            bold = workbook.add_format({'bold': True})
+            bold = workbook.add_format({'bold': True} | outer_borders_black)
 
             worksheet.write(f'A1', "Registrado en",
                             workbook.add_format(bold_param | center_text_param |
@@ -996,7 +997,7 @@ class DocsActions():
             worksheet.write(f'F1', "Modelo", bold)
             worksheet.write(f'G1', "Serie", bold)
 
-            for i, element in enumerate(activos_observaciones_list, start = 2):
+            for i, element in enumerate(activos_observaciones_list, start = 1):
                 row = [
                     element["id_registro"],
                     element["asiento"],
@@ -1010,9 +1011,11 @@ class DocsActions():
                 worksheet.write_row(row = i,
                                     col = 0,
                                     data = row,
-                                    cell_format = workbook.add_format(outer_borders_black))
+                                    cell_format = workbook.add_format({"align":
+                                                                       "center"}))
 
-        
+            worksheet.set_column("B:B", None,
+                                 workbook.add_format())
             workbook.close()
             #TODO descomentar esta linea en prod
             # Activos.objects.filter(impreso = False).update(impreso = True)  
