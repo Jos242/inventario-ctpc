@@ -7,6 +7,7 @@ import xlsxwriter
 
 #Django herramientas---------------------------
 from django.contrib.auth.models import User
+from xlsxwriter.workbook import Format
 from sgica.settings import MEDIA_ROOT
 from django.db.models import F, Value, CharField, OuterRef, Subquery, Func
 from django.db.models.functions import Coalesce
@@ -54,7 +55,7 @@ def handle_uploaded_file(files: list, doc_type:str = None, **kwargs) -> str:
         This method is just for saving the file following this structure:
         uploads/{model pk}/{file_name.ext}
     """
-    print(doc_type , "hola ue hace")
+
     nombre_oficial:str = kwargs.get("nombre_oficial", "")
     nombre_oficial = nombre_oficial.replace(" ", "_") if nombre_oficial != "" else ""
        
@@ -802,11 +803,11 @@ class DocsActions():
 
         bold_param        = {'bold': True}
         center_text_param = {'align': 'center'}
+        left_text_param   = {'align': 'left'}
         font_type         = {'font_name': 'Arial'}
         font_size         = {'font_size': 11}
 
         if print_type == "SoloActivos":
-           
             activos_list:QuerySet = resultados[:40] 
             workbook = xlsxwriter.Workbook(path_to_save)
             worksheet = workbook.add_worksheet()
@@ -967,13 +968,6 @@ class DocsActions():
             workbook = xlsxwriter.Workbook(path_to_save)
             worksheet = workbook.add_worksheet()
             #Para aumentar el ancho de la columna-------------------------------------
-            worksheet.set_column('A:A', 14.57) 
-            worksheet.set_column('B:B', 2.29) 
-            worksheet.set_column('C:C', 16.86) 
-            worksheet.set_column('D:D', 20.29) 
-            worksheet.set_column('E:E', 11.86) 
-            worksheet.set_column('F:F', 17.57)
-            worksheet.set_column('G:G', 19.71)
             outer_borders_black ={'top': 1,
                                   'left': 1,
                                   'bottom': 1,
@@ -1010,17 +1004,36 @@ class DocsActions():
 
                 worksheet.write_row(row = i,
                                     col = 0,
-                                    data = row,
-                                    cell_format = workbook.add_format({"align":
-                                                                       "center"}))
+                                    data = row)
 
-            worksheet.set_column("B:B", None,
-                                 workbook.add_format())
+                      
+
+            ## APPLY FORMAT TO [A:A, B:B, C:C]
+            a_column_format = workbook.add_format({'align':'center',
+                                                   'font_name': 'Arial',
+                                                   'font_size': 11} | outer_borders_black)
+            
+            b_column_format = workbook.add_format({'bold': True, 
+                                                   'align': 'center'} | outer_borders_black)
+
+            c_column_format = workbook.add_format({'align': 'center'} | outer_borders_black)
+
+            worksheet.set_column("A:A", 14.57, a_column_format)
+            worksheet.set_column("B:B", 2.29, b_column_format)
+            worksheet.set_column("C:C", 16.86, c_column_format) 
+            worksheet.set_column('D:D', 20.29, workbook.add_format(outer_borders_black)) 
+            worksheet.set_column('E:E', 11.86, workbook.add_format(outer_borders_black)) 
+            worksheet.set_column('F:F', 17.57, workbook.add_format(outer_borders_black))
+            worksheet.set_column('G:G', 19.71, workbook.add_format(outer_borders_black))
+             
+
             workbook.close()
+
             #TODO descomentar esta linea en prod
             # Activos.objects.filter(impreso = False).update(impreso = True)  
-            msg = f"go to '/media/documento_de_impresion/{file_name}/' to download the file"
-            return Response({"success": msg},
+            context = {"success": (f"go to/media/documento_de_impresion/{file_name}/ to "
+                                   "download the file")}
+            return Response(context,
                    status = status.HTTP_200_OK) 
     
 
