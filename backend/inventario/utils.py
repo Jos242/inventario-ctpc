@@ -7,7 +7,6 @@ import xlsxwriter
 
 #Django herramientas---------------------------
 from django.contrib.auth.models import User
-from xlsxwriter.workbook import Format
 from sgica.settings import MEDIA_ROOT
 from django.db.models import F, Value, CharField, OuterRef, Subquery, Func
 from django.db.models.functions import Coalesce
@@ -812,29 +811,26 @@ class DocsActions():
             workbook = xlsxwriter.Workbook(path_to_save)
             worksheet = workbook.add_worksheet()
             #Para aumentar el ancho de la columna-------------------------------------
-            worksheet.set_column('A:A', 14.57) 
-            worksheet.set_column('B:B', 2.29) 
-            worksheet.set_column('C:C', 16.86) 
-            worksheet.set_column('D:D', 20.29) 
-            worksheet.set_column('E:E', 11.86) 
-            worksheet.set_column('F:F', 17.57)
-            worksheet.set_column('G:G', 19.71)
+            # A-B-C-D-E-F-G
+            worksheet.set_column('A:A', 2.29) 
+            worksheet.set_column('B:B', 16.86) 
+            worksheet.set_column('C:C', 20.29) 
+            worksheet.set_column('D:D', 11.86) 
+            worksheet.set_column('E:E', 17.57)
+            worksheet.set_column('F:F', 19.71)
 
             #Crea un objeto 'Format' para dar formato al texto------------------------
             bold = workbook.add_format({'bold': True})
             counter = 1
-            worksheet.write(f'A1', "Registrado en",
-                            workbook.add_format(bold_param | center_text_param |
-                                                font_type | font_size))
-            worksheet.write(f'B1', "1", 
+            worksheet.write(f'A1', "1", 
                             workbook.add_format(bold_param | center_text_param))
                             
-            worksheet.write(f'C1', "No. Identificacion", 
+            worksheet.write(f'B1', "No. Identificacion", 
                             workbook.add_format(bold_param | center_text_param))
-            worksheet.write(f'D1', "Descripción", bold)
-            worksheet.write(f'E1', "Marca", bold)
-            worksheet.write(f'F1', "Modelo", bold)
-            worksheet.write(f'G1', "Serie", bold)
+            worksheet.write(f'C1', "Descripción", bold)
+            worksheet.write(f'D1', "Marca", bold)
+            worksheet.write(f'E1', "Modelo", bold)
+            worksheet.write(f'F1', "Serie", bold)
             
             
             for i, activo in enumerate(activos_list, start = 2):
@@ -975,25 +971,21 @@ class DocsActions():
 
             #Crea un objeto 'Format' para dar formato al texto------------------------
             bold = workbook.add_format({'bold': True} | outer_borders_black)
-
-            worksheet.write(f'A1', "Registrado en",
-                            workbook.add_format(bold_param | center_text_param |
-                                                font_type | font_size | outer_borders_black))
-            worksheet.write(f'B1', "1", 
+            
+            worksheet.write(f'A1', "1", 
                             workbook.add_format(bold_param | center_text_param |
                                                 outer_borders_black))
                             
-            worksheet.write(f'C1', "No. Identificacion", 
+            worksheet.write(f'B1', "No. Identificacion", 
                             workbook.add_format(bold_param | center_text_param |
                                                 outer_borders_black))
-            worksheet.write(f'D1', "Descripción", bold)
-            worksheet.write(f'E1', "Marca", bold)
-            worksheet.write(f'F1', "Modelo", bold)
-            worksheet.write(f'G1', "Serie", bold)
+            worksheet.write(f'C1', "Descripción", bold)
+            worksheet.write(f'D1', "Marca", bold)
+            worksheet.write(f'E1', "Modelo", bold)
+            worksheet.write(f'F1', "Serie", bold)
 
             for i, element in enumerate(activos_observaciones_list, start = 1):
                 row = [
-                    element["id_registro"],
                     element["asiento"],
                     element["no_identificacion"],
                     element["descripcion"],
@@ -1006,31 +998,45 @@ class DocsActions():
                                     col = 0,
                                     data = row)
 
-                      
-
-            ## APPLY FORMAT TO [A:A, B:B, C:C]
-            a_column_format = workbook.add_format({'align':'center',
-                                                   'font_name': 'Arial',
-                                                   'font_size': 11} | outer_borders_black)
-            
+                        
             b_column_format = workbook.add_format({'bold': True, 
                                                    'align': 'center'} | outer_borders_black)
 
             c_column_format = workbook.add_format({'align': 'center'} | outer_borders_black)
-
-            worksheet.set_column("A:A", 14.57, a_column_format)
-            worksheet.set_column("B:B", 2.29, b_column_format)
-            worksheet.set_column("C:C", 16.86, c_column_format) 
-            worksheet.set_column('D:D', 20.29, workbook.add_format(outer_borders_black)) 
-            worksheet.set_column('E:E', 11.86, workbook.add_format(outer_borders_black)) 
-            worksheet.set_column('F:F', 17.57, workbook.add_format(outer_borders_black))
-            worksheet.set_column('G:G', 19.71, workbook.add_format(outer_borders_black))
+ 
+            worksheet.set_column("A:A", 2.29, b_column_format)
+            worksheet.set_column("B:B", 16.86, c_column_format) 
+            worksheet.set_column('C:C', 20.29, workbook.add_format(outer_borders_black)) 
+            worksheet.set_column('D:D', 11.86, workbook.add_format(outer_borders_black)) 
+            worksheet.set_column('E:E', 17.57, workbook.add_format(outer_borders_black))
+            worksheet.set_column('F:F', 19.71, workbook.add_format(outer_borders_black))
              
-
+            worksheet.set_margins(left = 0.669, right = 0.354,
+                                  top = 0.984, bottom = 0.196)
+ 
+            worksheet.set_header('&L', {'margin': 0.314})
+            worksheet.set_footer('&R', {'margin': 0.314})
+            worksheet.fit_to_pages(1, 1)
             workbook.close()
 
-            #TODO descomentar esta linea en prod
-            # Activos.objects.filter(impreso = False).update(impreso = True)  
+            for element in activos_observaciones_list:
+                id_registro:str = element.get("id_registro")
+                origen:str = element.get("origen")
+
+                if (origen == "observaciones"): 
+                    obs:Observaciones = Observaciones.objects \
+                                                     .get(id_registro = id_registro)
+                    obs.impreso. = True
+                    obs.save()
+                    continue
+
+                activo:Activos = Activos.objects.get(id_registro = id_registro)
+                activo.impreso = True
+                activo.save()
+                 
+
+
+        
             context = {"success": (f"go to/media/documento_de_impresion/{file_name}/ to "
                                    "download the file")}
             return Response(context,
@@ -1046,6 +1052,7 @@ class DocsActions():
                             status = status.HTTP_400_BAD_REQUEST)
         
         try:
+
             doc = Docs.objects.get(id = pk)
 
         except Docs.DoesNotExist:
@@ -1537,8 +1544,7 @@ class ModoAdquisicionActions():
         serializer = ModoAdquisicionSerializer(data = request.data)
 
         if serializer.is_valid():
-            revision = serializer.create(serializer.validated_data)
-
+            serializer.create(serializer.validated_data)
             return Response(serializer.data, 
                             status = status.HTTP_200_OK)
 
@@ -1574,11 +1580,13 @@ class ModoAdquisicionActions():
         try: 
             adquisicion = ModoAdquisicion.objects.get(id = pk)
             adquisicion.delete()
-
+ 
         except ModoAdquisicion.DoesNotExist:
             return Response({"error": "modo adquisicion does not exist"},
                             status = status.HTTP_404_NOT_FOUND)
 
+ 
         return Response({"status": "modo adquisicion deleted"}, 
                         status = status.HTTP_200_OK)
+    
     

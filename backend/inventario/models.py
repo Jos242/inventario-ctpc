@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models.functions import Now
 from django.db.models import UniqueConstraint
 from django.contrib.auth.models import User
-
+from django.db.models.manager import Manager
 # Create your models here.
 class Puestos(models.Model):
     id = models.AutoField(primary_key = True)
@@ -129,7 +129,7 @@ class Activos(models.Model):
     placa = models.BooleanField(default = False)
     baja = models.CharField(max_length = 25 ,choices = DE_BAJA_TYPES, default = "NO DADO DE BAJA")
     plcNvStm = models.BooleanField(default = False)
-    objects = models.Manager()
+    objects = Manager()
     class Meta: 
         db_table = 'activos'
 
@@ -137,6 +137,14 @@ class Activos(models.Model):
         if not self.ubicacion_actual:
             self.ubicacion_actual = self.ubicacion_original
         super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return super().__str__()
+        return f"""\
+                id_registro       -> {self.id_registro}
+                asiento           -> {self.asiento}
+                no_identificacion -> {self.no_identificacion} \
+                """
 
 class Observaciones(models.Model):
     id = models.AutoField(primary_key=True)
