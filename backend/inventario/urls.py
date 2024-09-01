@@ -15,13 +15,13 @@ urlpatterns = [
     path("excel/todos-los-activos/", views.ActivosView.as_view()),
     path("agregar-activo/", views.ActivosView.as_view()),
     path("activos/excel/by/nos-identificacion/", views.ActivosView.as_view()),
-    path("activos/select-columns/", views.ActivosView.as_view()),
+    path("activos/select-columns/", views.ActivosViewNoAuth.as_view()),
     path("update-activo/<int:pk>/", views.ActivosView.as_view()),
     path("delete/last/id-registro/", views.ActivosView.as_view()),
 
     #Endpoints relacionados a las observaciones------------------------------
-    path("todas-las-observaciones/", views.ObservacionesView.as_view()),
-    path("observacion/<str:activo>/", views.ObservacionesView.as_view()),
+    path("todas-las-observaciones/", views.ObservacionesViewNoAuth.as_view()),
+    path("observacion/<str:activo>/", views.ObservacionesViewNoAuth.as_view()),
     path("nueva-observacion/", views.ObservacionesView.as_view()),
     path("observaciones-excel/", views.ObservacionesView.as_view()),
 
@@ -36,29 +36,30 @@ urlpatterns = [
     #Endpoints relacionados a los cierres de inventarios----------------------
     path("cierre/<int:pk>/", views.CierreInventarioView.as_view()),
     path("all-cierres/", views.CierreInventarioView.as_view()), 
-    path("nuevo-cierre/", views.CierreInventarioView.as_view()),
-    path("update-cierre/<int:pk>/", views.CierreInventarioView.as_view()),
+    path("nuevo-cierre/", views.CierreInventarioAdminAndFuncionarioView.as_view()),
+    path("update-cierre/<int:pk>/", views.CierreInventarioAdminAndFuncionarioView.as_view()),
     path("delete-cierre/<int:pk>/", views.CierreInventarioView.as_view()),
 
     #Endpoints relacionados a las Revisiones----------------------------------
-    path("revision/<int:pk>/", views.RevisionesView.as_view()),
-    path("no-existe/revisiones/", views.RevisionesView.as_view()),
+    path("revision/<int:pk>/", views.RevisionesAdminOrFuncView.as_view()),
+    path("no-existe/revisiones/", views.RevisionesAdminOrFuncView.as_view()),
     path("all-revisiones/", views.RevisionesView.as_view()),
-    path("nueva-revision/", views.RevisionesView.as_view()),
-    path("update-revision/<int:pk>/", views.RevisionesView.as_view()),
-    path("delete-revision/<int:pk>/", views.RevisionesView.as_view()),
+    path("nueva-revision/", views.RevisionesAdminOrFuncView.as_view()),
+    path("update-revision/<int:pk>/", views.RevisionesAdminOrFuncView.as_view()),
+    path("delete-revision/<int:pk>/", views.RevisionesAdminOrFuncView.as_view()),
 
     #Endpoints relacionados a la ubicaciones----------------------------------
     path("all-ubicaciones/", views.UbicacionesView.as_view()),
     path("ubicacion/<int:pk>/", views.UbicacionesView.as_view()),
-    path("ubicacion/funcionario-id/<int:funcionario_id>/", views.UbicacionesView.as_view()),
+    path("ubicacion/funcionario-id/<int:funcionario_id>/",
+         views.UbicacionesAdminOrFuncView.as_view()),
     path("nueva-ubicacion/", views.UbicacionesView.as_view()),
     path("ubicaciones-excel/", views.UbicacionesView.as_view()),
     path("update/ubicacion/<int:pk>/", views.UbicacionesView.as_view()),
     path("delete/ubicacion/<int:pk>/", views.UbicacionesView.as_view()),
 
     #Endpoints relacionados a los funcionarios--------------------------------
-    path("funcionario/<int:pk>/", views.FuncionariosView.as_view()),
+    path("funcionario/<int:pk>/", views.FuncionariosAdminOrFuncView.as_view()),
     path("all-funcionarios/", views.FuncionariosView.as_view()),
     path("funcionarios/as-excel-file/", views.FuncionariosView.as_view()),
 

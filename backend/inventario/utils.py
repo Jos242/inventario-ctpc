@@ -1,4 +1,5 @@
 #std python classes and others-----------------
+from http.client import ResponseNotReady
 import io
 import os
 from typing import Any
@@ -769,7 +770,10 @@ class DocsActions():
         # Combine both queries using union
         resultados:QuerySet = entries_activos.union(entries_observaciones)\
                                              .order_by('id_registro')
-  
+        if len(resultados[:40]) < 40:
+            return Response(data = {"error": ("there is not enough information "
+                                              "to generate the excel")},
+                            status = status.HTTP_400_BAD_REQUEST)
         only_activos = 1
         only_observaciones = 2
         list_decide = []
@@ -802,64 +806,79 @@ class DocsActions():
 
         bold_param        = {'bold': True}
         center_text_param = {'align': 'center'}
-        left_text_param   = {'align': 'left'}
         font_type         = {'font_name': 'Arial'}
         font_size         = {'font_size': 11}
 
         if print_type == "SoloActivos":
-            activos_list:QuerySet = resultados[:40] 
+            activos_list:Any = resultados[:40] 
             workbook = xlsxwriter.Workbook(path_to_save)
             worksheet = workbook.add_worksheet()
+            outer_borders_black ={'top': 1,
+                                  'left': 1,
+                                  'bottom': 1,
+                                  'right': 1}
+            
+            a_column_format = workbook.add_format({'bold': True, 
+                                                   'align': 'center'} | outer_borders_black)
+            b_column_format = workbook.add_format({'align': 'center'} | outer_borders_black)
             #Para aumentar el ancho de la columna-------------------------------------
-            # A-B-C-D-E-F-G
-            worksheet.set_column('A:A', 2.29) 
-            worksheet.set_column('B:B', 16.86) 
-            worksheet.set_column('C:C', 20.29) 
-            worksheet.set_column('D:D', 11.86) 
-            worksheet.set_column('E:E', 17.57)
-            worksheet.set_column('F:F', 19.71)
-
+            outer_borders_black_format = workbook.add_format(outer_borders_black) 
             #Crea un objeto 'Format' para dar formato al texto------------------------
             bold = workbook.add_format({'bold': True})
             counter = 1
-            worksheet.write(f'A1', "1", 
-                            workbook.add_format(bold_param | center_text_param))
-                            
-            worksheet.write(f'B1', "No. Identificacion", 
-                            workbook.add_format(bold_param | center_text_param))
-            worksheet.write(f'C1', "Descripción", bold)
-            worksheet.write(f'D1', "Marca", bold)
-            worksheet.write(f'E1', "Modelo", bold)
-            worksheet.write(f'F1', "Serie", bold)
+                        
             
-            
-            for i, activo in enumerate(activos_list, start = 2):
-                in_case = None
-    
-                if activo["asiento"] == 2 and i > 30:
-                    print("Entre aqui")
-                    id_registro = activo["id_registro"].split(',')
-                    id_registro[2] = "41"
-                    id_registro[1] = f"{int(id_registro[1]) - 1}"
-                    in_case = ",".join(id_registro)  
-            
+            for i, activo in enumerate(activos_list, start = 1):
                 row = [
-                    restar_uno(activo["id_registro"]),
-                    activo["asiento"] - 1 if activo["asiento"] != 2 and i <= 41 else 41,
+                    activo["asiento"],
                     activo["no_identificacion"],
                     activo["descripcion"],
                     activo["marca"],
                     activo["modelo"],
                     activo["serie"]
                 ]
-                if in_case != None:
-                    row[0] = in_case
 
-                worksheet.write_row(f'A{i}', row)
+                worksheet.write_row(row = i,
+                                    col = 0,
+                                    data = row)
 
+            worksheet.write(f'A1', "1", 
+                    workbook.add_format(bold_param | center_text_param |
+                                                outer_borders_black))                
+            worksheet.write(f'B1', "No. Identificacion", 
+                            workbook.add_format(bold_param | center_text_param |
+                                                outer_borders_black))
+            worksheet.write(f'C1', "Descripción",
+                            workbook.add_format(bold_param | outer_borders_black))
+            worksheet.write(f'D1', "Marca", 
+                            workbook.add_format(bold_param | outer_borders_black))
+            worksheet.write(f'E1', "Modelo",
+                            workbook.add_format(bold_param | outer_borders_black))
+            worksheet.write(f'F1', "Serie",
+                            workbook.add_format(bold_param | outer_borders_black))
+
+            worksheet.set_column('A:A', 2.29, a_column_format) 
+            worksheet.set_column('B:B', 16.86, b_column_format) 
+            worksheet.set_column('C:C', 20.29, outer_borders_black_format) 
+            worksheet.set_column('D:D', 11.86, outer_borders_black_format) 
+            worksheet.set_column('E:E', 17.57, outer_borders_black_format)
+            worksheet.set_column('F:F', 19.71, outer_borders_black_format)
+
+
+            worksheet.set_margins(left = 0.669, right = 0.354,
+                                  top = 0.984, bottom = 0.196)
+            worksheet.set_header('&L', {'margin': 0.314})
+            worksheet.set_footer('&R', {'margin': 0.314})
+            worksheet.fit_to_pages(1, 1)
             workbook.close()
-            #TODO descomentar esta linea en prod
-            # Activos.objects.filter(impreso = False).update(impreso = True) 
+
+            for activo in activos_list:
+                id_registro:str = activo.get("id_registro")
+                origen:str = activo.get("origen")
+                activo:Activos = Activos.objects.get(id_registro = id_registro)
+                activo.impreso = True
+                activo.save()
+
             msg = f"go to '/media/documento_de_impresion/{file_name}/' to download the file"
             return Response({"success": msg},
                    status = status.HTTP_200_OK)
@@ -867,12 +886,15 @@ class DocsActions():
         if print_type == "SoloObservaciones":
             workbook = xlsxwriter.Workbook(path_to_save) 
             worksheet = workbook.add_worksheet() 
-            observaciones_list:QuerySet = resultados 
-            
+            observaciones_list:QuerySet = resultados
+
             if len(observaciones_list) < 41:
-                return Response({"error": "not enough entries to create 'tabla de impresiones'"},
+                return Response(data = {"error": ("there is not enough information "
+                                              "to generate the 'observaciones' excel")},
                                 status = status.HTTP_400_BAD_REQUEST)
-            print(observaciones_list) 
+
+            who_is_last = observaciones_list.last()
+            print("This one is the last = ", who_is_last)
 
             #Para aumentar el ancho de la columna-------------------------------------
             worksheet.set_column('A:A', 14.57) 
@@ -901,10 +923,10 @@ class DocsActions():
                     worksheet.write(f'B{counter}', "41",
                                     workbook.add_format(bold_param | center_text_param))
                     worksheet.write(f'C{counter}', observacion['descripcion'])
-                    obs.id_registro = result
-                    obs.asiento = 41
-                    obs.impreso = True 
-                    obs.save()
+                    #obs.id_registro = result
+                    #obs.asiento = 41
+                    #obs.impreso = True 
+                    #obs.save()
                     last_id_registro_checked = observacion['id_registro']
                     print(last_id_registro_checked)
                     break
@@ -914,14 +936,18 @@ class DocsActions():
                 worksheet.write(f'B{counter}', new_asiento,
                                 workbook.add_format(bold_param | center_text_param))
 
-                obs.id_registro = new_id_registro
-                obs.asiento = new_asiento
-                obs.impreso = True
-                obs.save()
+                #obs.id_registro = new_id_registro
+                #obs.asiento = new_asiento
+                #obs.impreso = True
+                #obs.save()
                 worksheet.write(f'C{counter}', observacion['descripcion'])
                 counter += 1
 
             workbook.close()
+
+            return Response({"testing": "SoloObservaciones"},
+                            status = status.HTTP_200_OK)
+
 
             query_activos = Activos.objects.filter(impreso=0) \
                                 .annotate(origen=Value('activos', output_field=CharField())) \
@@ -1026,17 +1052,14 @@ class DocsActions():
                 if (origen == "observaciones"): 
                     obs:Observaciones = Observaciones.objects \
                                                      .get(id_registro = id_registro)
-                    obs.impreso. = True
+                    obs.impreso = True
                     obs.save()
                     continue
 
                 activo:Activos = Activos.objects.get(id_registro = id_registro)
                 activo.impreso = True
                 activo.save()
-                 
-
-
-        
+                         
             context = {"success": (f"go to/media/documento_de_impresion/{file_name}/ to "
                                    "download the file")}
             return Response(context,

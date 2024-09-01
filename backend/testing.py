@@ -18,6 +18,7 @@ HOST = None
 SECURE_FILE_PRIV = None
 run_server_now = False
 server_running = False
+
 def get_file_priv_path(*args, **kwargs):
     global SECURE_FILE_PRIV
     db:Connection = MySQLdb.connect(**kwargs) 

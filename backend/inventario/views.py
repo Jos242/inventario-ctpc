@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import generics
 from rest_framework import mixins
+from .permissions import IsAdminOrFuncionarioUser, IsAdminUser
 #----------------------------------------------
 from .utils import *
 #----------------------------------------------
@@ -31,8 +32,8 @@ class ActivosView(APIView):
     # permission_classes = [IsAuthenticated]
     # authentication_classes = [JWTAuthentication]
     activos_do:ActivosActions = None
-    permission_classes = []
-    authentication_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
 
     def __init__(self, **kwargs: Any) -> None:
@@ -49,12 +50,7 @@ class ActivosView(APIView):
         """
         path = request.path
 
-        # if path == "/todos-los-activos/":
-        #     return self.activos_do.all_activos()
-        
-        if path == "/activos-filtrados-columna/":
-            return self.activos_do.activos_filter_column()   
-        
+                      
         if path == f"/excel/todos-los-activos/":
             rp:Response = self.activos_do.get_excel_all_activos()
             return rp
@@ -70,10 +66,7 @@ class ActivosView(APIView):
             resp = self.activos_do.add_activo(request)  
             return resp
         
-        if path == "/activos/select-columns/":
-            rp:Response = self.activos_do.select_columns_to_filter(request)
-            return rp
-        
+                
         if path == "/activos/excel/by/nos-identificacion/":
             rp:Response = self.activos_do.create_excel_by_nos_identificacion(request)
             return rp
@@ -110,6 +103,7 @@ class ActivosViewNoAuth(APIView):
         pk = kwargs.get("pk", None)
         no_identificacion = kwargs.get("no_identificacion", None)
         ubicacion_actual = kwargs.get("ubicacion_actual", None)
+
         if path == f"/activo/{pk}/":
             return self.activos_do.get_activo_by_id(pk)
 
@@ -120,15 +114,25 @@ class ActivosViewNoAuth(APIView):
         if path == f"/activo/ubicacion-actual/{ubicacion_actual}/":
             rp:Response = self.activos_do.get_activo_by_ubicacion_id(ubicacion_actual)
             return rp
+
+        if path == "/activos-filtrados-columna/":
+            rp:Response = self.activos_do.activos_filter_column()    
+            return rp
         
-        return Response({"data": "did not match an endpoint for a HTTP GET Method"}, status= status.HTTP_404_NOT_FOUND)
+        return Response({"data": "did not match an endpoint for a HTTP GET Method"},
+                        status= status.HTTP_404_NOT_FOUND)
+
+    def post(self, request:Request):
+        path:str = request.path
+        if path == "/activos/select-columns/":
+            rp:Response = self.activos_do.select_columns_to_filter(request)
+            return rp
+ 
 
 class ObservacionesView(APIView):
     parser_classes = (FormParser, MultiPartParser, JSONParser)
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticatedOrReadOnly] 
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminUser] 
     observaciones_do:ObservacionesActions = None
 
     def __init__(self, **kwargs: Any) -> None:
@@ -137,14 +141,7 @@ class ObservacionesView(APIView):
     
     def get(self, request, activo = None): 
         path = request.path
-
-        if path == "/todas-las-observaciones/":
-            return self.observaciones_do.all_observaciones() 
-        
-        if path == f"/observacion/{activo}/":
-            rp:Response = self.observaciones_do.get_observacion_by_activo(activo = activo) 
-            return rp
-        
+                
         if path == f"/observaciones-excel/":
             rp:Response = self.observaciones_do.observaciones_excel()
             return rp
@@ -156,10 +153,30 @@ class ObservacionesView(APIView):
             print(request.data)
             return self.observaciones_do.add_new_observacion(request)
 
+class ObservacionesViewNoAuth(APIView):
+    parser_classes = (FormParser, MultiPartParser, JSONParser)
+    authentication_classes = []
+    permission_classes = []
+    observaciones_do:ObservacionesActions = None
+    
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.observaciones_do = ObservacionesActions()    
+
+    def get(self, request:Request, activo = None):
+        path = request.path
+        if path == f"/observacion/{activo}/":
+            rp:Response = self.observaciones_do.get_observacion_by_activo(activo = activo) 
+            return rp
+
+        if path == "/todas-las-observaciones/":
+            return self.observaciones_do.all_observaciones() 
+
+
 class UserView(APIView):
 
-    authentication_classes = []
-    permission_classes = [] 
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminUser] 
     user_do:UserActions = None
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -186,10 +203,8 @@ class UserView(APIView):
 
 class DocsView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated] 
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminUser] 
     docs_do:DocsActions = None
     
     def __init__(self, **kwargs: Any) -> None:
@@ -230,10 +245,8 @@ class DocsView(APIView):
 
 class CierreInventarioView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated] 
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminUser] 
     cierre_do:CierreInventarioActions = None 
 
     def __init__(self, **kwargs: Any) -> None:
@@ -252,22 +265,6 @@ class CierreInventarioView(APIView):
        return Response({"error": "not a valid endpoint"},
                        status = status.HTTP_400_BAD_REQUEST) 
 
-    def post(self, request) -> Response:
-       path = request.path
-       if '/nuevo-cierre/' == path:
-           rp:Response = self.cierre_do.nuevo_cierre(request)
-           return rp
-
-       return Response({"error": "not a valid endpoint"},
-                       status = status.HTTP_400_BAD_REQUEST)
-
-    def patch(self, request, pk = None):
-        path = request.path
-        if f"/update-cierre/{pk}/" == path:
-            rp:Response = self.cierre_do.update_cierre(request = request,
-                                                       pk = pk)
-            return rp 
-
     def delete(self, request, pk = None) -> Response:
         path = request.path
         if f"/delete-cierre/{pk}/" == path:
@@ -277,33 +274,74 @@ class CierreInventarioView(APIView):
         return Response({"error": "not a valid endpoint"},
                        status = status.HTTP_400_BAD_REQUEST)
 
+class CierreInventarioAdminAndFuncionarioView(APIView):
+    parser_classes   = (MultiPartParser, FormParser, JSONParser)
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrFuncionarioUser] 
+    cierre_do:CierreInventarioActions = None 
+    
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.cierre_do = CierreInventarioActions()
+
+    def post(self, request) -> Response:
+       path = request.path
+       if '/nuevo-cierre/' == path:
+           rp:Response = self.cierre_do.nuevo_cierre(request)
+           return rp
+
+       return Response({"error": "not a valid endpoint"},
+                       status = status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk:int | Any = None):
+        path = request.path
+        if f"/update-cierre/{pk}/" == path:
+            rp:Response = self.cierre_do.update_cierre(request = request,
+                                                       pk = pk)
+        return rp 
+
+
+
+
 class RevisionesView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated] 
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminUser] 
     revisiones_do:RevisionesActions = None
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.revisiones_do = RevisionesActions()
     
-    def get(self, request, pk = None):
+    def get(self, request):
        path = request.path
-
-       if f"/revision/{pk}/" == path:
-            rp:Response = self.revisiones_do.revision_by_id(pk)
-            return rp
-
-       if "/no-existe/revisiones/" == path:
-            rp:Response = self.revisiones_do.revision_by_no_existe()
-            return rp
 
        if "/all-revisiones/" == path:
             rp:Response = self.revisiones_do.all_revisiones()
             return rp
            
+
+class RevisionesAdminOrFuncView(APIView):
+    parser_classes   = (MultiPartParser, FormParser, JSONParser)
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrFuncionarioUser] 
+    revisiones_do:RevisionesActions = None
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.revisiones_do = RevisionesActions()
+
+    def get(self, request:Request, pk = None):
+        path = request.path
+      
+        if f"/revision/{pk}/" == path:
+            rp:Response = self.revisiones_do.revision_by_id(pk)
+            return rp
+
+ 
+        if "/no-existe/revisiones/" == path:
+            rp:Response = self.revisiones_do.revision_by_no_existe()
+            return rp
 
     def post(self, request) -> Response:
         path = request.path
@@ -311,6 +349,7 @@ class RevisionesView(APIView):
         if "/nueva-revision/" == path:
             rp:Response = self.revisiones_do.nueva_revision(request)
             return rp
+
     def patch(self, request, pk = None) -> Response:
         path = request.path
 
@@ -318,26 +357,27 @@ class RevisionesView(APIView):
             rp:Response = self.revisiones_do.update_revision(request = request,
                                                              pk = pk)
             return rp
+
     def delete(self, request, pk = None) -> Response:
         path = request.path
 
         if f"/delete-revision/{pk}/" == path:
             rp:Response = self.revisiones_do.delete_revision_by_id(pk) 
             return rp
+
+      
         
 class UbicacionesView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated] 
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminUser] 
     ubicaciones_do:UbicacionesActions = None
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.ubicaciones_do = UbicacionesActions()
 
-    def get(self, request, pk:int = None, funcionario_id:int = None):
+    def get(self, request, pk:int = None):
         path = request.path
 
         if f"/ubicacion/{pk}/" == path:
@@ -347,10 +387,6 @@ class UbicacionesView(APIView):
         if path == "/ubicaciones-excel/":
             return self.ubicaciones_do.ubicaciones_excel()
         
-        if path == f"/ubicacion/funcionario-id/{funcionario_id}/":
-            rp:Response = self.ubicaciones_do.ubicacion_by_funcionario_id(funcionario_id)
-            return rp
-
         if path == "/all-ubicaciones/":
             rp:Response = self.ubicaciones_do.all_ubicaciones() 
             return rp
@@ -376,12 +412,48 @@ class UbicacionesView(APIView):
             return rp
         pass
 
+class UbicacionesAdminOrFuncView(APIView):
+    parser_classes   = (MultiPartParser, FormParser, JSONParser)
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrFuncionarioUser] 
+    ubicaciones_do:UbicacionesActions = None
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.ubicaciones_do = UbicacionesActions()
+
+    def get(self, request, funcionario_id:int = None):
+        path = request.path
+      
+        if path == f"/ubicacion/funcionario-id/{funcionario_id}/":
+            rp:Response = self.ubicaciones_do.ubicacion_by_funcionario_id(funcionario_id)
+            return rp
+ 
 class FuncionariosView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated] 
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminUser] 
+    funcionarios_do:FuncionariosActions = None
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.funcionarios_do = FuncionariosActions()
+
+    def get(self, request) -> Response:
+        path = request.path
+    
+        if f"/all-funcionarios/" == path:
+            rp:Response = self.funcionarios_do.all_funcionarios()
+            return rp
+
+        if f"/funcionarios/as-excel-file/" == path:
+            rp = self.funcionarios_do.funcionarios_as_excel_file()
+            return rp
+
+class FuncionariosAdminOrFuncView(APIView):
+    parser_classes   = (MultiPartParser, FormParser, JSONParser)
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrFuncionarioUser]  
     funcionarios_do:FuncionariosActions = None
 
     def __init__(self, **kwargs: Any) -> None:
@@ -394,21 +466,12 @@ class FuncionariosView(APIView):
         if f"/funcionario/{pk}/" == path:
             rp:Response = self.funcionarios_do.funcionario_by_id(pk)
             return rp
-        
-        if f"/all-funcionarios/" == path:
-            rp:Response = self.funcionarios_do.all_funcionarios()
-            return rp
-        
-        if f"/funcionarios/as-excel-file/" == path:
-            rp = self.funcionarios_do.funcionarios_as_excel_file()
-            return rp
+    
 
 class ModoAdquisicionView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated] 
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminUser]  
     adquisicion_do:ModoAdquisicionActions = None
 
     def __init__(self, **kwargs: Any) -> None:
@@ -451,10 +514,11 @@ class PlantillasView(mixins.CreateModelMixin,
                      mixins.UpdateModelMixin,
                      mixins.DestroyModelMixin,
                      generics.GenericAPIView):
+
     queryset = Plantillas.objects.all()
     serializer_class = PlantillasSerializer
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request, *args, **kwargs):
         if 'pk' in kwargs:
@@ -489,8 +553,8 @@ class PlantillasView(mixins.CreateModelMixin,
     
 class HistorialDeAccesoView(APIView):
 
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request, *args, **kwargs):
         user_id = kwargs.get('user_id')
