@@ -175,9 +175,15 @@ class ObservacionesViewNoAuth(APIView):
 
 class UserView(APIView):
 
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminUser] 
-    user_do:UserActions = None
+    #authentication_classes = [JWTAuthentication]
+    #permission_classes = [IsAuthenticated, IsAdminUser] 
+    
+    #TODO: Delete these two lines-----------
+    authentication_classes = []
+    permission_classes = [] 
+    user_do:UserActions | Any = None
+    #---------------------------------------
+    
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.user_do = UserActions()
@@ -193,6 +199,9 @@ class UserView(APIView):
         if path == f"/actualizar-usuario/{pk}/":
             rp:Response = self.user_do.update_user(request, pk)
             return rp
+
+        return Response({"error": "not a valid a enpoint"}, 
+                        status = status.HTTP_200_OK)
 
         
     def delete(self, request:Request, pk:int) -> Response:

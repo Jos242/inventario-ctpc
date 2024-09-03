@@ -14,31 +14,46 @@ def test_all_activos():
         "de_baja": "DADO DE BAJA SIN PLACA",
         "ubicacion_actual": 7
     }
+    token = """eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI1MzQyNTg1LCJpYXQiOjE3MjUzMzUzODUsImp0aSI6ImQ4MTdjNDljY2IzYzQ5MjhhMWZlZmYxZjEzNjc4ZGI4IiwidXNlcl9pZCI6MTA0fQ.sbEA8_HYqCBYRrVC19obKKv8wwyHlnvtiKvxAVDvJGQ"""
 
+    headers = {
+        'Authorization': f'Bearer {token}'
+    }
 
     for i in range(33):
         x = requests.post(
-            url = url,
-            json = data
+            url=url,
+            json=data,
+            headers=headers
         )
+        print(f"Request {i+1}: {x.status_code}")
 
-#test_all_activos()
 
 def test_observaciones():
+
     url = "http://127.0.0.1:8000/nueva-observacion/"
     data = {
         "descripcion": "Hola",
         "activo": "1,124,31"
     }
+    token = """eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI1MzQyNTg1LCJpYXQiOjE3MjUzMzUzODUsImp0aSI6ImQ4MTdjNDljY2IzYzQ5MjhhMWZlZmYxZjEzNjc4ZGI4IiwidXNlcl9pZCI6MTA0fQ.sbEA8_HYqCBYRrVC19obKKv8wwyHlnvtiKvxAVDvJGQ"""
+
+    headers = {
+        'Authorization': f'Bearer {token}'
+    }
+
+
 
     #41
-    for i in range(1): 
+    for i in range(41): 
         x = requests.post(
             url = url,
-            json = data
+            json = data,
+            headers = headers
         )
 
     print(x.text)
 
 test_observaciones()
+test_all_activos()
 

@@ -142,7 +142,7 @@ def restar_uno(id_registro:str) -> str:
     nums[2] = f"0{int(nums[2]) - 1}" if int(nums[2])-1 < 10 else f"{int(nums[2])-1}"
     return ",".join(nums)
 
-def update_id_registro_and_asiento(id_registro:str) -> dict:
+def update_id_registro_and_asiento(id_registro:str) -> dict[str, str]:
     """
     Este metodo toma como el param el id_registro y le resta uno,
     esto haciendo que el output sea un nuevo value valido para escri
@@ -172,7 +172,49 @@ def update_id_registro_and_asiento(id_registro:str) -> dict:
             "id_registro": ",".join(nums),
             "asiento": nums[2]
         }
- 
+
+
+
+def next_entries_minus_one() -> str:
+    query_activos = Activos.objects.filter(impreso=0) \
+                            .annotate(origen=Value('activos', output_field=CharField())) \
+                            .values('id_registro', 'asiento', 'origen', 'descripcion')
+
+    # Query for Observaciones
+    query_observaciones = Observaciones.objects.filter(impreso=0) \
+                                            .annotate(origen=Value('observaciones', output_field=CharField())) \
+                                            .values('id_registro', 'asiento', 'origen', 'descripcion')
+
+    # Combine both queries using union
+    resultados = query_activos.union(query_observaciones).order_by('id_registro')
+
+    resultados_list = list(resultados)
+    if not resultados: 
+        return "Not possible to substract one, no extra entries"
+    for resultado in resultados_list:
+
+        if resultado['origen'] == 'activos':                         
+            activo:Activos = Activos.objects.get(id_registro = resultado['id_registro'])
+            updated_values = update_id_registro_and_asiento(activo.id_registro)
+            print("Estoy fallando antes de llegar aca (activos)")
+            print(resultado['id_registro'])
+            activo.id_registro = updated_values.get("id_registro")
+            activo.asiento = updated_values.get("asiento")
+            activo.save() 
+
+        if resultado['origen'] == 'observaciones':
+            observacion:Observaciones = Observaciones.objects.get(id_registro = resultado['id_registro'])
+            updated_values = update_id_registro_and_asiento(observacion.id_registro)
+            print("Estoy fallando antes de llegar aca (observaciones)")
+            print(resultado['id_registro'])
+            observacion.id_registro = updated_values.get("id_registro")
+            observacion.asiento = updated_values.get("asiento")
+            observacion.save()                       
+
+    return "Success, all entries have had one substracted" 
+
+
+
 #--------------------------------------------------------------
 class ActivosActions():
 
@@ -890,99 +932,79 @@ class DocsActions():
 
             if len(observaciones_list) < 41:
                 return Response(data = {"error": ("there is not enough information "
-                                              "to generate the 'observaciones' excel")},
+                                                  "to generate the 'observaciones' excel")},
                                 status = status.HTTP_400_BAD_REQUEST)
 
-            who_is_last = observaciones_list.last()
-            print("This one is the last = ", who_is_last)
+            who_is_last = list(observaciones_list[:41])[-1]
+            last_origen:str = who_is_last.get("origen", 0)
 
+            if last_origen == 'activos':
+                return Response({"error": "40 observaciones and 1 activos'"},
+                                status = status.HTTP_400_BAD_REQUEST)
+
+            
             #Para aumentar el ancho de la columna-------------------------------------
-            worksheet.set_column('A:A', 14.57) 
-            worksheet.set_column('B:B', 2.29) 
-            worksheet.set_column('C:C', 86.29) 
-            worksheet.set_column('D:D', 20.29) 
-            worksheet.set_column('E:E', 11.86) 
-            worksheet.set_column('F:F', 17.57)
-            worksheet.set_column('G:G', 19.71)
+            worksheet.set_column('A:A', 2.29) 
+            worksheet.set_column('B:B', 86.29) 
             counter:int = 1
+            # no_identificacion IS descripcion, because the query needs to be
+            # fixed 
+            outer_borders_black ={'top': 1,
+                                  'left': 1,
+                                  'bottom': 1,
+                                  'right': 1}
             
             for observacion in observaciones_list:
                 obs:Observaciones = Observaciones.objects.get(id_registro = observacion['id_registro']) 
                 new_id_registro = restar_uno(observacion['id_registro'])
                 new_asiento = int(observacion['asiento'] -1) 
-        
+                
                 if int(observacion['asiento']) == 2 and counter > 30:
                     nums = observacion['id_registro'].split(',') 
                     nums[2] = "41"
                     nums[1] = f"{int(nums[1]) - 1}"
-                    result =  ",".join(nums)
+                    result =  ",".join(nums) # ID_REGISTRO MINUS ONE
+
                     print(observacion['id_registro'])
                     print(nums[1]) 
-                    worksheet.write(f'A{counter}', result,
-                                workbook.add_format(center_text_param | font_type | font_size)) 
-                    worksheet.write(f'B{counter}', "41",
-                                    workbook.add_format(bold_param | center_text_param))
-                    worksheet.write(f'C{counter}', observacion['descripcion'])
-                    #obs.id_registro = result
-                    #obs.asiento = 41
-                    #obs.impreso = True 
-                    #obs.save()
-                    last_id_registro_checked = observacion['id_registro']
-                    print(last_id_registro_checked)
+                    worksheet.write(f'A{counter}', "41",
+                                    workbook.add_format(bold_param |
+                                                        center_text_param |
+                                                        outer_borders_black))
+                    worksheet.write(f'B{counter}',
+                                    observacion['no_identificacion'],
+                                    workbook.add_format(outer_borders_black))
+                    obs.id_registro = result
+                    obs.asiento = 41
+                    obs.impreso = True 
+                    obs.save()
                     break
+ 
+                worksheet.write(f'A{counter}', new_asiento,
+                                workbook.add_format(bold_param |
+                                                    center_text_param | outer_borders_black))
 
-                worksheet.write(f'A{counter}', new_id_registro,
-                                workbook.add_format(center_text_param | font_type | font_size))
-                worksheet.write(f'B{counter}', new_asiento,
-                                workbook.add_format(bold_param | center_text_param))
-
-                #obs.id_registro = new_id_registro
-                #obs.asiento = new_asiento
-                #obs.impreso = True
-                #obs.save()
-                worksheet.write(f'C{counter}', observacion['descripcion'])
+                obs.id_registro = new_id_registro
+                obs.asiento = new_asiento
+                obs.impreso = True
+                obs.save()
+                worksheet.write(f'B{counter}', observacion['no_identificacion'],
+                                workbook.add_format(outer_borders_black))
                 counter += 1
+            
+            worksheet.set_margins(left = 0.669, right = 0.354,
+                                  top = 0.984, bottom = 0.196)
+ 
+            worksheet.set_header('&L', {'margin': 0.314})
+            worksheet.set_footer('&R', {'margin': 0.314})
+            worksheet.fit_to_pages(1, 1)
 
             workbook.close()
-
+            next_entries_minus_one()   
             return Response({"testing": "SoloObservaciones"},
                             status = status.HTTP_200_OK)
 
 
-            query_activos = Activos.objects.filter(impreso=0) \
-                                .annotate(origen=Value('activos', output_field=CharField())) \
-                                .values('id_registro', 'asiento', 'origen', 'descripcion')
-
-            # Query for Observaciones
-            query_observaciones = Observaciones.objects.filter(impreso=0) \
-                                                    .annotate(origen=Value('observaciones', output_field=CharField())) \
-                                                    .values('id_registro', 'asiento', 'origen', 'descripcion')
-
-            # Combine both queries using union
-            resultados = query_activos.union(query_observaciones).order_by('id_registro')
-            resultados_list = list(resultados)
-            for resultado in resultados_list:
-
-                if resultado['origen'] == 'activos':                         
-                    activo:Activos = Activos.objects.get(id_registro = resultado['id_registro'])
-                    updated_values = update_id_registro_and_asiento(activo.id_registro)
-                    print("Estoy fallando antes de llegar aca (activos)")
-                    print(resultado['id_registro'])
-                    activo.id_registro = updated_values.get("id_registro")
-                    activo.asiento = updated_values.get("asiento")
-                    activo.save() 
-
-                if resultado['origen'] == 'observaciones':
-                    observacion:Observaciones = Observaciones.objects.get(id_registro = resultado['id_registro'])
-                    updated_values = update_id_registro_and_asiento(observacion.id_registro)
-                    print("Estoy fallando antes de llegar aca (observaciones)")
-                    print(resultado['id_registro'])
-                    observacion.id_registro = updated_values.get("id_registro")
-                    observacion.asiento = updated_values.get("asiento")
-                    observacion.save()                       
-
-            return Response({"testing": "SoloObservaciones"},
-                            status = status.HTTP_200_OK)
 
         if print_type == "ObservacionesYActivos":
 
@@ -1032,10 +1054,14 @@ class DocsActions():
  
             worksheet.set_column("A:A", 2.29, b_column_format)
             worksheet.set_column("B:B", 16.86, c_column_format) 
-            worksheet.set_column('C:C', 20.29, workbook.add_format(outer_borders_black)) 
-            worksheet.set_column('D:D', 11.86, workbook.add_format(outer_borders_black)) 
-            worksheet.set_column('E:E', 17.57, workbook.add_format(outer_borders_black))
-            worksheet.set_column('F:F', 19.71, workbook.add_format(outer_borders_black))
+            worksheet.set_column('C:C', 20.29,
+                                 workbook.add_format(outer_borders_black)) 
+            worksheet.set_column('D:D', 11.86,
+                                 workbook.add_format(outer_borders_black)) 
+            worksheet.set_column('E:E', 17.57,
+                                 workbook.add_format(outer_borders_black))
+            worksheet.set_column('F:F', 19.71,
+                                 workbook.add_format(outer_borders_black))
              
             worksheet.set_margins(left = 0.669, right = 0.354,
                                   top = 0.984, bottom = 0.196)
