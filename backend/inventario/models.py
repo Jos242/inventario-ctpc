@@ -123,7 +123,7 @@ class Activos(models.Model):
     fecha = models.DateTimeField(auto_now_add = True)
     observacion = models.TextField(blank = True) 
     impreso = models.BooleanField(default = False)
-    ubicacion_actual = models.ForeignKey(Ubicaciones, models.DO_NOTHING, db_column = 'ubicacion_actual',
+    ubicacion_actual = models.ForeignKey(Ubicaciones, models.SET_NULL, db_column = 'ubicacion_actual',
                                          blank = True, null = True, related_name = 'ubicacion_actual')
     conectividad = models.BooleanField(default = False)
     seguridad = models.BooleanField(default = False)
