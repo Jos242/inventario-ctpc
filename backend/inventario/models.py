@@ -3,6 +3,7 @@ from django.db.models.functions import Now
 from django.db.models import UniqueConstraint
 from django.contrib.auth.models import User
 from django.db.models.manager import Manager
+
 # Create your models here.
 class Puestos(models.Model):
     id = models.AutoField(primary_key = True)

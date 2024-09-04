@@ -149,14 +149,16 @@ def update_id_registro_and_asiento(id_registro:str) -> dict[str, str]:
     birlo en la base de datos.
     """
     nums = id_registro.split(",")
+    # [1, 140, 03] - [1, 140, 10]
+    #   (10 - 1) < 10 && 10 > 2 -> True
 
     if int(nums[2]) -1 < 10 and int(nums[2]) > 2:
-        nums[2] = f"0{int(nums[2]) - 1}"
+        nums[2] = f"0{int(nums[2]) - 1}" # (10 - 1) = 09
         return {
-            "id_registro": ",".join(nums),
-            "asiento": nums[2]
+            "id_registro": ",".join(nums), # 1, 140,09
+            "asiento": nums[2] # 09
         }
-    
+
     if int(nums[2]) == 2:
         nums[1] = str(int(nums[1]) -1)
         nums[2] = "41"
@@ -164,13 +166,13 @@ def update_id_registro_and_asiento(id_registro:str) -> dict[str, str]:
             "id_registro": ",".join(nums),
             "asiento": nums[2]
         }
-
-    
+    # [1, 140, 11] - [1,140, 41]
+    # (41-1) >= 10 -> True
     if int(nums[2]) -1 >= 10: 
-        nums[2] = f"{int(nums[2]) - 1}"
+        nums[2] = f"{int(nums[2]) - 1}" # 40
         return {
-            "id_registro": ",".join(nums),
-            "asiento": nums[2]
+            "id_registro": ",".join(nums), # 1,140, 40
+            "asiento": nums[2] # 40
         }
 
 
@@ -187,33 +189,33 @@ def next_entries_minus_one() -> str:
 
     # Combine both queries using union
     resultados = query_activos.union(query_observaciones).order_by('id_registro')
-
+    
     resultados_list = list(resultados)
+    print(f"Resultados list length -> {len(resultados_list)}")
+
     if not resultados: 
         return "Not possible to substract one, no extra entries"
+    
+ 
     for resultado in resultados_list:
+        print(f"""(next_entries_minus_one) -> id_registro:
+              {resultado['id_registro']} asiento: {resultado['asiento']} """)
 
         if resultado['origen'] == 'activos':                         
             activo:Activos = Activos.objects.get(id_registro = resultado['id_registro'])
-            updated_values = update_id_registro_and_asiento(activo.id_registro)
-            print("Estoy fallando antes de llegar aca (activos)")
-            print(resultado['id_registro'])
+            updated_values = update_id_registro_and_asiento(str(activo.id_registro))
             activo.id_registro = updated_values.get("id_registro")
             activo.asiento = updated_values.get("asiento")
             activo.save() 
 
         if resultado['origen'] == 'observaciones':
-            observacion:Observaciones = Observaciones.objects.get(id_registro = resultado['id_registro'])
+            observacion = Observaciones.objects.get(id_registro = resultado['id_registro'])
             updated_values = update_id_registro_and_asiento(observacion.id_registro)
-            print("Estoy fallando antes de llegar aca (observaciones)")
-            print(resultado['id_registro'])
             observacion.id_registro = updated_values.get("id_registro")
             observacion.asiento = updated_values.get("asiento")
             observacion.save()                       
 
     return "Success, all entries have had one substracted" 
-
-
 
 #--------------------------------------------------------------
 class ActivosActions():
@@ -1000,7 +1002,7 @@ class DocsActions():
             worksheet.fit_to_pages(1, 1)
 
             workbook.close()
-            next_entries_minus_one()   
+            next_entries_minus_one()
             return Response({"testing": "SoloObservaciones"},
                             status = status.HTTP_200_OK)
 

@@ -12,19 +12,12 @@ def test_all_activos():
         "estado": "BUENO",
         "precio": 200,
         "de_baja": "DADO DE BAJA SIN PLACA",
-        "ubicacion_actual": 7
-    }
-    token = """eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI1MzQyNTg1LCJpYXQiOjE3MjUzMzUzODUsImp0aSI6ImQ4MTdjNDljY2IzYzQ5MjhhMWZlZmYxZjEzNjc4ZGI4IiwidXNlcl9pZCI6MTA0fQ.sbEA8_HYqCBYRrVC19obKKv8wwyHlnvtiKvxAVDvJGQ"""
-
-    headers = {
-        'Authorization': f'Bearer {token}'
-    }
+        "ubicacion_actual": 7}
 
     for i in range(33):
         x = requests.post(
             url=url,
             json=data,
-            headers=headers
         )
         print(f"Request {i+1}: {x.status_code}")
 
@@ -36,24 +29,18 @@ def test_observaciones():
         "descripcion": "Hola",
         "activo": "1,124,31"
     }
-    token = """eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI1MzQyNTg1LCJpYXQiOjE3MjUzMzUzODUsImp0aSI6ImQ4MTdjNDljY2IzYzQ5MjhhMWZlZmYxZjEzNjc4ZGI4IiwidXNlcl9pZCI6MTA0fQ.sbEA8_HYqCBYRrVC19obKKv8wwyHlnvtiKvxAVDvJGQ"""
-
-    headers = {
-        'Authorization': f'Bearer {token}'
-    }
-
+ 
 
 
     #41
     for i in range(41): 
         x = requests.post(
             url = url,
-            json = data,
-            headers = headers
-        )
+            json = data)
+        print(f"Request {i+1}: {x.status_code}")
 
-    print(x.text)
-
+test_all_activos()
 test_observaciones()
 test_all_activos()
+
 

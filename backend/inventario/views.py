@@ -29,18 +29,15 @@ class ActivosView(APIView):
     """
 
     parser_classes = (FormParser, MultiPartParser, JSONParser)
-    # permission_classes = [IsAuthenticated]
-    # authentication_classes = [JWTAuthentication]
     activos_do:ActivosActions = None
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsAdminUser]
-
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.activos_do = ActivosActions()     
 
-    def get(self, request, pk:int = None, no_identificacion:str = None):
+    def get(self, request):
         """
         Los metodos HTTP llevan como param el request,
         que en pocas palabras es el HTTP Header que el 
@@ -49,8 +46,7 @@ class ActivosView(APIView):
         al request
         """
         path = request.path
-
-                      
+ 
         if path == f"/excel/todos-los-activos/":
             rp:Response = self.activos_do.get_excel_all_activos()
             return rp
@@ -131,8 +127,8 @@ class ActivosViewNoAuth(APIView):
 
 class ObservacionesView(APIView):
     parser_classes = (FormParser, MultiPartParser, JSONParser)
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminUser] 
+    #authentication_classes = [JWTAuthentication]
+    #permission_classes = [IsAuthenticated, IsAdminUser] 
     observaciones_do:ObservacionesActions = None
 
     def __init__(self, **kwargs: Any) -> None:
@@ -215,7 +211,7 @@ class DocsView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsAdminUser] 
     docs_do:DocsActions = None
-    
+     
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.docs_do = DocsActions()
