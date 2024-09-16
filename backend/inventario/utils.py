@@ -8,7 +8,7 @@ import xlsxwriter
 
 #Django herramientas---------------------------
 from django.contrib.auth.models import User
-from sgica.settings import MEDIA_ROOT
+from sgica.settings import BASE_DIR, MEDIA_ROOT
 from django.db.models import F, Value, CharField, OuterRef, Subquery, Func
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse
@@ -782,7 +782,7 @@ class DocsActions():
         files:Any = request.FILES.getlist(key = 'archivo', default = [])
         ruta:str = handle_uploaded_file(files)
         doc:Docs = serializer.create(serializer.validated_data)
-        doc.ruta = ruta
+        doc.ruta = f"media/{ruta}"
         doc.impreso = impreso
         doc.save()
 
@@ -922,8 +922,13 @@ class DocsActions():
                 activo:Activos = Activos.objects.get(id_registro = id_registro)
                 activo.impreso = True
                 activo.save()
-
-            msg = f"go to '/media/documento_de_impresion/{file_name}/' to download the file"
+            
+            ruta = f"media/documentos_de_impresion/{file_name}/"
+            doc:Docs = Docs(titulo = file_name, tipo = "EXCEL",
+                            ruta = ruta, impreso = False)
+            doc.save()
+            
+            msg = f"go to '/media/documentos_de_impresion/{file_name}/' to download the file"
             return Response({"success": msg},
                    status = status.HTTP_200_OK)
 
@@ -1003,6 +1008,12 @@ class DocsActions():
 
             workbook.close()
             next_entries_minus_one()
+
+            ruta = f"media/documentos_de_impresion/{file_name}/"
+            doc:Docs = Docs(titulo = file_name, tipo = "EXCEL",
+                            ruta = ruta, impreso = False)
+            doc.save()
+
             return Response({"testing": "SoloObservaciones"},
                             status = status.HTTP_200_OK)
 
@@ -1087,8 +1098,12 @@ class DocsActions():
                 activo:Activos = Activos.objects.get(id_registro = id_registro)
                 activo.impreso = True
                 activo.save()
-                         
-            context = {"success": (f"go to/media/documento_de_impresion/{file_name}/ to "
+            
+            ruta = f"media/documentos_de_impresion/{file_name}/"
+            doc:Docs = Docs(titulo = file_name, tipo = "EXCEL",
+                            ruta = ruta, impreso = False)
+            doc.save() 
+            context = {"success": (f"go to/media/documentos_de_impresion/{file_name}/ to "
                                    "download the file")}
             return Response(context,
                    status = status.HTTP_200_OK)
@@ -1101,11 +1116,9 @@ class DocsActions():
     def update_doc_info(self, request:Request, pk:int) -> Response: 
         data = request.data
         serializer = DocUpdateSerializer(data = data)
-
         if not serializer.is_valid():
             return Response(serializer.errors,
-                            status = status.HTTP_400_BAD_REQUEST)
-        
+                            status = status.HTTP_400_BAD_REQUEST)        
         try:
 
             doc = Docs.objects.get(id = pk)
@@ -1120,11 +1133,31 @@ class DocsActions():
         context = ReadDocSerializer(instance = doc)
 
         return Response(context.data,
-                        status = status.HTTP_200_OK)          
+                        status = status.HTTP_200_OK)
+
     #Metodos para el HTTP DELETE------------------------------
     def delete_document(self, pk:int):
+        try:
+            doc:Docs = Docs.objects.get(id = pk)
+            path = str(doc.ruta).split(sep = "/")
+            document_absolute_path:str = os.path.join(BASE_DIR, path[0],
+                                                      path[1], path[2])
+            exist = os.path.exists(document_absolute_path)
+            
+            if not exist:
+                doc.delete()
+                return Response({"status": "doc entry exists but not the file, entry deleted"},
+                                status = status.HTTP_200_OK)
 
-        return Response("Hola", status = status.HTTP_200_OK)
+            os.remove(document_absolute_path)
+            doc.delete()
+
+        except Docs.DoesNotExist:
+            return Response({"error": "document does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+        
+        return Response({"success": "doc entry and file have been deleted"},
+                        status = status.HTTP_200_OK)
 
 
 

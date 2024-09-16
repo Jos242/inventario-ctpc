@@ -30,8 +30,10 @@ class ActivosView(APIView):
 
     parser_classes = (FormParser, MultiPartParser, JSONParser)
     activos_do:ActivosActions = None
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    #authentication_classes = [JWTAuthentication]
+    #permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = []
+    permission_classes = []
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -130,6 +132,9 @@ class ObservacionesView(APIView):
     #authentication_classes = [JWTAuthentication]
     #permission_classes = [IsAuthenticated, IsAdminUser] 
     observaciones_do:ObservacionesActions = None
+    authentication_classes = []
+    permission_classes = []
+
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)

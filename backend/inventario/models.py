@@ -114,9 +114,9 @@ class Activos(models.Model):
     no_identificacion = models.CharField(unique=True, max_length=150)
     descripcion = models.CharField(max_length=150)
     marca = models.CharField(max_length=150, default = "N/A")
-    modelo = models.CharField(max_length=150,default = "N/A")
-    serie = models.CharField(max_length=150, default= "N/A")
-    estado = models.CharField(max_length=7, blank=True, choices= ESTADO_ACTIVO) 
+    modelo = models.CharField(max_length=150, default = "N/A")
+    serie = models.CharField(max_length=150, default = "N/A")
+    estado = models.CharField(max_length=7, blank = True, choices= ESTADO_ACTIVO) 
     ubicacion_original = models.ForeignKey(Ubicaciones, on_delete = models.SET_NULL, db_column='ubicacion_original',
                                            null=True, related_name = 'ubicacion_original')
     modo_adquisicion = models.ForeignKey(ModoAdquisicion, on_delete= models.SET_NULL, db_column = 'modo_adquisicion',
@@ -130,7 +130,8 @@ class Activos(models.Model):
     conectividad = models.BooleanField(default = False)
     seguridad = models.BooleanField(default = False)
     placa = models.BooleanField(default = False)
-    baja = models.CharField(max_length = 25 ,choices = DE_BAJA_TYPES, default = "NO DADO DE BAJA")
+    baja = models.CharField(max_length = 25 ,choices = DE_BAJA_TYPES,
+                            default = "NO DADO DE BAJA")
     forced = models.BooleanField(default = False)
     objects = Manager()
     class Meta: 

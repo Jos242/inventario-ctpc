@@ -19,7 +19,7 @@ class UpdateActivoSerializer(serializers.ModelSerializer):
         model = Activos
         fields = ['descripcion', 'marca', 'modelo',
                   'serie', 'estado', 'modo_adquisicion',
-                  'ubicacion_actual', 'precio', 'baja'] 
+                  'ubicacion_actual', 'precio', 'baja', 'placa'] 
     
 class ReadActivoSerializerComplete(serializers.ModelSerializer):
     ubicacion_original = serializers.CharField(required = False)
