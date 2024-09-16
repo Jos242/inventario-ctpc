@@ -70,7 +70,7 @@ class UpdateUserSerializer(serializers.Serializer):
     nombre_completo = serializers.CharField(required = False)
 
 class FuncionariosSerializer(serializers.ModelSerializer):
-   
+    
     class Meta:
         model = Funcionarios 
         fields = ['user', 'nombre_completo', 'departamento',
@@ -141,8 +141,9 @@ class UpdateUserSerializer(serializers.Serializer):
 
 
 class ReadFuncionariosSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(required = False)
     class Meta:
-        model = Funcionarios 
+        model = Funcionarios
         fields = '__all__' 
 
 
