@@ -1121,6 +1121,13 @@ class DocsActions():
 
         return Response(context.data,
                         status = status.HTTP_200_OK)          
+    #Metodos para el HTTP DELETE------------------------------
+    def delete_document(self, pk:int):
+
+        return Response("Hola", status = status.HTTP_200_OK)
+
+
+
 
 #--------------------------------------------------------    
 class CierreInventarioActions():

@@ -26,13 +26,14 @@ urlpatterns = [
     path("observaciones-excel/", views.ObservacionesView.as_view()),
 
     #Endpoints relacionados a los documentos--------------------------------- 
-    path("guardar-acta/", views.DocsView.as_view()), 
+    path("guardar-acta/", views.DocsView.as_view()),
     path("obtener-documentos/", views.DocsView.as_view()),
     path("obtener-documento/<int:pk>/", views.DocsView.as_view()),
     path("crear-excel/impresiones/", views.DocsView.as_view()),
     path("forzar-excel/impresiones/", views.DocsView.as_view()),
     path("excel/activos-observaciones/", views.DocsView.as_view()),
     path("update-doc-info/<int:pk>/", views.DocsView.as_view()),
+    path("delete-document/<int:pk>/", views.DocsView.as_view()),
 
     #Endpoints relacionados a los cierres de inventarios----------------------
     path("cierre/<int:pk>/", views.CierreInventarioView.as_view()),

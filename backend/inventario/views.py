@@ -254,6 +254,16 @@ class DocsView(APIView):
         if path == f"/update-doc-info/{pk}/":
             return self.docs_do.update_doc_info(request, pk) 
 
+    def delete(self, request, pk:int | None =  None) -> Response:
+        path = request.path
+
+        if path == f"/delete-document/{pk}/":
+            rp:Response = self.docs_do.delete_document(pk = pk)
+            return rp 
+
+        return Response({"error": "delete endpoint not found"},
+                         status = status.HTTP_404_NOT_FOUND)
+
 class CierreInventarioView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
     authentication_classes = [JWTAuthentication]
