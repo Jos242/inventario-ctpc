@@ -845,7 +845,7 @@ class DocsActions():
                             status = status.HTTP_200_OK)
 
         file_name = serializer.validated_data.get("file_name")
-        path_to_save = os.path.join(MEDIA_ROOT, 'documentos_de_impresion' ,
+        path_to_save = os.path.join(MEDIA_ROOT, 'documentos_de_impresion',
                                     file_name)
 
         bold_param        = {'bold': True}
@@ -1091,7 +1091,11 @@ class DocsActions():
             context = {"success": (f"go to/media/documento_de_impresion/{file_name}/ to "
                                    "download the file")}
             return Response(context,
-                   status = status.HTTP_200_OK) 
+                   status = status.HTTP_200_OK)
+
+    def force_print_doc(self, request:Request) -> Response:
+        return Response("Hola", status = status.HTTP_200_OK) 
+
     
 
     def update_doc_info(self, request:Request, pk:int) -> Response: 
@@ -1474,7 +1478,7 @@ class FuncionariosActions():
             funcionarios = Funcionarios.objects.all()
             serializer = ReadFuncionariosSerializer(instance = funcionarios,
                                               many = True)
-        except Revisiones.DoesNotExist:
+        except Funcionarios.DoesNotExist:
             return Response({"error": "there are not 'funcionarios'"},
                             status = status.HTTP_404_NOT_FOUND)
 
@@ -1603,7 +1607,7 @@ class ModoAdquisicionActions():
                         status = status.HTTP_400_BAD_REQUEST)
 
     #Metodos para el HTTP PATCH--------------------------------
-    def update_modo_adquisicion(self, request, pk:int):
+    def update_modo_adquisicion(self, request, pk:int) -> Response:
         data = request.data
         serializer = ModoAdquisicionSerializer(data = data)
 
@@ -1638,6 +1642,4 @@ class ModoAdquisicionActions():
 
  
         return Response({"status": "modo adquisicion deleted"}, 
-                        status = status.HTTP_200_OK)
-    
-    
+                        status = status.HTTP_200_OK) 

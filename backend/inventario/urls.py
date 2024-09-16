@@ -30,6 +30,7 @@ urlpatterns = [
     path("obtener-documentos/", views.DocsView.as_view()),
     path("obtener-documento/<int:pk>/", views.DocsView.as_view()),
     path("crear-excel/impresiones/", views.DocsView.as_view()),
+    path("forzar-excel/impresiones/", views.DocsView.as_view()),
     path("excel/activos-observaciones/", views.DocsView.as_view()),
     path("update-doc-info/<int:pk>/", views.DocsView.as_view()),
 
@@ -60,7 +61,7 @@ urlpatterns = [
 
     #Endpoints relacionados a los funcionarios--------------------------------
     path("funcionario/<int:pk>/", views.FuncionariosAdminOrFuncView.as_view()),
-    path("all-funcionarios/", views.FuncionariosView.as_view()),
+    path("all-funcionarios/", views.FuncionariosAdminOrFuncView.as_view()),
     path("funcionarios/as-excel-file/", views.FuncionariosView.as_view()),
 
     #Endpoints relacionados a el modo de aquisicion---------------------------

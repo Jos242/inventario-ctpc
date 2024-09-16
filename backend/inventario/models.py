@@ -42,6 +42,7 @@ class Departamentos(models.Model):
         return self.descripcion
  
 class Funcionarios(models.Model):
+    id = models.AutoField(primary_key = True)
     user = models.OneToOneField(User, on_delete = models.CASCADE)
     nombre_completo = models.TextField()
     departamento = models.ForeignKey(Departamentos, models.DO_NOTHING, db_column='departamento')
@@ -103,7 +104,8 @@ class Activos(models.Model):
     DE_BAJA_TYPES = {
         "NO DADO DE BAJA": "NO DADO DE BAJA",
         "DADO DE BAJA CON PLACA": "DADO DE BAJA CON PLACA",
-        "DADO DE BAJA SIN PLACA": "DADO DE BAJA SIN PLACA"
+        "DADO DE BAJA SIN PLACA": "DADO DE BAJA SIN PLACA",
+        "A DAR DE BAJA": "A DAR DE BAJA"
     }
 
     id = models.AutoField(primary_key=True)
@@ -129,7 +131,7 @@ class Activos(models.Model):
     seguridad = models.BooleanField(default = False)
     placa = models.BooleanField(default = False)
     baja = models.CharField(max_length = 25 ,choices = DE_BAJA_TYPES, default = "NO DADO DE BAJA")
-    plcNvStm = models.BooleanField(default = False)
+    forced = models.BooleanField(default = False)
     objects = Manager()
     class Meta: 
         db_table = 'activos'
@@ -153,7 +155,8 @@ class Observaciones(models.Model):
     asiento = models.IntegerField()
     descripcion = models.TextField()
     activo = models.ForeignKey(Activos, to_field='id_registro', on_delete = models.CASCADE)
-    impreso = models.BooleanField(default = False) 
+    impreso = models.BooleanField(default = False)
+    forced = models.BooleanField(default = False)
     objects = models.Manager()
     class Meta:
         db_table = 'observaciones'

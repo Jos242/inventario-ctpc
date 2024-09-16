@@ -140,11 +140,11 @@ class UpdateUserSerializer(serializers.Serializer):
 
 
 
-class ReadFuncionariosSerializer(serializers.Serializer):
-    user = serializers.CharField(max_length = 240, required = False)
-    nombre_completo = serializers.CharField(max_length = 240, required = False)
-    departamento = serializers.CharField(max_length = 240, required = False)
-    puesto = serializers.CharField(max_length = 240, required = False)
+class ReadFuncionariosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Funcionarios 
+        fields = '__all__' 
+
 
 class ReadUserSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150, required = False)

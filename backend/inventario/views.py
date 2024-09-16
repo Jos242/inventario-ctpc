@@ -208,9 +208,12 @@ class UserView(APIView):
 
 class DocsView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminUser] 
+    #authentication_classes = [JWTAuthentication]
+    #permission_classes = [IsAuthenticated, IsAdminUser] 
     docs_do:DocsActions = None
+    authentication_classes = []
+    permission_classes = [] 
+
      
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -238,6 +241,9 @@ class DocsView(APIView):
 
         if path == f"/crear-excel/impresiones/":
             return self.docs_do.create_print_doc(request = request)
+
+        if path == f"/forzar-excel/impresiones/":
+            return self.docs_do.force_print_doc(request = request)
 
         return Response({"error": "not a valid post request"},
                         status = status.HTTP_400_BAD_REQUEST)
@@ -436,9 +442,11 @@ class UbicacionesAdminOrFuncView(APIView):
  
 class FuncionariosView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminUser] 
+    #authentication_classes = [JWTAuthentication]
+    #permission_classes = [IsAuthenticated, IsAdminUser] 
     funcionarios_do:FuncionariosActions = None
+    authentication_classes = []
+    permission_classes = [] 
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -446,10 +454,6 @@ class FuncionariosView(APIView):
 
     def get(self, request) -> Response:
         path = request.path
-    
-        if f"/all-funcionarios/" == path:
-            rp:Response = self.funcionarios_do.all_funcionarios()
-            return rp
 
         if f"/funcionarios/as-excel-file/" == path:
             rp = self.funcionarios_do.funcionarios_as_excel_file()
@@ -457,9 +461,11 @@ class FuncionariosView(APIView):
 
 class FuncionariosAdminOrFuncView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminOrFuncionarioUser]  
+    #authentication_classes = [JWTAuthentication]
+    #permission_classes = [IsAuthenticated, IsAdminOrFuncionarioUser]  
     funcionarios_do:FuncionariosActions = None
+    authentication_classes = []
+    permission_classes = [] 
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -472,6 +478,9 @@ class FuncionariosAdminOrFuncView(APIView):
             rp:Response = self.funcionarios_do.funcionario_by_id(pk)
             return rp
     
+        if f"/all-funcionarios/" == path:
+            rp:Response = self.funcionarios_do.all_funcionarios()
+            return rp
 
 class ModoAdquisicionView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
