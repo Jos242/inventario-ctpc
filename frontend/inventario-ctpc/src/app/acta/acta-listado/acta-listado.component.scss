@@ -23,5 +23,11 @@ mat-card{
     background-color: rgb(255, 183, 50);
 }
 
+.disabled-button {
+    background-color: #b0b0b0; /* Gray out the button */
+    color: #ffffff;           /* Keep the text color consistent */
+    cursor: not-allowed;      /* Show the not-allowed cursor */
+  }
+
 
 

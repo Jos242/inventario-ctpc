@@ -1,7 +1,7 @@
 <div>
     <mat-card>
         <mat-card-content>
-                <div>
+                <div *ngIf="datos">
                     <h1>Detalles del Activo {{ datos.no_identificacion }}</h1>
                     <div class="row">
                         <div class="col-sm-4">
@@ -33,16 +33,18 @@
                             <h2>Acciones</h2>
                             <p>
                                 <button mat-flat-button color="primary" (click)="onEdit()">Editar Activo</button>  
+                                
                             </p>  
                             <p>
-                                <button mat-flat-button color="primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Agregar Anotacion</button>  
+                                <button mat-raised-button color="primary" (click)="openDialog()">Agregar Anotacion</button>
+                                
                             </p>   
                             
                             <p>
                                 <button mat-flat-button color="primary" (click)="darBaja()">Marcar Placa Como Impresa</button>  
                             </p>  
                             <p>
-                                <button mat-flat-button style="background-color: red; color: white;" color="primary">Dar de Baja</button>  
+                                <button mat-flat-button style="background-color: red; color: white;" color="primary" (click)="darBaja()">Marcar para dar de Baja</button>  
                             </p>
                             
                                              
@@ -54,38 +56,3 @@
     </mat-card>
 </div>
 
-<!-- Modal -->
-<div class="modal fade" #exampleModal id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Agregar Anotacion</h1>
-          <button type="button" id="closeModalButton" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-              <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">
-                <div class="container">
-                    <div class="row">
-                        <mat-form-field appearance="outline" class="inputsForm">
-                            <mat-label>Descripcion</mat-label>
-                            <textarea matInput formControlName="descripcion" placeholder="Ej. El activo con placa 1234-1234 ha..."></textarea>
-                        </mat-form-field>
-                    </div>
-                    <div class="row">
-                        <button mat-flat-button color="primary" type="submit" [disabled]="!myForm.valid">Agregar Anotacion</button>
-                    </div>
-
-                </div>
-
-              
-            </form>
-              
-        </div>
-        <div class="modal-footer">
-          <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button mat-flat-button color="primary">Agregar</button> -->
-        </div>
-      </div>
-    </div>
-  </div>
-  

@@ -41,7 +41,7 @@
                     <p><strong>Creado el:</strong> {{ selectedDocument.creado_el | date:"long"}}</p>
                     <p><strong>Ha sido Impreso?:</strong> {{ selectedDocument.impreso ? 'Sí' : 'No' }}</p>
                     <button mat-raised-button color="primary" class="descargar" (click)="downloadDocument(selectedDocument.ruta)">Descargar Documento</button>
-                    <button mat-raised-button color="secondary" class="impreso" (click)="marcarImpreso()" [disabled]="selectedDocument.impreso">Marcar Como Impreso</button>
+                    <button mat-raised-button color="secondary" class="impreso" (click)="marcarImpreso()" [disabled]="selectedDocument.impreso" [ngClass]="{'disabled-button': selectedDocument.impreso}">Marcar Como Impreso</button>
                   </div>
                   <div class="document-details" *ngIf="!selectedDocument">
                     <h2>Titulo del Documento</h2>

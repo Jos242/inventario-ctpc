@@ -1,0 +1,46 @@
+<h1 mat-dialog-title>Agregar Anotacion</h1>
+<div mat-dialog-content>
+  <form [formGroup]="myForm" class="divForm">
+    <div class="container">
+      <div class="row">
+        <br>
+        <mat-form-field appearance="outline" class="inputsForm" style="margin-top: 6px;">
+          <mat-label>Descripción</mat-label>
+          <textarea matInput formControlName="descripcion" placeholder="Ej. El activo con placa 1234-1234 ha..."></textarea>
+        </mat-form-field>
+      </div>
+      <div class="row">
+        <h2>Agregar anotación a varios activos</h2>
+        <section class="example-section">
+          <div class="row">
+            <div class="col-sm-10">
+              <mat-form-field appearance="outline" class="inputsForm" >
+                <mat-label>Numero de Placa</mat-label>
+                <mat-select formControlName="no_identificacion" placeholder="Seleccione un activo">
+                  <mat-option *ngFor="let activo of datosActivos" [value]="activo">
+                    {{ activo.no_identificacion }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="col-sm-2">
+              <button mat-flat-button color="primary" class="confirmar" style="height: 54px;" (click)="agregarActivo()">Agregar</button>
+            </div>
+          </div>
+          <div class="selected-activos">
+            <strong>Activos Seleccionados:</strong> 
+            {{ activosEnLista }}
+          </div>
+          
+        </section>
+      </div>
+      <br>
+      <div class="row">
+        <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="!myForm.valid">Agregar Anotación</button>
+      </div>
+    </div>
+  </form>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-flat-button color="primary" [mat-dialog-close]="false" style="margin-right: 16px;">Cerrar</button>
+</div>

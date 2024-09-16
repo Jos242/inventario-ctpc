@@ -404,6 +404,21 @@ export class ActaExcelCustomComponent implements AfterViewInit {
             window.URL.revokeObjectURL(url);
             document.body.removeChild(link);
             this.isLoadingResults = false; // Stop loading
+            this.toast.success(`Excel generado correctamente`, {
+              dismissible: true,
+              duration: 4000,  // 3 seconds
+              position: 'top-right',  // position of the toast
+              style: {
+                border: '1px solid #28a745', // Add a green border
+                // padding: '16px',
+                color: '#28a745',
+                background: '#f0fdf4' // Light green background
+              },
+              iconTheme: {
+                primary: '#28a745',
+                secondary: '#FFFAEE',
+              },
+            });
           },
           error: (error) => {
             this.isLoadingResults = false; // Stop loading on error

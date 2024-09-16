@@ -12,19 +12,24 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatSelectModule} from '@angular/material/select';
 import { FormGroup, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, timeout } from 'rxjs';
 import { GenericService } from '../../share/generic.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AuthService } from '../../share/auth.service';
+import { BooleanToYesNoPipe } from '../../share/boolean-to-yes-no.pipe';
+import {ChangeDetectionStrategy} from '@angular/core';
+import {MatDatepickerModule} from '@angular/material/datepicker';
+import {provideNativeDateAdapter} from '@angular/material/core';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
+import { HotToastService } from '@ngxpert/hot-toast';
 
 import Swal from 'sweetalert2';
 
 import moment from 'moment';
 import 'moment/locale/es';
-
-
 
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
@@ -32,17 +37,20 @@ import pdfFonts from 'pdfmake/build/vfs_fonts';
 import jspdf from 'jspdf';
 import html2canvas from 'html2canvas';
 
+
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 @Component({
   selector: 'app-acta-baja-create',
   standalone: true,
+  providers:[provideNativeDateAdapter()],
   imports: [
     MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatRippleModule, MatTabsModule, MatGridListModule, MatCardModule,
-    ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,
+    ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,BooleanToYesNoPipe, MatFormFieldModule, MatInputModule, MatDatepickerModule, MatProgressSpinnerModule
   ],
   templateUrl: './acta-baja-create.component.html',
-  styleUrl: './acta-baja-create.component.scss'
+  styleUrl: './acta-baja-create.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ActaBajaCreateComponent {
   numActa: any;
@@ -64,6 +72,8 @@ export class ActaBajaCreateComponent {
 
   isLoadingResults:any;
 
+  pageSizeOptions: number[] = [10, 25, 40, 100];
+
  
   dataSource = new MatTableDataSource<any>();
   displayedColumns: string[] = ['no_identificacion', 'descripcion', 'marca', 'modelo', 'serie'];
@@ -79,6 +89,8 @@ export class ActaBajaCreateComponent {
 
   selectedActivos: any[] = []; // Array to store selected activos
   activosForm: any[] = []; // Array to store selected activos
+
+  listoGuardar:any=false;
 
   @ViewChild('specific') specific!: ElementRef;
   @ViewChild('firstTable') firstTable!: ElementRef;
@@ -96,7 +108,8 @@ export class ActaBajaCreateComponent {
     private sanitizer: DomSanitizer,
     private formBuilder: FormBuilder,
     private authService: AuthService,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private toast: HotToastService
   ) {
     this.filtros = this.formBuilder.group({
       id_registro: false,
@@ -125,9 +138,10 @@ export class ActaBajaCreateComponent {
 
   ngOnInit(){
     this.myForm = this.formBuilder.group({
-      descripcion: ['', Validators.required],
+      descripcion: ['Se llevara a la unidad productiva de reciclaje para la reutilización de los dispositivos y el desecho de las partes que no sean útiles según corresponda a las empresas recolectoras de reciclaje (Se separa papel, plástico, vidrío, baterías, cartón y otros).', Validators.required],
       activo: ['', Validators.required],
       razon: ['', Validators.required],
+      fecha: ['', Validators.required],
       search: [''] 
 
     });
@@ -149,8 +163,13 @@ export class ActaBajaCreateComponent {
 
   
 
-  applyFilter(filterValue: string): void {
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
+    
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   resetActa(): void {
@@ -168,9 +187,26 @@ export class ActaBajaCreateComponent {
     if (!this.activoTablas[this.currentRow].some(a => a.no_identificacion === activo.no_identificacion)) {
       //heightTabla = this.calculateHeightPercentage();
       this.calcularTablas(activo);
+      this.toast.success(`Activo ${activo.no_identificacion} agregado al acta exitosamente`, {
+        dismissible: true,
+        duration: 4000,  // 3 seconds
+        position: 'top-right',  // position of the toast
+        style: {
+          border: '1px solid #28a745', // Add a green border
+          // padding: '16px',
+          color: '#28a745',
+          background: '#f0fdf4' // Light green background
+        },
+        iconTheme: {
+          primary: '#28a745',
+          secondary: '#FFFAEE',
+        },
+      });
     }
     // Update the form control with the array
     this.myForm.patchValue({ activo: this.activosForm.join(', ') });
+
+    
   }
   
   calcularTablas(activo) {
@@ -261,8 +297,32 @@ export class ActaBajaCreateComponent {
         const numDocsThisYear = docsThisYear.length + 1;
 
         this.numActa = `${numDocsThisYear}-${currentYear}`;
-        this.fechaActa = moment().format('dddd D [de] MMMM YYYY');
+        this.myForm.get('fecha').valueChanges.subscribe(selectedDate => {
+          if (selectedDate) {
+            this.fechaActa = moment(selectedDate).format('dddd D [de] MMMM YYYY');
+          }
+        });
+
+        if(this.fechaActa) {
+          this.toast.success(`Fecha ${this.fechaActa} seleccionada exitosamente`, {
+            dismissible: true,
+            duration: 4000,  // 3 seconds
+            position: 'top-right',  // position of the toast
+            style: {
+              border: '1px solid #28a745', // Add a green border
+              // padding: '16px',
+              color: '#28a745',
+              background: '#f0fdf4' // Light green background
+            },
+            iconTheme: {
+              primary: '#28a745',
+              secondary: '#FFFAEE',
+            },
+          });
+        }
+        
         this.ahno = currentYear;
+        console.log(this.fechaActa)
 
       });
   }
@@ -320,7 +380,9 @@ export class ActaBajaCreateComponent {
   }
 
   generatePdf(data) {
+    this.isLoadingResults = true;  // Start loading
     html2canvas(data, { scale: 2, allowTaint: true }).then(canvas => {
+      
      let HTML_Width = canvas.width;
      let HTML_Height = canvas.height;
      console.log(HTML_Height +"h " + HTML_Width +"w ")
@@ -369,10 +431,12 @@ export class ActaBajaCreateComponent {
       .subscribe((data:any)=>{
         console.log(data);
 
+        this.isLoadingResults = false;  // Start loading
       });
-
+      this.isLoadingResults = false;  // Start loading
       
    });
+   this.isLoadingResults = false;  // Start loading
  }
 
  onSubmit() {
@@ -385,10 +449,48 @@ export class ActaBajaCreateComponent {
     formData.append('razon', this.myForm.value.razon);
     this.descActa=this.myForm.value.descripcion;
 
+    this.toast.success(`Descripcion: "${this.descActa}" agregada`, {
+      dismissible: true,
+      duration: 10000,  // 3 seconds
+      position: 'top-right',  // position of the toast
+      style: {
+        border: '1px solid #28a745', // Add a green border
+        // padding: '16px',
+        color: '#28a745',
+        background: '#f0fdf4' // Light green background
+      },
+      iconTheme: {
+        primary: '#28a745',
+        secondary: '#FFFAEE',
+      },
+    });
+    
+    const loadingTimeout = setTimeout(() => {
+      this.toast.success(`Razon "${this.myForm.value.razon}" seleccionada`, {
+        dismissible: true,
+        duration: 4000,  // 3 seconds
+        position: 'top-right',  // position of the toast
+        style: {
+          border: '1px solid #28a745', // Add a green border
+          // padding: '16px',
+          color: '#28a745',
+          background: '#f0fdf4' // Light green background
+        },
+        iconTheme: {
+          primary: '#28a745',
+          secondary: '#FFFAEE',
+        },
+      });
+    }, 100);
+
+    
 
 
+    this.listoGuardar=true;
     console.log(formData);
     // const formData = this.myForm.value;
+
+    this.listaDocs();
 
 
     

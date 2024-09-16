@@ -114,6 +114,7 @@ export class ActivoCreateComponent {
       .subscribe({
         next: (data: any[]) => {
           this.ubicaciones = data;
+          this.ubicaciones.sort();
           console.log(this.ubicaciones)
           this.isLoadingResults = false;
           clearTimeout(loadingTimeout);

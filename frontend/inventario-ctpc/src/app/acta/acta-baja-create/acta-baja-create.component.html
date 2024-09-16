@@ -1,4 +1,11 @@
 <div>
+  @if (isLoadingResults) {
+    <div class="example-loading-shade">
+      @if (isLoadingResults) {
+        <mat-spinner></mat-spinner>
+      }
+    </div>
+  }   
     <div class="titulo d-flex justify-content-center">
         <h1>Crear Nueva Acta de Baja</h1>
     </div>
@@ -10,7 +17,7 @@
                       <div class="row">
                         <mat-form-field appearance="outline" class="inputsForm">
                           <mat-label>Descripcion</mat-label>
-                          <input matInput formControlName="descripcion" placeholder="Se estaran dando a una empresa que manejara los desechos de manera adecuada">
+                          <textarea matInput formControlName="descripcion"></textarea>
                           <mat-hint>Descripcion de lo que se hara con el activo</mat-hint>
                         </mat-form-field>
                         <br>
@@ -22,51 +29,128 @@
                           </mat-select>
                           <mat-hint>Razon por la cual se estara dando de baja el activo</mat-hint>
                         </mat-form-field>
-                      </div>
-                  
-                      <div class="row"> 
-                        <mat-form-field>
-                          <mat-label>Search</mat-label>
-                          <input matInput formControlName="search" placeholder="Search activos">
+                        <mat-form-field appearance="outline" class="inputsForm">
+                          <mat-label>Seleccione la fecha</mat-label>
+                          <input formControlName="fecha" matInput [matDatepicker]="picker" readonly="true" (focus)="picker.open()">
+                          <mat-hint>DD/MM/AAAA</mat-hint>
+                          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                          <mat-datepicker #picker></mat-datepicker>
                         </mat-form-field>
+                        
+                      </div>
+
+                      <div class="row">
+                        <h1 *ngIf="!myForm.get('razon').value">Por favor seleccione la razon por la que se daran de baja los activos para poder visualizar los activos</h1>
+
+                        <mat-form-field appearance="outline" class="inputsForm">
+                          <mat-label>Buscar...</mat-label>
+                          <input matInput (keyup)="applyFilter($event)" placeholder="Ej. Monitor, Aula 01, 6105-1234" #input>
+                        </mat-form-field>
+                        
+                        <div class="mat-elevation-z8">
+                          <table mat-table [dataSource]="dataSource" matSort *ngIf="myForm.get('razon').value">
+                            <!-- ID Registro Column -->
+                            <ng-container *ngIf="displayedColumns.includes('id_registro')" matColumnDef="id_registro">
+                              <th mat-header-cell *matHeaderCellDef mat-sort-header> ID de Registro </th>
+                              <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.id_registro}} </td>
+                            </ng-container>
+                        
+                            <!-- No. Identificacion Column -->
+                            <ng-container *ngIf="displayedColumns.includes('no_identificacion')" matColumnDef="no_identificacion">
+                              <th mat-header-cell *matHeaderCellDef mat-sort-header> No. Placa </th>
+                              <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.no_identificacion}} </td>
+                            </ng-container>
+                        
+                            <!-- Descripcion Column -->
+                            <ng-container *ngIf="displayedColumns.includes('descripcion')" matColumnDef="descripcion">
+                              <th mat-header-cell *matHeaderCellDef mat-sort-header> Descripcion </th>
+                              <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.descripcion}} </td>
+                            </ng-container>
+          
+                            <ng-container *ngIf="displayedColumns.includes('marca')" matColumnDef="marca">
+                              <th mat-header-cell *matHeaderCellDef mat-sort-header> Marca </th>
+                              <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.marca}} </td>
+                            </ng-container>
+          
+                            <ng-container *ngIf="displayedColumns.includes('modelo')" matColumnDef="modelo">
+                              <th mat-header-cell *matHeaderCellDef mat-sort-header> Modelo </th>
+                              <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.modelo}} </td>
+                            </ng-container>
+                        
+                            <!-- Ubicacion Column -->
+                            <ng-container *ngIf="displayedColumns.includes('ubicacion_original_alias')" matColumnDef="ubicacion_original_alias">
+                              <th mat-header-cell *matHeaderCellDef mat-sort-header> Ubicacion Original </th>
+                              <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.ubicacion_original_alias}} </td>
+                            </ng-container>
+          
+                            <ng-container *ngIf="displayedColumns.includes('ubicacion_actual_alias')" matColumnDef="ubicacion_actual_alias">
+                              <th mat-header-cell *matHeaderCellDef mat-sort-header> Ubicacion Actual </th>
+                              <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.ubicacion_actual_alias}} </td>
+                            </ng-container>
+          
+                            <ng-container *ngIf="displayedColumns.includes('serie')" matColumnDef="serie">
+                              <th mat-header-cell *matHeaderCellDef mat-sort-header> Serie </th>
+                              <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.serie}} </td>
+                            </ng-container>
+          
+                            <ng-container *ngIf="displayedColumns.includes('estado')" matColumnDef="estado">
+                              <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+                              <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.estado}} </td>
+                            </ng-container>
+          
+                            <ng-container *ngIf="displayedColumns.includes('modo_adquisicion_desc')" matColumnDef="modo_adquisicion_desc">
+                              <th mat-header-cell *matHeaderCellDef mat-sort-header> Modo de Adquisicion</th>
+                              <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.modo_adquisicion_desc}} </td>
+                            </ng-container>
+          
+                            <ng-container *ngIf="displayedColumns.includes('precio')" matColumnDef="precio">
+                              <th mat-header-cell *matHeaderCellDef mat-sort-header> Precio </th>
+                              <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.precio}} </td>
+                            </ng-container>
+          
+                            <ng-container *ngIf="displayedColumns.includes('conectividad')" matColumnDef="conectividad">
+                              <th mat-header-cell *matHeaderCellDef mat-sort-header> Es Conectividad </th>
+                              <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.conectividad | booleanToYesNo}} </td>
+                            </ng-container>
+          
+                            <ng-container *ngIf="displayedColumns.includes('seguridad')" matColumnDef="seguridad">
+                              <th mat-header-cell *matHeaderCellDef mat-sort-header> Es Seguridad </th>
+                              <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.seguridad | booleanToYesNo}} </td>
+                            </ng-container>
+          
+                            <ng-container *ngIf="displayedColumns.includes('placa')" matColumnDef="placa">
+                              <th mat-header-cell *matHeaderCellDef mat-sort-header> Placa Impresa </th>
+                              <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.placa | booleanToYesNo}} </td>
+                            </ng-container>
+          
+                            <ng-container *ngIf="displayedColumns.includes('baja')" matColumnDef="baja">
+                              <th mat-header-cell *matHeaderCellDef mat-sort-header> Baja </th>
+                              <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.baja}} </td>
+                            </ng-container>
+          
+                            <ng-container *ngIf="displayedColumns.includes('fecha')" matColumnDef="fecha">
+                              <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha de Creacion </th>
+                              <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.fecha | date:"short" }} </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectActivo(row)"></tr>
+                          
+                            <!-- Row shown when there is no matching data. -->
+                            <tr class="mat-row" *matNoDataRow>
+                              <td class="mat-cell" colspan="4">No se han encontrado datos para "{{input.value}}"</td>
+                            </tr>
+                          </table>
+                        
+                          <mat-paginator [pageSizeOptions]="pageSizeOptions"  showFirstLastButtons [pageSize]="5" aria-label="Seleccione pagina de activos" ></mat-paginator>
+                        </div>
+
                       </div>
                   
-                      <div class="row">
-                        <table mat-table [dataSource]="dataSource" style="cursor: pointer;" class="mat-elevation-z8" matSort>
-                          <!-- Columns Definition -->
-                          <ng-container matColumnDef="no_identificacion">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Numero de identificacion del bien </th>
-                            <td mat-cell *matCellDef="let element" (click)="selectActivo(element)"> {{element.no_identificacion}} </td>
-                          </ng-container>
                   
-                          <ng-container matColumnDef="descripcion">
-                            <th mat-header-cell *matHeaderCellDef> Descripcion del bien </th>
-                            <td mat-cell *matCellDef="let element" (click)="selectActivo(element)"> {{element.descripcion}} </td>
-                          </ng-container>
+                      
                   
-                          <ng-container matColumnDef="marca">
-                            <th mat-header-cell *matHeaderCellDef> Marca </th>
-                            <td mat-cell *matCellDef="let element" (click)="selectActivo(element)"> {{element.marca}} </td>
-                          </ng-container>
-                  
-                          <ng-container matColumnDef="modelo">
-                            <th mat-header-cell *matHeaderCellDef> Modelo </th>
-                            <td mat-cell *matCellDef="let element" (click)="selectActivo(element)"> {{element.modelo}} </td>
-                          </ng-container>
-                  
-                          <ng-container matColumnDef="serie">
-                            <th mat-header-cell *matHeaderCellDef> Serie </th>
-                            <td mat-cell *matCellDef="let element" (click)="selectActivo(element)"> {{element.serie}} </td>
-                          </ng-container>
-                  
-                          <!-- Header and Row Declarations -->
-                          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                        </table>
-                        <mat-paginator [pageSize]="5" showFirstLastButtons></mat-paginator>
-                      </div>
-                  
-                      <div class="row">
+                      <div class="row" style="margin-top:10px ;">
                         <div class="col-sm-6">
                           <button mat-flat-button color="primary" type="submit" class="btnAgregar" [disabled]="!myForm.valid">Agregar Informacion Al Acta</button>
                         </div>
@@ -77,7 +161,7 @@
                       </div>
                       <div class="row">
                         <div class="col-lg" style="margin-top: 10px;">
-                          <button mat-flat-button color="primary" (click)="generatePdf(contentToConvert)">Guardar y Descargar PDF</button>
+                          <button mat-flat-button color="primary" (click)="generatePdf(contentToConvert)" [disabled]="!listoGuardar">Guardar y Descargar PDF</button>
                         </div>  
                         
                       </div>
@@ -95,6 +179,9 @@
 <br>
 <div class="titulo d-flex justify-content-center">
     <h1>Previsualizacion del Acta</h1>
+</div>
+<div class="titulo d-flex justify-content-center">
+  <h3>No se preocupe si se ve mal formateada, a la hora de crear el pdf se vera con el formato correcto</h3>
 </div>
 <br>
 <div class="d-flex justify-content-center">

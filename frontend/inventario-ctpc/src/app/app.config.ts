@@ -9,7 +9,8 @@ registerLocaleData(localeCR, "es")
 import { routes } from './app.routes';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { authInterceptor } from './share/auth.interceptor';
   
 export const appConfig: ApplicationConfig = {
-  providers: [provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes),provideHotToastConfig(), provideAnimationsAsync(), provideHttpClient(), [{ provide: LOCALE_ID, useValue: 'es-CR' }]]
+  providers: [provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes),provideHotToastConfig(), provideAnimationsAsync(), provideHttpClient(withInterceptors([authInterceptor])), [{ provide: LOCALE_ID, useValue: 'es-CR' }]]
 };

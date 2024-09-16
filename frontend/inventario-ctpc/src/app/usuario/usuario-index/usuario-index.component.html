@@ -1,0 +1,48 @@
+<mat-form-field>
+    <mat-label>Buscar...</mat-label>
+    <input matInput (keyup)="applyFilter($event)" placeholder="Ej. Juan Perez, 101110111" #input>
+  </mat-form-field>
+  @if (isLoadingResults) {
+    <div class="example-loading-shade">
+      @if (isLoadingResults) {
+        <mat-spinner></mat-spinner>
+      }
+    </div>
+  }
+  
+  <div class="mat-elevation-z8">
+    <table mat-table [dataSource]="dataSource" matSort>
+
+      <ng-container matColumnDef="user">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Cedula </th>
+        <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este funcionario"> {{row.user}} </td>
+      </ng-container>
+  
+      <ng-container matColumnDef="nombre_completo">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Nombre </th>
+        <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este funcionario"> {{row.nombre_completo}} </td>
+      </ng-container>
+  
+      <ng-container matColumnDef="departamento">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Departamento </th>
+        <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este funcionario"> {{row.departamento}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="puesto">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Puesto </th>
+        <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este funcionario"> {{row.puesto}} </td>
+      </ng-container>
+  
+      
+    
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="verDetalles(row.user)"></tr>
+    
+      <!-- Row shown when there is no matching data. -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" colspan="4">No se han encontrado datos para "{{input.value}}"</td>
+      </tr>
+    </table>
+  
+    <mat-paginator [pageSizeOptions]="pageSizeOptions"  showFirstLastButtons [pageSize]="10" aria-label="Seleccione pagina de usuarios" ></mat-paginator>
+  </div>

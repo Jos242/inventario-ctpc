@@ -11,6 +11,8 @@ import Swal from 'sweetalert2';
 import { MatButtonModule } from '@angular/material/button';
 import { environment } from '../../../environments/environment';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { HotToastService } from '@ngxpert/hot-toast';
+
 
 
 @Component({
@@ -36,7 +38,8 @@ export class ActaExcelsComponent {
     private router:Router,
     private route:ActivatedRoute,
     private httpClient:HttpClient,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private toast: HotToastService
     ){
       this.filtros = this.fb.group({
         id_registro: false,
@@ -103,6 +106,21 @@ export class ActaExcelsComponent {
           window.open(url, '_blank');
           this.isLoadingResults = false; // Stop loading
           // clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
+          this.toast.success(`Excel generado correctamente`, {
+            dismissible: true,
+            duration: 4000,  // 3 seconds
+            position: 'top-right',  // position of the toast
+            style: {
+              border: '1px solid #28a745', // Add a green border
+              // padding: '16px',
+              color: '#28a745',
+              background: '#f0fdf4' // Light green background
+            },
+            iconTheme: {
+              primary: '#28a745',
+              secondary: '#FFFAEE',
+            },
+          });
 
         },
         error: (error) => {
@@ -150,6 +168,7 @@ export class ActaExcelsComponent {
           this.excels = Math.floor(this.excels/40)
           this.isLoadingResults = false; // Stop loading
           clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
+          
 
         },
         error: (error) => {
@@ -200,6 +219,23 @@ export class ActaExcelsComponent {
 
                   this.isLoadingResults = false;
                   clearTimeout(loadingTimeout);
+
+                  this.toast.success(`Excel generado correctamente`, {
+                    dismissible: true,
+                    duration: 4000,  // 3 seconds
+                    position: 'top-right',  // position of the toast
+                    style: {
+                      border: '1px solid #28a745', // Add a green border
+                      // padding: '16px',
+                      color: '#28a745',
+                      background: '#f0fdf4' // Light green background
+                    },
+                    iconTheme: {
+                      primary: '#28a745',
+                      secondary: '#FFFAEE',
+                    },
+                  });
+                  
               },
               error: (error) => {
                   this.isLoadingResults = false;
