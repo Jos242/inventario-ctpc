@@ -32,7 +32,7 @@ class AuthUser(TokenViewBase):
 
     def post(self, request: Request, *args, **kwargs) -> Response:
         serializer = self.get_serializer(data=request.data)
-        
+         
         try:
             serializer.is_valid(raise_exception=True)
             user = User.objects.get(username = request.data['username']) 
@@ -52,6 +52,8 @@ class AuthUser(TokenViewBase):
         
         except TokenError as e:
             raise InvalidToken(e.args[0])
+
+        serializer.validated_data["user_type"] = tipo_usuario
 
         return Response(serializer.validated_data,
                         status=status.HTTP_200_OK)
