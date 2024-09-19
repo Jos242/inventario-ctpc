@@ -79,7 +79,7 @@ class Ubicaciones(models.Model):
         db_table = 'ubicaciones'
 
     def __str__(self) -> str:
-        return self.alias
+        return str(self.nombre_oficial)
 
 class ModoAdquisicion(models.Model):
 
