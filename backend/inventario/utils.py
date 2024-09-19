@@ -343,13 +343,13 @@ class ActivosActions():
 
     def select_columns_to_filter(self, request) -> Response:
         FIELDS = request.data.get('fields', [])
-        RELATED_FIELDS = ["ubicacion_original_alias", "ubicacion_actual_alias", "modo_adquisicion_desc"]
+        RELATED_FIELDS = ["ubicacion_original_nombre_oficial", "ubicacion_actual_nombre_oficial", "modo_adquisicion_desc"]
         SELECT_RELATED = ['ubicacion_original', 'ubicacion_actual', 'modo_adquisicion']
         related_map = dict(zip(RELATED_FIELDS, SELECT_RELATED))
         related_fields = [related_map[column] for column in RELATED_FIELDS if column in FIELDS]
         annotations = {
-                'ubicacion_original_alias': F('ubicacion_original__alias'),
-                'ubicacion_actual_alias': F('ubicacion_actual__alias'),
+                'ubicacion_original_nombre_oficial': F('ubicacion_original__nombre_oficial'),
+                'ubicacion_actual_nombre_oficial': F('ubicacion_actual__nombre_oficial'),
                 'modo_adquisicion_desc': F('modo_adquisicion__descripcion'),
         }
 
