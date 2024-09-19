@@ -74,15 +74,16 @@ table {
 }
 
 .row-red {
-  color: red;
+  background-color: red;
+  color: white;
 }
 
 .row-orange {
-  color: orange;
+  background-color: orange;
 }
 
 .row-yellow {
-  color: rgb(129, 84, 255);
+  background-color: rgb(255, 251, 0);
 }
 
 @media (max-width: 1435px) {

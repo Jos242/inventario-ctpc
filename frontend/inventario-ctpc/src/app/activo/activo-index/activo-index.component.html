@@ -95,16 +95,25 @@
                     <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.modelo}} </td>
                   </ng-container>
               
-                  <!-- Ubicacion Column -->
+                                    <!-- Ubicacion Column -->
+                                    <!-- Original Ubicacion -->
                   <ng-container *ngIf="displayedColumns.includes('ubicacion_original_nombre_oficial')" matColumnDef="ubicacion_original_nombre_oficial">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header> Ubicacion Original </th>
-                    <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.ubicacion_original_nombre_oficial}} </td>
+                    <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo">
+                      {{ row.ubicacion_original_nombre_oficial }} ({{ row.aliasOriginal }})
+
+                     
+                    </td>
                   </ng-container>
 
+                  <!-- Actual Ubicacion -->
                   <ng-container *ngIf="displayedColumns.includes('ubicacion_actual_nombre_oficial')" matColumnDef="ubicacion_actual_nombre_oficial">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header> Ubicacion Actual </th>
-                    <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.ubicacion_actual_nombre_oficial}} </td>
+                    <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo">
+                      {{ row.ubicacion_actual_nombre_oficial }}({{ row.aliasActual }})
+                    </td>
                   </ng-container>
+
 
                   <ng-container *ngIf="displayedColumns.includes('serie')" matColumnDef="serie">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header> Serie </th>

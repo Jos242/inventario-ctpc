@@ -89,6 +89,7 @@ export class ActivoIndexComponent implements AfterViewInit  {
   loading = false; // Add a loading state flag
 
   filtros: FormGroup;
+  ubicaciones: any;
 
 
 
@@ -187,26 +188,81 @@ export class ActivoIndexComponent implements AfterViewInit  {
             this.updatePageSizeOptions();
           this.isLoadingResults = false; // Stop loading
         });
-        
+      
+
     }
 
     hasObservaciones(activoId: string): boolean {
-      // Check if activo has observaciones by matching the id_registro
-     
+      // Check if activo has observaciones by matching the id_registros
+    //  console.log(activoId, "regisgtro que se esta matcheando")
+    //  console.log(this.observaciones.some(obs => obs.activo == activoId))
       return this.observaciones.some(obs => obs.activo == activoId);
     }
 
     getRowClass(row: any): string {
       this.isLoadingResults = true;
-      if ( this.hasObservaciones(row.id_registro)) {
-        return 'row-yellow';
+      if (  row.baja == 'DADO DE BAJA CON PLACA' || row.baja == 'DADO DE BAJA SIN PLACA') {
+        return 'row-red';
       } else if (row.baja == 'A DAR DE BAJA') {
         return 'row-orange';
-      } else if (row.baja == 'DADO DE BAJA CON PLACA' || row.baja == 'DADO DE BAJA SIN PLACA') {
-        return 'row-red';
+      } else if (this.hasObservaciones(row.id_registro)) {
+        return 'row-yellow';
       }
       return '';
     }
+
+    loadUbicaciones(): void {
+      this.isLoadingResults = true;
+    
+      const loadingTimeout = setTimeout(() => {
+        if (this.isLoadingResults) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Hay problemas...',
+            text: 'La carga de datos esta durando mas de lo esperado... Por favor intente nuevamente',
+          });
+        }
+      }, 15000);
+    
+      this.gService.list('all-ubicaciones/')
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (data: any[]) => {
+            this.ubicaciones = data;
+            console.log(this.ubicaciones);
+    
+            // Match ubicacion fields and attach aliases for both original and actual ubicaciones
+            this.datos.forEach((element: any) => {
+              const ubicacionOriginal = this.ubicaciones.find(
+                (ubi: any) => ubi.nombre_oficial === element.ubicacion_original_nombre_oficial
+              );
+              const ubicacionActual = this.ubicaciones.find(
+                (ubi: any) => ubi.nombre_oficial === element.ubicacion_actual_nombre_oficial
+              );
+    
+              // Assign aliasOriginal and aliasActual if found
+              element.aliasOriginal = ubicacionOriginal?.alias || null;
+              element.aliasActual = ubicacionActual?.alias || null;
+            });
+    
+            this.isLoadingResults = false;
+            clearTimeout(loadingTimeout);
+          },
+          error: (error) => {
+            this.isLoadingResults = false;
+            clearTimeout(loadingTimeout);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador.',
+            });
+          }
+        });
+    }
+    
+    
+    
+    
     
     checks(){
       this.isLoadingResults = true;  // Start loading
@@ -248,6 +304,7 @@ export class ActivoIndexComponent implements AfterViewInit  {
             this.isLoadingResults = false; // Stop loading
             clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
             this.displayMessage = false;
+            this.loadUbicaciones();
           },
           error: (error) => {
             this.isLoadingResults = false; // Stop loading on error
@@ -259,6 +316,7 @@ export class ActivoIndexComponent implements AfterViewInit  {
             });
           }
         });
+        
         
     }
 
