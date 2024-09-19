@@ -255,8 +255,8 @@ class ModoAdquisicionSerializer(serializers.ModelSerializer):
 
 
 class DynamicReadActivosSerializer(serializers.ModelSerializer):  
-    ubicacion_original_alias = serializers.CharField()
-    ubicacion_actual_alias = serializers.CharField()
+    ubicacion_original_nombre_oficial= serializers.CharField()
+    ubicacion_actual_nombre_oficial = serializers.CharField()
     modo_adquisicion_desc = serializers.CharField()
 
   
@@ -266,9 +266,9 @@ class DynamicReadActivosSerializer(serializers.ModelSerializer):
             'id', 'id_registro', 'asiento',
             'no_identificacion', 'descripcion', 'marca',
             'modelo', 'serie', 'estado',
-            'ubicacion_original_alias', 'modo_adquisicion_desc', 'precio',
+            'ubicacion_original_nombre_oficial', 'modo_adquisicion_desc', 'precio',
             'fecha', 'observacion', 'impreso',
-            'ubicacion_actual_alias', 'conectividad', 'seguridad',
+            'ubicacion_actual_nombre_oficial', 'conectividad', 'seguridad',
             'placa', 'baja'
         ]
 
