@@ -32,7 +32,7 @@
                             <br>
                             <h2>Acciones</h2>
                             <p>
-                                <button mat-flat-button color="primary" (click)="onEdit()">Editar Activo</button>  
+                                <button mat-raised-button color="primary" (click)="onEdit()">Editar Activo</button>  
                                 
                             </p>  
                             <p>
@@ -41,10 +41,10 @@
                             </p>   
                             
                             <p>
-                                <button mat-flat-button color="primary" (click)="darBaja()">Marcar Placa Como Impresa</button>  
+                                <button mat-raised-button color="primary" (click)="marcarPlaca()" *ngIf="datos.placa==false">Marcar Placa Como Impresa</button>  
                             </p>  
                             <p>
-                                <button mat-flat-button style="background-color: red; color: white;" color="primary" (click)="darBaja()">Marcar para dar de Baja</button>  
+                                <button mat-raised-button style="background-color: red; color: white;" color="primary" *ngIf="datos.baja=='NO DADO DE BAJA'" (click)="darBaja()">Marcar para dar de Baja</button>  
                             </p>
                             
                                              

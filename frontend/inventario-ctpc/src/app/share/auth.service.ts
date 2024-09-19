@@ -1,7 +1,7 @@
 import { getNgModuleById, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
@@ -14,9 +14,11 @@ export class AuthService {
 
   private baseURL = environment.apiURL; 
   private currentUserKey = 'currentUser';
+  private currentUserType = 'userType';
 
   private loggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
-
+  private currentUserSubject = new BehaviorSubject<any>(this.getCurrentUser());
+  private userTypeSubject = new BehaviorSubject<string | null>(this.getUserType());
 
   constructor(private http: HttpClient, private router: Router) { 
 
@@ -28,9 +30,19 @@ export class AuthService {
       .pipe(
         tap(response => {
           localStorage.setItem('authToken', response.access);
+          localStorage.setItem('userType', response.user_type);
+          this.setCurrentUser(response.user);
+
           this.loggedInSubject.next(true);
-          console.log("login")
-          this.router.navigate(['/index']);
+          this.userTypeSubject.next(response.user_type);
+          console.log("login");
+          if(this.getUserType()=="Administrador"){
+            this.router.navigate(['/index']);
+          }else{
+            this.router.navigate(['/revision']);
+          }
+
+          
         }),
         catchError(error => {
 
@@ -51,13 +63,18 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem('authToken');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('userType');
     this.loggedInSubject.next(false);
+    this.currentUserSubject.next(null);
+    this.userTypeSubject.next(null);
     this.router.navigate(['/login']);
   }
   
 
   setCurrentUser(user: any): void {
     localStorage.setItem(this.currentUserKey, JSON.stringify(user));
+    this.currentUserSubject.next(user); // Notify subscribers about current user update
   }
 
   getCurrentUser(): any {
@@ -65,9 +82,35 @@ export class AuthService {
     return userString ? JSON.parse(userString) : null;
   }
 
+  // Observable for current user
+  getCurrentUser$(): Observable<any> {
+    return this.currentUserSubject.asObservable();
+  }
+
+  setUserType(userType: string): void {
+    localStorage.setItem(this.currentUserType, userType);
+    this.userTypeSubject.next(userType);  // Notify subscribers about user type update
+  }
+
+   // Manage user type
+   getUserType(): string | null {
+    return localStorage.getItem(this.currentUserType);
+  }
+
+  // Observable for user type
+  getUserType$(): Observable<string | null> {
+    return this.userTypeSubject.asObservable();
+  }
+
+
+
+
+
   private hasToken(): boolean {
     return !!localStorage.getItem("authToken");
   }
+
+  
 
   
 }

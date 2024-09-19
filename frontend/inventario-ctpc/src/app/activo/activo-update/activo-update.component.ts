@@ -29,9 +29,19 @@ export class ActivoUpdateComponent {
   ubicaciones: any;
   modosAdquisicion: any;
   estados: { id: string, descripcion: string }[] = [
-    { id: 'BUENO', descripcion: 'Bueno' },
-    { id: 'MALO', descripcion: 'Malo' },
-    { id: 'REGULAR', descripcion: 'Regular' }
+    { id: 'BUENO', descripcion: 'BUENO' },
+    { id: 'MALO', descripcion: 'MALO' },
+    { id: 'REGULAR', descripcion: 'REGULAR' }
+  ];
+  bajas: { id: string, descripcion: string }[] = [
+    { id: 'NO DADO DE BAJA', descripcion: 'NO DADO DE BAJA' },
+    { id: 'DADO DE BAJA CON PLACA', descripcion: 'DADO DE BAJA CON PLACA' },
+    { id: 'DADO DE BAJA SIN PLACA', descripcion: 'DADO DE BAJA SIN PLACA' },
+    { id: 'A DAR DE BAJA', descripcion: 'A DAR DE BAJA' },
+  ];
+  placas: { id: boolean, descripcion: string }[] = [
+    { id: false, descripcion: 'No' },
+    { id: true, descripcion: 'Si' },
   ];
   datos: any;
   activoId: any;
@@ -60,9 +70,11 @@ export class ActivoUpdateComponent {
       descripcion: ['', Validators.required],
       ubicacion_actual: [Validators.required],
       modo_adquisicion: [ Validators.required],
-      marca: [''],
-      modelo: [''],
-      serie: [''],
+      marca: ["N/A"],
+      modelo: ["N/A"],
+      serie: ["N/A"],
+      baja: ['DADO DE BAJA'],
+      placa: [''],
       estado: ['', Validators.required],
       precio: [''],
       conectividad: [false],
@@ -143,13 +155,14 @@ export class ActivoUpdateComponent {
     this.gService.list(`activo/${activoId}/`)
       .pipe(takeUntil(this.destroy$))
       .subscribe(data => {
-        this.datos = data;
+        this.datos = data;console.log(this.datos)
         this.setDefaultValues();
-        console.log(this.datos)
+        
         this.activoId=this.datos.id;
         // this.selectedUbicacion = this.datos.ubicacion_original; // Set the default value for ubicacion
         // this.selectedModoAdquisicion = this.datos.modo_adquisicion; 
         this.myForm.patchValue(this.datos);
+        console.log("final load activo details")
       });
   }
 
@@ -165,7 +178,10 @@ export class ActivoUpdateComponent {
 
       
       const ubicacion = this.ubicaciones.find(ubic => ubic.nombre_oficial === this.datos.ubicacion_original);
+      console.log(this.ubicaciones)
+      console.log(ubicacion)
       this.selectedUbicacion = ubicacion.id;
+      console.log("final set default values")
       // console.log(ubicacion)
       // this.myForm.get('ubicacion_original').setValue(ubicacion ? ubicacion.id : null);
     }

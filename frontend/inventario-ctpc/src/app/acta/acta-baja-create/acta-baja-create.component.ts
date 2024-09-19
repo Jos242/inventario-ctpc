@@ -12,7 +12,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatSelectModule} from '@angular/material/select';
 import { FormGroup, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil, timeout } from 'rxjs';
+import { concatMap, firstValueFrom, from, Subject, takeUntil, timeout } from 'rxjs';
 import { GenericService } from '../../share/generic.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -60,6 +60,7 @@ export class ActaBajaCreateComponent {
 
   datos: any;
   datosActivos:any;
+  activosDeBaja: any;
   myForm: FormGroup;
 
   id: any;
@@ -76,19 +77,26 @@ export class ActaBajaCreateComponent {
 
  
   dataSource = new MatTableDataSource<any>();
+  dataSourceDeBaja = new MatTableDataSource<any>();
   displayedColumns: string[] = ['no_identificacion', 'descripcion', 'marca', 'modelo', 'serie'];
 
   activoTablas: any[] = [[]];
   currentRow: any = 0;
   currentHeightPx: any = 0.00;
 
-  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild('allPaginator') allPaginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
+
+  // @ViewChild(MatPaginator) paginatorDeBaja: MatPaginator;
+  @ViewChild(MatSort) sortDeBaja: MatSort;
+
+  @ViewChild('paginatorDeBaja') paginatorDeBaja: MatPaginator;
 
   destroy$:Subject<boolean>=new Subject<boolean>();
 
   selectedActivos: any[] = []; // Array to store selected activos
   activosForm: any[] = []; // Array to store selected activos
+
 
   listoGuardar:any=false;
 
@@ -112,6 +120,7 @@ export class ActaBajaCreateComponent {
     private toast: HotToastService
   ) {
     this.filtros = this.formBuilder.group({
+      id: true,
       id_registro: false,
       no_identificacion: true,
       descripcion: true,
@@ -120,14 +129,14 @@ export class ActaBajaCreateComponent {
       serie: true,
       estado: false,
       impreso: false,
-      ubicacion_original_alias: false,
-      ubicacion_actual_alias: false,
+      ubicacion_original_nombre_oficial: false,
+      ubicacion_actual_nombre_oficial: false,
       modo_adquisicion_desc: false,
       precio: false,
       conectividad: false,
       seguridad: false,
       placa: false,
-      baja: false,
+      baja: true,
       fecha: false,
     });
 
@@ -185,6 +194,7 @@ export class ActaBajaCreateComponent {
     // Add the activo with the selected reason to the array if it's not already present
     // Solo lo hace con el row actual, ver despues que
     if (!this.activoTablas[this.currentRow].some(a => a.no_identificacion === activo.no_identificacion)) {
+      console.log("disque activos", this.activoTablas)
       //heightTabla = this.calculateHeightPercentage();
       this.calcularTablas(activo);
       this.toast.success(`Activo ${activo.no_identificacion} agregado al acta exitosamente`, {
@@ -355,14 +365,25 @@ export class ActaBajaCreateComponent {
         next: (data: any) => {
           console.log(data);
           this.datos = data;
-          // Count the number of items where datos.placa is false
-          this.datosActivos = data;
-          this.dataSource.data = data;
-          this.dataSource.data = data;
+          
+          this.datosActivos = data.filter((activo: any) => activo.baja !== 'DADO DE BAJA CON PLACA'); // Exclude "DADO DE BAJA"
 
-          this.dataSource.paginator = this.paginator;
+          this.activosDeBaja = data.filter((activo: any) => activo.baja == 'A DAR DE BAJA'); // Activos to be deactivated
+          this.dataSourceDeBaja.data = this.activosDeBaja;
+          this.dataSourceDeBaja.paginator = this.paginatorDeBaja;
+          this.dataSourceDeBaja.sort = this.sortDeBaja;
+
+          this.dataSource.data = this.datosActivos;
+          this.dataSource.paginator = this.allPaginator;
           this.dataSource.sort = this.sort;
-          console.log(this.datosActivos);
+
+          
+
+          
+
+          console.log('All Activos:', this.datosActivos);
+          console.log('Activos a Dar de Baja:', this.activosDeBaja);
+
           this.isLoadingResults = false; // Stop loading
           clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
 
@@ -373,7 +394,7 @@ export class ActaBajaCreateComponent {
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: 'Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador.',
+            text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. ${error}`,
           });
         }
       });
@@ -433,11 +454,51 @@ export class ActaBajaCreateComponent {
 
         this.isLoadingResults = false;  // Start loading
       });
+
+    
+
+      const updatedData = {
+        baja: 'DADO DE BAJA CON PLACA'
+      };
+    
+      this.darBaja();
+
+
       this.isLoadingResults = false;  // Start loading
       
    });
    this.isLoadingResults = false;  // Start loading
  }
+
+ async darBaja() {
+  this.toast.warning(`Activos se han dado de baja`, {
+    duration: 4000,
+    position: 'top-right',
+    style: {
+      border: '1px solid #ffc107',
+      color: '#856404',
+      background: '#fff3cd'
+    },
+    dismissible: true,
+  });
+
+  const updatedData = {
+    baja: 'DADO DE BAJA CON PLACA'
+  };
+
+  // Flatten the nested array
+  const flatActivos = this.activoTablas.flat();
+
+  for (const activo of flatActivos) {
+    try {
+      // Update each activo
+      await firstValueFrom(this.gService.patch(`update-activo/${activo.id}/`, updatedData));
+      console.log(`Activo ${activo.id} updated successfully`);
+    } catch (error) {
+      console.error(`Error updating Activo ${activo.id}`);
+    }
+  }
+}
 
  onSubmit() {
   if (this.myForm.valid) {

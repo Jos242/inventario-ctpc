@@ -75,10 +75,10 @@
                                       <p><mat-checkbox formControlName="modelo">Modelo</mat-checkbox></p>
                                       <p><mat-checkbox formControlName="serie">No de Serie</mat-checkbox></p>
                                       <p><mat-checkbox formControlName="estado">Estado</mat-checkbox></p>
-                                      <p><mat-checkbox formControlName="ubicacion_original_alias">Ubicacion Original</mat-checkbox></p>
+                                      <p><mat-checkbox formControlName="ubicacion_original_nombre_oficial">Ubicacion Original</mat-checkbox></p>
                                     </div>
                                     <div class="col-lg-3">
-                                      <p><mat-checkbox formControlName="ubicacion_actual_alias">Ubicacion Actual</mat-checkbox></p>
+                                      <p><mat-checkbox formControlName="ubicacion_actual_nombre_oficial">Ubicacion Actual</mat-checkbox></p>
                                       <p><mat-checkbox formControlName="modo_adquisicion_desc">Modo de Adquisicion</mat-checkbox></p>
                                       <p><mat-checkbox formControlName="conectividad">Es "Conectividad"</mat-checkbox></p>
                                       <p><mat-checkbox formControlName="seguridad">Es "Seguridad"</mat-checkbox></p>
@@ -136,14 +136,14 @@
                               </ng-container>
                           
                               <!-- Ubicacion Column -->
-                              <ng-container *ngIf="displayedColumns.includes('ubicacion_original_alias')" matColumnDef="ubicacion_original_alias">
+                              <ng-container *ngIf="displayedColumns.includes('ubicacion_original_nombre_oficial')" matColumnDef="ubicacion_original_nombre_oficial">
                                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Ubicacion Original </th>
-                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.ubicacion_original_alias}} </td>
+                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.ubicacion_original_nombre_oficial}} </td>
                               </ng-container>
             
-                              <ng-container *ngIf="displayedColumns.includes('ubicacion_actual_alias')" matColumnDef="ubicacion_actual_alias">
+                              <ng-container *ngIf="displayedColumns.includes('ubicacion_actual_nombre_oficial')" matColumnDef="ubicacion_actual_nombre_oficial">
                                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Ubicacion Actual </th>
-                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.ubicacion_actual_alias}} </td>
+                                <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.ubicacion_actual_nombre_oficial}} </td>
                               </ng-container>
             
                               <ng-container *ngIf="displayedColumns.includes('serie')" matColumnDef="serie">
@@ -232,9 +232,9 @@
                     </ng-container>
             
                     <!-- Ubicacion Column -->
-                    <ng-container matColumnDef="ubicacion_original_alias">
+                    <ng-container matColumnDef="ubicacion_original_nombre_oficial">
                         <th mat-header-cell *matHeaderCellDef> Ubicacion </th>
-                        <td mat-cell *matCellDef="let element" matTooltip="Presione para remover este activo al excel"> {{element.ubicacion_original_alias}} </td>
+                        <td mat-cell *matCellDef="let element" matTooltip="Presione para remover este activo al excel"> {{element.ubicacion_original_nombre_oficial}} </td>
                     </ng-container>
 
 
@@ -250,9 +250,9 @@
                     </ng-container>
                 
   
-                    <ng-container *ngIf="false" matColumnDef="ubicacion_actual_alias">
+                    <ng-container *ngIf="false" matColumnDef="ubicacion_actual_nombre_oficial">
                       <th mat-header-cell *matHeaderCellDef mat-sort-header> Ubicacion Actual </th>
-                      <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.ubicacion_actual_alias}} </td>
+                      <td mat-cell *matCellDef="let row" matTooltip="Presione para agregar este activo al excel"> {{row.ubicacion_actual_nombre_oficial}} </td>
                     </ng-container>
   
                     <ng-container *ngIf="false" matColumnDef="serie">

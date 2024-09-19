@@ -35,6 +35,9 @@ export class LoginIndexComponent implements OnInit{
   baseUrl: string = environment.apiURL;
   currentUser: any;
 
+
+
+
   public isLoadingResults = false;
 
 
@@ -83,6 +86,8 @@ export class LoginIndexComponent implements OnInit{
           clearTimeout(loadingTimeout); 
           this.currentUser=this.myForm.get('usuario').value;
           this.authService.setCurrentUser(this.currentUser);
+
+         
           Swal.fire({
             icon: 'success',
             title: 'Exito',

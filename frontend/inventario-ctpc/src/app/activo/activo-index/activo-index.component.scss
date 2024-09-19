@@ -73,6 +73,18 @@ table {
   margin-left: 11px;
 }
 
+.row-red {
+  color: red;
+}
+
+.row-orange {
+  color: orange;
+}
+
+.row-yellow {
+  color: rgb(129, 84, 255);
+}
+
 @media (max-width: 1435px) {
   .example-container{
       width: 90%;

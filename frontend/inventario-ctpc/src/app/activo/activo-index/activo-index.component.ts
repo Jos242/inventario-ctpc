@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy, ElementRef } from '@angular/core';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardActions, MatCardModule} from '@angular/material/card';
@@ -37,8 +37,8 @@ export interface ActivoData {
   modelo: string;
   serie: string;
   estado: string;
-  ubicacion_original_alias: string;
-  ubicacion_actual_alias: string;
+  ubicacion_original_nombre_oficial: string;
+  ubicacion_actual_nombre_oficial: string;
   modo_adquisicion_desc: string;
   precio: string;
   conectividad: string;
@@ -70,13 +70,18 @@ export class ActivoIndexComponent implements AfterViewInit  {
   public isLoadingResults = false;
 
   displayMessage: boolean = false;
+  filterValue: any;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
+  @ViewChild('input') input: ElementRef;
+
   datos:any;
   destroy$:Subject<boolean>=new Subject<boolean>();
   baseUrl: string = environment.apiURL;
+
+  observaciones: any[] = []; // Store all observaciones
 
   totalItems: number;
 
@@ -102,8 +107,8 @@ export class ActivoIndexComponent implements AfterViewInit  {
         modelo: true,
         serie: false,
         estado: false,
-        ubicacion_original_alias: true,
-        ubicacion_actual_alias: false,
+        ubicacion_original_nombre_oficial: true,
+        ubicacion_actual_nombre_oficial: false,
         modo_adquisicion_desc: false,
         precio: false,
         conectividad: false,
@@ -119,26 +124,47 @@ export class ActivoIndexComponent implements AfterViewInit  {
         this.filtros.patchValue(cachedFilters);
       }
 
-
-      this.checks();  
+      
+      
+      this.checks(); 
       // Initialize displayedColumns based on initial filter values
       this.updateDisplayedColumns();
     }
 
+    
+
     ngOnInit(): void {
+       // Fetch observaciones on initialization
+      // this.input.nativeElement.value = localStorage.getItem('lastSearch') ? localStorage.getItem('lastSearch') : '';
+
+      
       this.filtros.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
         this.updateDisplayedColumns();
         this.displayMessage = true;
       });
+      
     }
 
     ngAfterViewInit() {
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
+      if(localStorage.getItem('lastSearch')){
+        console.log(localStorage.getItem('lastSearch'))
+        console.log(this.input)
+        this.input.nativeElement.value = localStorage.getItem('lastSearch');
+        this.applyFilter(null,localStorage.getItem('lastSearch'))
+      }else{
+        this.input.nativeElement.value=null;
+      }
     }
 
     ngOnDestroy(): void {
-
+      if(this.filterValue){
+        localStorage.setItem('lastSearch', this.filterValue);
+      }else{
+        localStorage.setItem('lastSearch', '');
+      }
+      
       this.destroy$.complete();
     }
 
@@ -146,6 +172,41 @@ export class ActivoIndexComponent implements AfterViewInit  {
       this.displayedColumns = Object.keys(this.filtros.value).filter(key => this.filtros.value[key]);
     }
 
+    fetchObservaciones(): void {
+      this.isLoadingResults = true; // Stop loading
+      this.gService.list('todas-las-observaciones/')
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((data: any) => {
+          this.observaciones = data; // Store all observaciones
+          console.log(this.observaciones)
+          for(let element of this.datos){
+            element.class=this.getRowClass(element);
+          }
+          this.dataSource.data = this.datos;
+            this.totalItems = this.datos.length;
+            this.updatePageSizeOptions();
+          this.isLoadingResults = false; // Stop loading
+        });
+        
+    }
+
+    hasObservaciones(activoId: string): boolean {
+      // Check if activo has observaciones by matching the id_registro
+     
+      return this.observaciones.some(obs => obs.activo == activoId);
+    }
+
+    getRowClass(row: any): string {
+      this.isLoadingResults = true;
+      if ( this.hasObservaciones(row.id_registro)) {
+        return 'row-yellow';
+      } else if (row.baja == 'A DAR DE BAJA') {
+        return 'row-orange';
+      } else if (row.baja == 'DADO DE BAJA CON PLACA' || row.baja == 'DADO DE BAJA SIN PLACA') {
+        return 'row-red';
+      }
+      return '';
+    }
     
     checks(){
       this.isLoadingResults = true;  // Start loading
@@ -175,7 +236,13 @@ export class ActivoIndexComponent implements AfterViewInit  {
           next: (data: any) => {
             console.log(data);
             this.datos = data;
-            this.dataSource.data = data;
+            this.fetchObservaciones();
+            this.displayMessage = true;
+            // data.for(element => {
+              
+            // });
+           
+            this.dataSource.data = this.datos;
             this.totalItems = data.length;
             this.updatePageSizeOptions();
             this.isLoadingResults = false; // Stop loading
@@ -192,15 +259,22 @@ export class ActivoIndexComponent implements AfterViewInit  {
             });
           }
         });
+        
     }
 
     updatePageSizeOptions() {
       this.pageSizeOptions = [10, 25, 40, 100, this.totalItems];
     }
 
-    applyFilter(event: Event) {
-      const filterValue = (event.target as HTMLInputElement).value;
-      this.dataSource.filter = filterValue.trim().toLowerCase();
+    applyFilter(event: Event, flag: string) {
+      if(flag){
+        this.filterValue=flag;
+      }else{
+        this.filterValue = (event.target as HTMLInputElement).value;
+      }
+
+      
+      this.dataSource.filter = this.filterValue.trim().toLowerCase();
       
       if (this.dataSource.paginator) {
         this.dataSource.paginator.firstPage();

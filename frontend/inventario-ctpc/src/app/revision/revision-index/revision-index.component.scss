@@ -1,0 +1,29 @@
+.mainDiv {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center; /* Align text */
+    width: 95%;
+}
+.imgLogo{
+    max-width: 150px;
+    margin-top: 5px;
+}
+
+button {
+    margin-top: 20px; /* Add some spacing between the button and the last <h2> */
+}
+
+.example-loading-shade {
+    position: absolute;
+    top: 73px; /* Adjust this to match your header height */
+    left: 0;
+    bottom: 0; /* Changed to 0 to cover the entire content area below the header */
+    right: 0;
+    background: rgba(0, 0, 0, 0.15);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }

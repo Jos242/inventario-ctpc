@@ -1,1 +1,16 @@
-<p>revision-index works!</p>
+
+@if (isLoadingResults) {
+    <div class="example-loading-shade">
+      @if (isLoadingResults) {
+        <mat-spinner></mat-spinner>
+      }
+    </div>
+  }
+<div class="mainDiv">
+     <img class="imgLogo" src="assets/images/logocole.png" alt="CTPC">
+    <h2 *ngIf="currentUserData">Funcionario: {{ currentUserData.user}}  </h2>
+    <H1>Su Ubicacion Asignada Es: </H1>
+    <h2 *ngIf="datosUbi"> {{datosUbi.nombre_oficial}} ({{datosUbi.alias}})</h2>
+    <h3>Una vez presionado el boton de iniciar, sera rederigido al Inventario de su aula. Debe finalizar de realizar la revision antes de cerrar la pagina. </h3>
+    <button mat-flat-button color="primary">Iniciar Revision de Inventario</button>
+</div>

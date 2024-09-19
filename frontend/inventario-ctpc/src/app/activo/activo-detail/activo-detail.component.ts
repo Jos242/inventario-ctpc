@@ -137,7 +137,7 @@ export class ActivoDetailComponent implements OnInit{
         });
     }
 
-    darBaja(){
+    darBaja() {
       this.toast.warning(`Activo se ha marcado para dar de baja, por favor cree el acta de baja`, {
         duration: 4000,
         position: 'top-right',
@@ -148,6 +148,57 @@ export class ActivoDetailComponent implements OnInit{
         },
         dismissible: true,
       });
+    
+      const updatedData = {
+        baja: 'A DAR DE BAJA'
+      };
+    
+      this.gService.patch(`update-activo/${this.datos.id}/`, updatedData)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (updatedActivo: any) => {
+            console.log(`Activo ${this.datos.id} updated successfully`);
+            
+            // Update the local datos variable to reflect changes in the HTML
+            this.datos = { ...this.datos, ...updatedActivo }; // Merge updated values
+          },
+          error: () => {
+            console.error(`Error updating Activo ${this.datos.id}`);
+          }
+        });
+    }
+
+    marcarPlaca(){
+      this.toast.warning(`Activo se ha marcado con placa impresa`, {
+        duration: 4000,
+        position: 'top-right',
+        style: {
+          border: '1px solid #ffc107',
+          color: '#856404',
+          background: '#fff3cd'
+        },
+        dismissible: true,
+      });
+    
+      const updatedData = {
+        placa: true
+      };
+    
+      this.gService.patch(`update-activo/${this.datos.id}/`, updatedData)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (updatedActivo: any) => {
+            console.log(`Activo ${this.datos.id} updated successfully`);
+            
+            // Update the local datos variable to reflect changes in the HTML
+            this.datos = { ...this.datos, ...updatedActivo }; // Merge updated values
+          },
+          error: () => {
+            console.error(`Error updating Activo ${this.datos.id}`);
+          }
+        });
+        
+      
     }
 
     onEdit(): void {

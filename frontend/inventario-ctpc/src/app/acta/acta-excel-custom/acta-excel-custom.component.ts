@@ -41,8 +41,8 @@ export interface ActivoData {
   modelo: string;
   serie: string;
   estado: string;
-  ubicacion_original_alias: string;
-  ubicacion_actual_alias: string;
+  ubicacion_original_nombre_oficial: string;
+  ubicacion_actual_nombre_oficial: string;
   modo_adquisicion_desc: string;
   precio: string;
   conectividad: string;
@@ -70,8 +70,8 @@ export interface ActivoData {
 })
 export class ActaExcelCustomComponent implements AfterViewInit {
 
-  displayedColumns: string[] = ['no_identificacion', 'descripcion', 'ubicacion_original_alias'];
-  displayedColumns2: string[] = ['no_identificacion', 'descripcion', 'ubicacion_original_alias'];
+  displayedColumns: string[] = ['no_identificacion', 'descripcion', 'ubicacion_original_nombre_oficial'];
+  displayedColumns2: string[] = ['no_identificacion', 'descripcion', 'ubicacion_original_nombre_oficial'];
   dataSource: MatTableDataSource<ActivoData> = new MatTableDataSource<ActivoData>();
   dataSource2: MatTableDataSource<ActivoData> = new MatTableDataSource<ActivoData>();
   public isLoadingResults = false;
@@ -120,8 +120,8 @@ export class ActaExcelCustomComponent implements AfterViewInit {
         modelo: false,
         serie: false,
         estado: false,
-        ubicacion_original_alias: true,
-        ubicacion_actual_alias: false,
+        ubicacion_original_nombre_oficial: true,
+        ubicacion_actual_nombre_oficial: false,
         modo_adquisicion_desc: false,
         precio: false,
         conectividad: false,
@@ -296,7 +296,7 @@ export class ActaExcelCustomComponent implements AfterViewInit {
 
 
       // Find all activos with the selected ubicacion
-      const activosConUbicacion = this.datos.filter(activo => activo.ubicacion_original_alias === selectedUbi);
+      const activosConUbicacion = this.datos.filter(activo => activo.ubicacion_original_nombre_oficial === selectedUbi);
 
 
       // Add each activo to the second table if it's not already there

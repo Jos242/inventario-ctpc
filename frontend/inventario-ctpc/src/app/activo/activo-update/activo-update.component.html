@@ -51,6 +51,7 @@
                                 <mat-hint>Precio en Colones del Producto, utilizando puntos para las decimas</mat-hint>
                             </mat-form-field> 
                         </div>
+                        
                     </div>
                     <div class="row">
                         <div class="col-lg">
@@ -74,6 +75,33 @@
                                 <mat-hint>Numero de serie del activo</mat-hint>
                             </mat-form-field>
                         </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-lg">
+                            <mat-form-field appearance="outline" class="inputsForm">
+                                <mat-label>Placa Impresa</mat-label>
+                                <mat-select formControlName="placa" placeholder="Si">
+                                    <mat-option *ngFor="let placa of placas" [value]="placa.id">{{ placa.descripcion }}</mat-option>
+                                    </mat-select>
+                                <mat-hint>El activo tiene su placa de inventario impresa y pegada?</mat-hint>
+                                
+                            </mat-form-field> 
+                        </div>
+                        <div class="col-lg">
+                            
+                                <mat-form-field appearance="outline" class="inputsForm">
+                                    <mat-label>Dado de Baja</mat-label>
+                                    <mat-select formControlName="baja" placeholder="NO DADO DE BAJA">
+                                        <mat-option *ngFor="let baja of bajas" [value]="baja.id">{{ baja.descripcion }}</mat-option>
+                                        </mat-select>
+                                    <mat-hint>Se ha dado de baja el activo?</mat-hint>
+
+                                    
+
+                                </mat-form-field> 
+                           
+                        </div>
                         <div class="col-lg">
                             <mat-form-field appearance="outline" class="inputsForm">
                                 <mat-label>Estado</mat-label>
@@ -82,14 +110,6 @@
                                 </mat-select>
                                 <mat-hint>Estado actual del activo</mat-hint>
                             </mat-form-field>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg">
-
-                        </div>
-                        <div class="col-lg">
-
                         </div>
                     </div>
 

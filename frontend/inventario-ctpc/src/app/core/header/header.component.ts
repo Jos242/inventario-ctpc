@@ -16,13 +16,30 @@ import { CommonModule } from '@angular/common';
 export class HeaderComponent {
 
   logged: any;
+  currentUser: any;
+  userType: string | null;
 
   constructor(private authService: AuthService, private router: Router) {
     this.authService.isLoggedIn$().subscribe((x) => {
       this.logged=x;
     })
+
     
 
+  }
+
+  ngOnInit(): void {
+    this.authService.getCurrentUser$().subscribe(user => {
+      this.currentUser = user;
+      console.log('Current User Updated: ', this.currentUser);
+    });
+
+    // Subscribe to user type changes
+    this.authService.getUserType$().subscribe(userType => {
+      this.userType = userType;
+      console.log('User Type Updated: ', this.userType);
+    });
+    
   }
 
 

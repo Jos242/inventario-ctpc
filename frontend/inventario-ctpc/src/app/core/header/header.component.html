@@ -15,30 +15,43 @@
             <span>Escanear</span>
           </a>
         </li>
-        <li class="nav-item" *ngIf="logged"> 
-          <a mat-button [routerLink]="'/activos'" >
+        <li class="nav-item" *ngIf="logged && userType" > 
+          <a mat-button [routerLink]="'/activos'" *ngIf="userType == 'Administrador'" >
             <mat-icon>list</mat-icon>
             <span>Listado de Activos</span>
           </a>
         </li>
-        <li class="nav-item" *ngIf="logged"> 
-          <a mat-button [routerLink]="'/actas'" >
+        <li class="nav-item" *ngIf="logged && userType"> 
+          <a mat-button [routerLink]="'/actas'" *ngIf="userType == 'Administrador'" >
             <mat-icon>description</mat-icon>
             <span>Actas y Excels</span>
           </a>
         </li>
-        <li class="nav-item" *ngIf="logged"> 
-          <a mat-button [routerLink]="'/activos/crear'" >
+        <li class="nav-item" *ngIf="logged && userType"> 
+          <a mat-button [routerLink]="'/activos/crear'" *ngIf="userType == 'Administrador'" >
             <mat-icon>add_box</mat-icon>
             <span>Crear Activos</span>
           </a>
         </li>
-        <li class="nav-item" *ngIf="logged"> 
-          <a mat-button [routerLink]="'/admin'" >
+        <li class="nav-item" *ngIf="logged && userType"> 
+          <a mat-button [routerLink]="'/admin'" *ngIf="userType == 'Administrador'">
             <mat-icon>settings</mat-icon>
             <span>Administracion</span>
           </a>
         </li>
+        <li class="nav-item" *ngIf="logged && userType"> 
+          <a mat-button [routerLink]="'/revision'">
+            <mat-icon>settings</mat-icon>
+            <span>Revision de Aula</span>
+          </a>
+        </li>
+        <!-- falta uno para revision de admin -->
+        <!-- <li class="nav-item" *ngIf="logged"> 
+          <a mat-button [routerLink]="'/admin'" *ngIf="userType.role === 'Administrador'">
+            <mat-icon>settings</mat-icon>
+            <span></span>
+          </a>
+        </li> -->
         <li class="nav-item" *ngIf="logged"> 
           <button mat-button (click)="logout()" >
             <mat-icon>logout</mat-icon>

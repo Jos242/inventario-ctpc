@@ -16,29 +16,37 @@ import { ActivoUpdateComponent } from './activo/activo-update/activo-update.comp
 import { ActaExcelsComponent } from './acta/acta-excels/acta-excels.component';
 import { ActaExcelCustomComponent } from './acta/acta-excel-custom/acta-excel-custom.component';
 import { UsuarioIndexComponent } from './usuario/usuario-index/usuario-index.component';
+import { RevisionIndexComponent } from './revision/revision-index/revision-index.component';
+import { RevisionAulaComponent } from './revision/revision-aula/revision-aula.component';
+import { RevisionAdminComponent } from './revision/revision-admin/revision-admin.component';
+import { adminGuard } from './share/guards/admin.guard';
 
 
 export const routes: Routes = [
-    { path:'activos', component: ActivoIndexComponent, canActivate: [authGuard]  },
-    { path:'index', component: HomeIndexComponent, canActivate: [authGuard] },
+    { path:'activos', component: ActivoIndexComponent, canActivate: [authGuard, adminGuard]  },
+    { path:'index', component: HomeIndexComponent, canActivate: [authGuard, adminGuard] },
     // { path:'index', component: HomeIndexComponent , canActivate: [authGuard] },
     { path: 'login', component: LoginIndexComponent },
 
-    { path:'admin', component: AdminIndexComponent, canActivate: [authGuard] },
+    { path:'admin', component: AdminIndexComponent, canActivate: [authGuard, adminGuard] },
 
-    { path:'actas', component: ActaIndexComponent, canActivate: [authGuard]},
-    { path:'actas/baja', component: ActaBajaCreateComponent, canActivate: [authGuard]},
-    { path:'actas/traslado', component: ActaMoverCreateComponent, canActivate: [authGuard]},
-    { path:'actas/lista', component: ActaListadoComponent, canActivate: [authGuard]},
-    { path:'actas/excels', component: ActaExcelsComponent, canActivate: [authGuard]},
-    { path:'actas/excel-custom', component: ActaExcelCustomComponent, canActivate: [authGuard]},
+    { path:'actas', component: ActaIndexComponent, canActivate: [authGuard, adminGuard]},
+    { path:'actas/baja', component: ActaBajaCreateComponent, canActivate: [authGuard, adminGuard]},
+    { path:'actas/traslado', component: ActaMoverCreateComponent, canActivate: [authGuard, adminGuard]},
+    { path:'actas/lista', component: ActaListadoComponent, canActivate: [authGuard, adminGuard]},
+    { path:'actas/excels', component: ActaExcelsComponent, canActivate: [authGuard, adminGuard]},
+    { path:'actas/excel-custom', component: ActaExcelCustomComponent, canActivate: [authGuard, adminGuard]},
 
-    { path:'usuarios', component: UsuarioIndexComponent},
+    { path:'usuarios', component: UsuarioIndexComponent, canActivate: [authGuard, adminGuard]},
     
-    { path:'activos/crear', component: ActivoCreateComponent, canActivate: [authGuard]},
+    { path:'activos/crear', component: ActivoCreateComponent, canActivate: [authGuard, adminGuard]},
     { path:'activos/scan', component: ActivoScanComponent },
 
-    { path:'activos/:id/edit', component: ActivoUpdateComponent },
+    { path:'revision', component: RevisionIndexComponent, canActivate: [authGuard]} ,
+    { path:'revision/aula', component: RevisionAulaComponent, canActivate: [authGuard]} ,
+    { path:'revision/admin', component: RevisionAdminComponent, canActivate: [authGuard, adminGuard]} ,
+
+    { path:'activos/:id/edit', component: ActivoUpdateComponent, canActivate: [authGuard, adminGuard] },
     { path:'activos/:id', component: ActivoDetailComponent },
     
     
