@@ -339,6 +339,19 @@ export class ActivoIndexComponent implements AfterViewInit  {
       }
     }
 
+    onMiddleClick(event: MouseEvent, no_identificacion: string): void {
+      console.log(event)
+      if (event.button === 1) {  // Middle-click detection
+        console.log(event)
+        event.preventDefault();  // Prevent default behavior (scrolling)
+        
+        // Open the page in a new tab
+        // this.router.navigate(['activos/',no_identificacion, '_blank']);
+        // this.router.navigate(['activos', no_identificacion]);
+        window.open(`/activos/${no_identificacion}`, '_blank');
+      }
+    }
+
     verDetalles(id: string): void {
       this.router.navigate(['activos/', id]);
     }
