@@ -1,7 +1,11 @@
-from django.contrib.auth.models import User
-from inventario.models import *
-from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
+from django.contrib.auth.models     import User
+from inventario.models              import *
+from rest_framework                 import serializers
+from rest_framework.exceptions      import ValidationError
+from inventario._utils              import handle_uploaded_file
+from django.core.files.uploadedfile import InMemoryUploadedFile
+import os
+from sgica.settings                 import MEDIA_ROOT
 
 class ActivoSerializer(serializers.ModelSerializer):
     id_registro = serializers.CharField(required = False)
@@ -124,7 +128,7 @@ class UpdateUserSerializer(serializers.Serializer):
                 if new_user_id != funcionario.user_id and Funcionarios.objects.filter(user_id = new_user_id).exists():
                     raise ValidationError({"error": "user_id already in use by another funcionario"})
 
-                funcionario.user = new_user_id
+                funcionario.user            = new_user_id
                 funcionario.nombre_completo = validated_data.get("nombre_completo", funcionario.nombre_completo) 
                 funcionario.departamento    = validated_data.get("departamento", funcionario.departamento)
                 funcionario.puesto          = validated_data.get("puesto", funcionario.puesto) 
@@ -164,16 +168,30 @@ class DocSerializer(serializers.ModelSerializer):
     creado_el = serializers.DateTimeField(read_only = True)  
 
     class Meta:
-
         model  = Docs
         fields = ['titulo', 'tipo', 'archivo','creado_el']
     
+    def is_valid(self, *, raise_exception=False, impreso) -> bool:
+        valid:bool = super().is_valid(raise_exception=raise_exception)
+
+        if not valid:
+            return valid
+
+        is_file_type_pdf:bool    = self.validated_data.get("TIPO") == 'PDF' 
+        is_impreso_not_none:bool = impreso is None
+ 
+        if  is_file_type_pdf and is_impreso_not_none:
+            self._errors["field_required"] = ["field 'impreso' is required"]
+            return False
+
+        return valid
+
     def create(self, validated_data:dict):
-        archivo = validated_data.pop('archivo', None)
+        validated_data.pop('archivo', None)
         return super().create(validated_data)
     
     def update(self, instance:Docs, validated_data:dict):
-        archivo = validated_data.pop('archivo', None)
+        validated_data.pop('archivo', None)
         return super().update(self, instance, validated_data)
 
 class DocUpdateSerializer(serializers.ModelSerializer):
@@ -208,23 +226,43 @@ class RevisionesSerializer(serializers.ModelSerializer):
   
     class Meta:
         model = Revisiones
-        fields = ['id', 'id_registro', 'status', 'fecha', 'nota', 'cierre_inventario_id'] 
+        fields = ['id', 'id_registro', 'status',
+                  'fecha', 'nota', 'cierre_inventario_id'] 
+
+    def is_valid(self, *, raise_exception=False) -> bool:
+        valid:bool = super().is_valid(raise_exception = raise_exception)
+
+        if not valid:
+            return valid
+        
+        no_existe_status:bool          = self.validated_data["status"] == "NO EXISTE"
+        nota_in_validated_data:bool    = "nota" in self.validated_data
+
+        if no_existe_status and not nota_in_validated_data:
+            self._errors['field_required'] = ["field 'nota' is required"]
+            return False
+
+        return valid 
+
+    def update(self, instance:Revisiones, validated_data:dict) -> Revisiones:
+        instance = super().update(instance, validated_data)
+        instance.save()
+        return instance
      
 class WhatTheExcelNameIs(serializers.Serializer):
     file_name = serializers.CharField()
     
     def is_valid(self, *args, **kwargs):
         valid = super().is_valid(*args, **kwargs)        
-        init_vals:dict = self.get_initial()
-        file_name:str = init_vals.get("file_name") 
+        file_name:str = self.validated_data.get("file_name") 
 
-        if valid: 
-            file_name = self.validated_data.get('file_name', '')
-            if not file_name.lower().endswith('.xlsx'):
-                self._errors['file_name'] = ['El archivo debe tener la extensión .xlsx']
-                return False
+        if not valid:
+            return valid
 
-        return valid
+        if not file_name.lower().endswith('.xlsx'):
+            self._errors['file_name'] = ['not .xlsx extension']
+            return False
+
 
 class UbicacionesSerializer(serializers.ModelSerializer):
     img_path = serializers.FileField(required = False)
@@ -234,9 +272,57 @@ class UbicacionesSerializer(serializers.ModelSerializer):
         fields = ['id', 'nombre_oficial',
                   'alias', 'funcionario_id',
                   'img_path']
-    def update(self, instance, validated_data):
+
+    def create(self, ubicacion_files:list[InMemoryUploadedFile],
+               validated_data: dict) -> Ubicaciones:
+
+        nombre_oficial = validated_data["nombre_oficial"]
+
+        if "alias" not in validated_data:
+            validated_data["alias"] = nombre_oficial 
+
+        params =   {"files": ubicacion_files,
+                    "doc_type": "ubicacion_img",
+                    "nombre_oficial": validated_data.get("nombre_oficial", "")} 
+
+        ruta:str = handle_uploaded_file(**params)  
+
+        if "img_path" in validated_data:
+            validated_data["img_path"] = ruta
+
+        ubicacion:Ubicaciones = Ubicaciones(**validated_data)
+        ubicacion.save() 
+        return ubicacion 
+
+    def update(self, instance:Ubicaciones,
+               ubicacion_files:list[InMemoryUploadedFile],
+               validated_data:dict):
+        old_folder_name:str = instance.nombre_oficial.replace(" ", "_")
+        new_folder_name:str = validated_data.get('nombre_oficial',
+                                                 instance.nombre_oficial).replace(" ", "_")
+
+        old_dir = os.path.join(MEDIA_ROOT, "uploads", "ubicaciones", old_folder_name)
+        new_dir = os.path.join(MEDIA_ROOT, "uploads", "ubicaciones", new_folder_name) 
+        relative_new_dir =  os.path.join("uploads", "ubicaciones", new_folder_name)
+
+        if not os.path.exists(old_dir):
+            os.makedirs(new_dir)
+            instance.img_path = relative_new_dir
+
+        elif old_folder_name != new_folder_name:
+            os.rename(old_dir, new_dir)
+            instance.img_path = relative_new_dir
+
+        files:list = ubicacion_files
+        handle_uploaded_file(**{
+                       "files": files,
+                       "doc_type": "ubicacion_img",
+                       "nombre_oficial": instance.nombre_oficial
+                       })
         validated_data.pop('img_path', None)
+
         return super().update(instance, validated_data)
+
 
 class ReadUbicacionesSerializer(serializers.ModelSerializer):
     img_path = serializers.CharField(required = False)
