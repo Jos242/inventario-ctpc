@@ -210,7 +210,7 @@ class ReadDocSerializer(serializers.ModelSerializer):
 class CierreInventarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = CierreInventario
-        fields = ['tipo_revision', 'funcionario',
+        fields = ['id', 'tipo_revision', 'funcionario',
                   'ubicacion', 'fecha', 'finalizado']
         read_only_fields = ['id']
 
