@@ -84,15 +84,13 @@ class Ubicaciones(models.Model):
 class ModoAdquisicion(models.Model):
 
     id = models.AutoField(primary_key = True)
-    #TODO set param blank to false in production
-    descripcion = models.CharField(max_length = 240, unique = True,
-                                   blank = True) #IN PRODUCTION THIS ONE IS FALSE
+    descripcion = models.CharField(max_length = 240, unique = True)
 
     class Meta:
         db_table = 'modoadquisicion'
 
     def __str__(self) -> str:
-        return self.descripcion
+        return str(self.descripcion)
 
 class Activos(models.Model):
     ESTADO_ACTIVO = {
