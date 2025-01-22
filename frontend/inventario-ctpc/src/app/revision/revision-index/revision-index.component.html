@@ -12,5 +12,5 @@
     <H1>Su Ubicacion Asignada Es: </H1>
     <h2 *ngIf="datosUbi"> {{datosUbi.nombre_oficial}} ({{datosUbi.alias}})</h2>
     <h3>Una vez presionado el boton de iniciar, sera rederigido al Inventario de su aula. Debe finalizar de realizar la revision antes de cerrar la pagina. </h3>
-    <button mat-flat-button color="primary">Iniciar Revision de Inventario</button>
+    <button mat-flat-button color="primary" (click)="iniciarRevision()">Iniciar Revision de Inventario</button>
 </div>

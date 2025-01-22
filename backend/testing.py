@@ -25,7 +25,8 @@ def get_file_priv_path(*args, **kwargs):
     cursor:Cursor = db.cursor()
     cursor.execute("SHOW VARIABLES LIKE 'secure_file_priv'")
     result = cursor.fetchone()[1]
-    SECURE_FILE_PRIV = result 
+    print("RESULTADO: ",result)
+    SECURE_FILE_PRIV = "/var/lib/mysql-files/"
     cursor.close()
     db.close()
 
@@ -268,6 +269,7 @@ def connection_like_root(*args, **kwargs):
 def load_modo_adquisiciones(*args, **kwargs):
     kwargs['db'] = 'SGICA'
     file_path = os.path.join(SECURE_FILE_PRIV, "all_modos_de_adquisicion.csv")
+    print(file_path)
     db:Connection = MySQLdb.connect(**kwargs)
     # Crear un cursor para ejecutar consultas
     cursor:Cursor = db.cursor()
@@ -278,7 +280,7 @@ def load_modo_adquisiciones(*args, **kwargs):
             INTO TABLE modoadquisicion 
             FIELDS TERMINATED BY ';' 
             ENCLOSED BY '"'
-            LINES TERMINATED BY '\\n'
+            LINES TERMINATED BY '\\r\\n'
             (id, descripcion);
             """
 
@@ -301,7 +303,7 @@ def load_ubicaciones(*args, **kwargs):
             INTO TABLE ubicaciones 
             FIELDS TERMINATED BY ';' 
             ENCLOSED BY '"'
-            LINES TERMINATED BY '\\n'
+            LINES TERMINATED BY '\\r\\n'
             (id, nombre_oficial, alias, img_path);
             """
 
@@ -323,7 +325,7 @@ def load_all_activos(*args, **kwargs):
                INTO TABLE activos 
                FIELDS TERMINATED BY ';' 
                ENCLOSED BY '"'
-               LINES TERMINATED BY '\\n'
+               LINES TERMINATED BY '\\r\\n'
                (id_registro, asiento, no_identificacion, descripcion, marca, modelo, serie, estado, 
                 ubicacion_original, modo_adquisicion, precio, fecha, observacion, impreso, ubicacion_actual, conectividad,
                 seguridad, placa, baja);"""
@@ -348,7 +350,7 @@ def load_all_observaciones(*args, **kwargs):
             INTO TABLE observaciones
             FIELDS TERMINATED BY ';' 
             ENCLOSED BY '"'
-            LINES TERMINATED BY '\n'
+            LINES TERMINATED BY '\\r\\n'
             (id_registro, asiento, descripcion, activo_id, impreso);
              """
     run_server_now = True

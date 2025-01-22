@@ -2,7 +2,7 @@
 # >>> ~/Desktop/projects/inventario-ctpc/backend/ 
 
 from inventario.models                       import User
-from inventario.serializers                  import UpdateUserSerializer, UserSerializer 
+from inventario.serializers                  import UpdateUserSerializer, UserSerializer, FuncionariosSerializer
 from rest_framework.response                 import Response
 from rest_framework                          import status
 from inventario.permissions                  import IsAdminUser

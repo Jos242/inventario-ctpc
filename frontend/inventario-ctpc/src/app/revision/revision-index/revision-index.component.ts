@@ -79,6 +79,7 @@ export class RevisionIndexComponent {
     
             this.isLoadingResults = false;
             clearTimeout(loadingTimeout);
+            
           },
           error: (error) => {
             this.isLoadingResults = false;
@@ -90,6 +91,50 @@ export class RevisionIndexComponent {
             });
           }
         });
+    }
+
+    iniciarRevision(){
+
+      this.isLoadingResults = true;  // Start loading
+
+      const loadingTimeout = setTimeout(() => {
+        if (this.isLoadingResults) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Hay problemas...',
+            text: 'La carga de datos esta durando mas de lo esperado... Por favor intente nuevamente',
+          });
+        }
+      }, 15000); // 15 seconds
+
+      let formData;
+      //crear cierre
+      this.gService.create('nuevo-cierre/', formData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data: any) => {
+          console.log(data);
+          this.datos = data;             
+
+
+          this.isLoadingResults = false; // Stop loading
+          clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
+
+        },
+        error: (error) => {
+          this.isLoadingResults = false; // Stop loading on error
+          clearTimeout(loadingTimeout); // Clear the timeout if there's an error
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. ${error}`,
+          });
+        }
+      });
+
+      //retorna el create con el id
+      //usar ese id para redireccionar al cierre-nuevo
+      console.log("enlace redireccionamiento: " , `/cierre-nuevo/${this.currentUserData.id}/`,  )
     }
 
     loadUbiByFunc(): void {
@@ -113,6 +158,8 @@ export class RevisionIndexComponent {
             console.log(this.datosUbi);
             this.isLoadingResults = false;
             clearTimeout(loadingTimeout);
+            
+            
           },
           error: (error) => {
             this.isLoadingResults = false;
