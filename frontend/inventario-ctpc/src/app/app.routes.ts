@@ -20,6 +20,9 @@ import { RevisionIndexComponent } from './revision/revision-index/revision-index
 import { RevisionAulaComponent } from './revision/revision-aula/revision-aula.component';
 import { RevisionAdminComponent } from './revision/revision-admin/revision-admin.component';
 import { adminGuard } from './share/guards/admin.guard';
+import { UsuarioCreateComponent } from './usuario/usuario-create/usuario-create.component';
+import { UsuarioDetailComponent } from './usuario/usuario-detail/usuario-detail.component';
+import { UsuarioEditComponent } from './usuario/usuario-edit/usuario-edit.component';
 
 
 export const routes: Routes = [
@@ -38,6 +41,9 @@ export const routes: Routes = [
     { path:'actas/excel-custom', component: ActaExcelCustomComponent, canActivate: [authGuard, adminGuard]},
 
     { path:'usuarios', component: UsuarioIndexComponent, canActivate: [authGuard, adminGuard]},
+    { path:'usuarios/:id', component: UsuarioDetailComponent, canActivate: [authGuard, adminGuard]},
+    { path:'usuarios/crear', component: UsuarioCreateComponent, canActivate: [authGuard, adminGuard]},
+    { path:'usuarios/:id/edit', component: UsuarioEditComponent, canActivate: [authGuard, adminGuard]},
     
     { path:'activos/crear', component: ActivoCreateComponent, canActivate: [authGuard, adminGuard]},
     { path:'activos/scan', component: ActivoScanComponent },

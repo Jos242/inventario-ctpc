@@ -46,7 +46,7 @@ import { AddAnnotationDialogComponent } from '../../add-annotation-dialog/add-an
     MatMenuModule,
     RouterLink, MatSelectModule, MatDialogModule,
     CommonModule,ReactiveFormsModule, 
-    MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, MatTooltip, BooleanToYesNoPipe
+    MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, BooleanToYesNoPipe
   ],
   templateUrl: './activo-detail.component.html',
   styleUrl: './activo-detail.component.scss'
