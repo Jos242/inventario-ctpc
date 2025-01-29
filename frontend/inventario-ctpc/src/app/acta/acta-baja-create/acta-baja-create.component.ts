@@ -46,8 +46,8 @@ pdfMake.vfs = pdfFonts.pdfMake.vfs;
   providers:[provideNativeDateAdapter()],
   imports: [
     MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatRippleModule, MatTabsModule, MatGridListModule, MatCardModule,
-    ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,BooleanToYesNoPipe, MatFormFieldModule, MatInputModule, MatDatepickerModule, MatProgressSpinnerModule
-  ],
+    ReactiveFormsModule, MatButtonModule, MatSelectModule, CommonModule, MatFormFieldModule, MatInputModule, MatDatepickerModule, MatProgressSpinnerModule
+],
   templateUrl: './acta-baja-create.component.html',
   styleUrl: './acta-baja-create.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

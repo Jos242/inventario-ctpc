@@ -34,10 +34,6 @@ export interface ActivoData {
   standalone: true,
   imports: [
     MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule, FormsModule, MatButtonModule, MatIconModule,
-    
-    
-    
-    RouterLink, 
     CommonModule,
     MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, MatTooltip, FormsModule, ReactiveFormsModule
   ],

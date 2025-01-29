@@ -1,1 +1,67 @@
-<p>usuario-edit works!</p>
+<div class="titulo d-flex justify-content-center">
+    <h1>Editar Usuario</h1>
+</div>
+<div class="formAgregar">
+    <mat-card>
+        <mat-card-content>
+            <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="col-lg">    
+                                <mat-form-field appearance="outline" class="inputsForm">
+                                    <mat-label>Usuario</mat-label>
+                                    <input matInput formControlName="usuario" >
+                                    <mat-hint>Usuario con el que inicia sesión</mat-hint>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="col-lg">    
+                                <mat-form-field appearance="outline" class="inputsForm">
+                                    <mat-label>Contraseña</mat-label>
+                                    <input matInput formControlName="password">
+                                    <mat-hint>Contraseña con la que inicia sesión</mat-hint>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div class="col-lg">    
+                                <mat-form-field appearance="outline" class="inputsForm">
+                                    <mat-label>Nombre completo</mat-label>
+                                    <input matInput formControlName="nombreCompleto" >
+                                    <mat-hint>Nombre completo del usuario</mat-hint>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="col-lg">    
+                                <mat-form-field appearance="outline" class="inputsForm">
+                                    <mat-label>Departamento</mat-label>
+                                    <input matInput formControlName="departamento" >
+                                    <mat-hint>Departamento del usuario</mat-hint>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="col-lg">    
+                                <mat-form-field appearance="outline" class="inputsForm">
+                                    <mat-label>Puesto</mat-label>
+                                    <input matInput formControlName="puesto" >
+                                    <mat-hint>Puesto del usuario</mat-hint>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <button mat-flat-button color="primary" type="submit" [disabled]="!myForm.valid">Editar usuario</button>
+                    </div>
+
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>

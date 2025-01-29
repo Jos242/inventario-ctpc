@@ -1,0 +1,26 @@
+<div>
+    <mat-card>
+        <mat-card-content>
+                <div *ngIf="datos">
+                    <h1>Detalles del Modo de Adquisición</h1>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h2>Detalles Generales</h2>
+                            <p><strong>Descripción:</strong> {{ datos.descripcion }}</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <h2>Acciones</h2>
+                            <p>
+                                <a mat-raised-button color="primary" (click)="onEdit()">Editar Modo de Adquisición</a>  
+                                
+                            </p>  
+                            
+                                             
+                        </div>
+                    </div>    
+                    <button mat-flat-button color="primary" routerLink="/adquisiciones">Retornar</button>            
+                </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+

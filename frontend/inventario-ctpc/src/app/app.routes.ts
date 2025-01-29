@@ -20,6 +20,17 @@ import { RevisionIndexComponent } from './revision/revision-index/revision-index
 import { RevisionAulaComponent } from './revision/revision-aula/revision-aula.component';
 import { RevisionAdminComponent } from './revision/revision-admin/revision-admin.component';
 import { adminGuard } from './share/guards/admin.guard';
+import { UsuarioCreateComponent } from './usuario/usuario-create/usuario-create.component';
+import { UsuarioDetailComponent } from './usuario/usuario-detail/usuario-detail.component';
+import { UsuarioEditComponent } from './usuario/usuario-edit/usuario-edit.component';
+import { UbicacionIndexComponent } from './ubicacion/ubicacion-index/ubicacion-index.component';
+import { UbicacionCreateComponent } from './ubicacion/ubicacion-create/ubicacion-create.component';
+import { UbicacionDetailComponent } from './ubicacion/ubicacion-detail/ubicacion-detail.component';
+import { UbicacionEditComponent } from './ubicacion/ubicacion-edit/ubicacion-edit.component';
+import { AdquisicionIndexComponent } from './adquisicion/adquisicion-index/adquisicion-index.component';
+import { AdquisicionDetailComponent } from './adquisicion/adquisicion-detail/adquisicion-detail.component';
+import { AdquisicionCreateComponent } from './adquisicion/adquisicion-create/adquisicion-create.component';
+import { AdquisicionEditComponent } from './adquisicion/adquisicion-edit/adquisicion-edit.component';
 
 
 export const routes: Routes = [
@@ -38,6 +49,9 @@ export const routes: Routes = [
     { path:'actas/excel-custom', component: ActaExcelCustomComponent, canActivate: [authGuard, adminGuard]},
 
     { path:'usuarios', component: UsuarioIndexComponent, canActivate: [authGuard, adminGuard]},
+    { path:'usuarios/crear', component: UsuarioCreateComponent, canActivate: [authGuard, adminGuard]},
+    { path:'usuarios/:id', component: UsuarioDetailComponent, canActivate: [authGuard, adminGuard]},
+    { path:'usuarios/:id/edit', component: UsuarioEditComponent, canActivate: [authGuard, adminGuard]},
     
     { path:'activos/crear', component: ActivoCreateComponent, canActivate: [authGuard, adminGuard]},
     { path:'activos/scan', component: ActivoScanComponent },
@@ -48,6 +62,16 @@ export const routes: Routes = [
 
     { path:'activos/:id/edit', component: ActivoUpdateComponent, canActivate: [authGuard, adminGuard] },
     { path:'activos/:id', component: ActivoDetailComponent },
+
+    { path:'ubicaciones', component: UbicacionIndexComponent, canActivate: [authGuard, adminGuard]},
+    { path:'ubicaciones/crear', component: UbicacionCreateComponent, canActivate: [authGuard, adminGuard]},
+    { path:'ubicaciones/:id', component: UbicacionDetailComponent, canActivate: [authGuard, adminGuard]},
+    { path:'ubicaciones/:id/edit', component: UbicacionEditComponent, canActivate: [authGuard, adminGuard]},
+
+    { path:'adquisiciones', component: AdquisicionIndexComponent, canActivate: [authGuard, adminGuard]},
+    { path:'adquisiciones/crear', component: AdquisicionCreateComponent, canActivate: [authGuard, adminGuard]},
+    { path:'adquisiciones/:id', component: AdquisicionDetailComponent, canActivate: [authGuard, adminGuard]},
+    { path:'adquisiciones/:id/edit', component: AdquisicionEditComponent, canActivate: [authGuard, adminGuard]},
     
     
 
