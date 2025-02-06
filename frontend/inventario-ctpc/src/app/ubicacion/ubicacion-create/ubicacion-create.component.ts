@@ -14,19 +14,20 @@ import { FormGroup, ReactiveFormsModule, FormBuilder, Validators } from '@angula
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { GenericService } from '../../share/generic.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AuthService } from '../../share/auth.service';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
 import Swal from 'sweetalert2';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-ubicacion-create',
   standalone: true,
-  imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatRippleModule, MatTabsModule, MatGridListModule, MatCardModule,
-    ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,MatCheckboxModule
+  imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatRippleModule, MatTabsModule, MatGridListModule, MatCardModule, RouterLink,
+    ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,MatCheckboxModule, MatIconModule
   ],
   templateUrl: './ubicacion-create.component.html',
   styleUrl: './ubicacion-create.component.scss'
@@ -35,6 +36,7 @@ export class UbicacionCreateComponent {
   myForm: FormGroup;
   destroy$:Subject<boolean>=new Subject<boolean>();
 
+  funcionarios: any[];
   tipoUsuarios: { id: string, descripcion: string }[] = [
     { id: 'FUNCIONARIO', descripcion: 'Funcionario' },
     { id: 'ADMINISTRADOR', descripcion: 'Administrador' },
@@ -56,14 +58,40 @@ export class UbicacionCreateComponent {
 
   ngOnInit(){
     this.initForm();
+    this.cargarFuncionarios();
   }
 
   initForm(){
     this.myForm = this.formBuilder.group({
       nombreOficial: ['', [Validators.required, Validators.maxLength(128)]],
       alias: ['', [Validators.required, Validators.maxLength(128)]],
-      funcionario: ['']
+      funcionarioId: [''],
+      imagen: ['']
     });
+  }
+
+  cargarFuncionarios() {
+    this.gService.list('all-funcionarios/')
+    .pipe(takeUntil(this.destroy$))
+    .subscribe((data:any)=>{
+      this.funcionarios = data;
+    });
+  }
+  
+  seleccionarArchivo(event: any) {
+    const archivo = event.target.files[0];
+    console.log(archivo)
+    if (archivo) {
+      const maxSizeInBytes = 50 * 1024 * 1024; // Tamaño máximo de 50 MB
+  
+      if (archivo.size > maxSizeInBytes) {
+        this.myForm.get('imagen').setErrors({'size': true});
+      } else {
+        this.myForm.get('imagen').setErrors(null);
+  
+        this.myForm.patchValue({ imagen: archivo });
+      }
+    }
   }
 
   async onSubmit() {
@@ -72,14 +100,20 @@ export class UbicacionCreateComponent {
       let datas = {
         nombre_oficial: this.myForm.value.nombreOficial,
         alias: this.myForm.value.alias,
-        funcionario_id: this.myForm.value.funcionario
+        funcionario_id: this.myForm.value.funcionarioId,
+        //img_path: this.myForm.value.imagen
       };
-
 
       this.gService.create('nueva-ubicacion/', datas)
       .pipe(takeUntil(this.destroy$))
       .subscribe((data:any)=>{
-        console.log(data)
+        Swal.fire({
+          icon: 'success',
+          title: 'Éxito',
+          text: 'La ubicación se ha creado correctamente',
+        });
+
+        this.router.navigate([`/ubicaciones`]);
       });
     } else {
       Swal.fire({

@@ -98,7 +98,6 @@ export class UbicacionIndexComponent {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data: any) => {
-          console.log(data);
           this.datos = data;
           this.dataSource.data = data;
           this.isLoadingResults = false; // Stop loading

@@ -14,7 +14,7 @@ import { FormGroup, ReactiveFormsModule, FormBuilder, Validators } from '@angula
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { GenericService } from '../../share/generic.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AuthService } from '../../share/auth.service';
@@ -25,7 +25,7 @@ import Swal from 'sweetalert2';
 @Component({
   selector: 'app-adquisicion-edit',
   standalone: true,
-  imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatRippleModule, MatTabsModule, MatGridListModule, MatCardModule,
+  imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatRippleModule, MatTabsModule, MatGridListModule, MatCardModule, RouterLink,
     ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,MatCheckboxModule
   ],
   templateUrl: './adquisicion-edit.component.html',
@@ -53,7 +53,6 @@ export class AdquisicionEditComponent {
 
   ngOnInit(){
     this.adquisicionId = this.route.snapshot.paramMap.get('id');
-    console.log(this.adquisicionId)
     this.cargarDatos();
   }
 
@@ -67,7 +66,6 @@ export class AdquisicionEditComponent {
       this.gService.list(`modo-adquisicion/${this.adquisicionId}/`)
         .pipe(takeUntil(this.destroy$))
         .subscribe((data:any)=>{
-          console.log(data);
           this.myForm.setValue({
             descripcion: data.descripcion
           })
@@ -91,7 +89,8 @@ export class AdquisicionEditComponent {
               title: 'Éxito',
               text: 'Activo actualizado correctamente',
             });
-            // this.router.navigate(['/activos']);
+
+            this.router.navigate([`/adquisiciones/${this.adquisicionId}`]);
           },
           error: () => {
             Swal.fire({

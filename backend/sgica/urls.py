@@ -54,6 +54,8 @@ class AuthUser(TokenViewBase):
             raise InvalidToken(e.args[0])
 
         serializer.validated_data["user_type"] = tipo_usuario
+        serializer.validated_data["user_id"] = user.id
+        serializer.validated_data["user"] = user.username
 
         return Response(serializer.validated_data,
                         status=status.HTTP_200_OK)

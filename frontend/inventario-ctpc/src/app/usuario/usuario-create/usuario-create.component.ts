@@ -14,19 +14,20 @@ import { FormGroup, ReactiveFormsModule, FormBuilder, Validators } from '@angula
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { GenericService } from '../../share/generic.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AuthService } from '../../share/auth.service';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
 import Swal from 'sweetalert2';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-usuario-create',
   standalone: true,
-  imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatRippleModule, MatTabsModule, MatGridListModule, MatCardModule,
-    ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,MatCheckboxModule
+  imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatRippleModule, MatTabsModule, MatGridListModule, MatCardModule, RouterLink,
+    ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,MatCheckboxModule, MatIconModule
   ],
   templateUrl: './usuario-create.component.html',
   styleUrl: './usuario-create.component.scss'
@@ -36,6 +37,7 @@ export class UsuarioCreateComponent {
   destroy$:Subject<boolean>=new Subject<boolean>();
 
   usuarioId: any;
+  esconderPassword: boolean = true;
 
   tipoUsuarios: { id: string, descripcion: string }[] = [
     { id: 'FUNCIONARIO', descripcion: 'Funcionario' },
@@ -112,7 +114,6 @@ export class UsuarioCreateComponent {
       this.gService.create('crear-usuario/', datas)
       .pipe(takeUntil(this.destroy$))
       .subscribe((data:any)=>{
-        console.log(data)
         if (data.username && data.username[0]) {
           Swal.fire({
             icon: 'error',
@@ -131,6 +132,8 @@ export class UsuarioCreateComponent {
             title: 'Éxito',
             text: 'El usuario se ha creado correctamente',
           });
+
+          this.router.navigate([`/usuarios`]);
         }
       });
     } else {

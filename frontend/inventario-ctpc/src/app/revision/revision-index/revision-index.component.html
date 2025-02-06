@@ -9,8 +9,14 @@
 <div class="mainDiv">
      <img class="imgLogo" src="assets/images/logocole.png" alt="CTPC">
     <h2 *ngIf="currentUserData">Funcionario: {{ currentUserData.user}}  </h2>
-    <H1>Su Ubicacion Asignada Es: </H1>
-    <h2 *ngIf="datosUbi"> {{datosUbi.nombre_oficial}} ({{datosUbi.alias}})</h2>
-    <h3>Una vez presionado el boton de iniciar, sera rederigido al Inventario de su aula. Debe finalizar de realizar la revision antes de cerrar la pagina. </h3>
-    <button mat-flat-button color="primary" (click)="iniciarRevision()">Iniciar Revision de Inventario</button>
+    <div *ngIf="hasUbicacion; else noUbicacion">
+      <H1>Su Ubicacion Asignada Es: </H1>
+      <h2 *ngIf="datosUbi"> {{datosUbi.nombre_oficial}} ({{datosUbi.alias}})</h2>
+      <h3>Una vez presionado el boton de iniciar, sera rederigido al Inventario de su aula. Debe finalizar de realizar la revision antes de cerrar la pagina. </h3>
+      <button mat-flat-button color="primary" (click)="iniciarRevision()">Iniciar Revision de Inventario</button>
+    </div>
+
+    <ng-template #noUbicacion>
+      <h2>Usted no tiene ninguna ubicación asignada, no hace falta ninguna revisión de su parte, gracias.</h2>
+    </ng-template>
 </div>

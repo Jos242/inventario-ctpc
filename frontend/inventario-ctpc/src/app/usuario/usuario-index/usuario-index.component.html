@@ -9,6 +9,8 @@
       }
     </div>
   }
+
+  <a routerLink="/usuarios/crear"  mat-raised-button color="primary">Crear Usuario</a> 
   
   <div class="mat-elevation-z8">
     <table mat-table [dataSource]="dataSource" matSort>
@@ -36,7 +38,7 @@
       
     
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="verDetalles(row.user)"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="verDetalles(row.id)"></tr>
     
       <!-- Row shown when there is no matching data. -->
       <tr class="mat-row" *matNoDataRow>

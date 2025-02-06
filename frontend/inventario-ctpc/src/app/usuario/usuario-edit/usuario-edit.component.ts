@@ -14,19 +14,20 @@ import { FormGroup, ReactiveFormsModule, FormBuilder, Validators } from '@angula
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { GenericService } from '../../share/generic.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AuthService } from '../../share/auth.service';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
 import Swal from 'sweetalert2';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-usuario-edit',
   standalone: true,
-  imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatRippleModule, MatTabsModule, MatGridListModule, MatCardModule,
-    ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,MatCheckboxModule
+  imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatRippleModule, MatTabsModule, MatGridListModule, MatCardModule, RouterLink,
+    ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,MatCheckboxModule, MatIconModule
   ],
   templateUrl: './usuario-edit.component.html',
   styleUrl: './usuario-edit.component.scss'
@@ -36,6 +37,7 @@ export class UsuarioEditComponent {
   destroy$:Subject<boolean>=new Subject<boolean>();
 
   usuarioId: any;
+  esconderPassword: boolean = true;
 
   tipoUsuarios: { id: string, descripcion: string }[] = [
     { id: 'FUNCIONARIO', descripcion: 'Funcionario' },
@@ -59,7 +61,6 @@ export class UsuarioEditComponent {
 
   ngOnInit(){
     this.usuarioId = this.route.snapshot.paramMap.get('id');
-    console.log(this.usuarioId)
     this.cargarDatos();
   }
 
@@ -73,30 +74,26 @@ export class UsuarioEditComponent {
     });
   }
   
-    cargarDatos() {
-      this.gService.list(`funcionario/${this.usuarioId}/`)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe((data:any)=>{
-          console.log(data);
-          this.myForm.setValue({
-            usuario: data.user,
-            password: '********',
-            nombreCompleto: data.nombre_completo,
-            departamento: data.departamento,
-            puesto: data.puesto,
-          })
-        });
-    }
+  cargarDatos() {
+    this.gService.list(`funcionario/${this.usuarioId}/`)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data:any)=>{
+        this.myForm.setValue({
+          usuario: data.user,
+          password: '',
+          nombreCompleto: data.nombre_completo,
+          departamento: data.departamento,
+          puesto: data.puesto,
+        })
+      });
+  }
 
   async onSubmit() {
       if (this.myForm.valid) {
         
         let datas = {
           username: this.myForm.value.usuario,
-          password: this.myForm.value.password,
-          nombre_completo: this.myForm.value.nombreCompleto,
-          departamento: this.myForm.value.departamento,
-          puesto: this.myForm.value.puesto
+          password: 'xd'
         };
   
   
@@ -109,7 +106,7 @@ export class UsuarioEditComponent {
               title: 'Éxito',
               text: 'Activo actualizado correctamente',
             });
-            // this.router.navigate(['/activos']);
+            this.router.navigate([`/usuarios/${this.usuarioId}`]);
           },
           error: () => {
             Swal.fire({

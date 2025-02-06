@@ -14,7 +14,7 @@ import { FormGroup, ReactiveFormsModule, FormBuilder, Validators } from '@angula
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { GenericService } from '../../share/generic.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AuthService } from '../../share/auth.service';
@@ -25,7 +25,7 @@ import Swal from 'sweetalert2';
 @Component({
   selector: 'app-ubicacion-edit',
   standalone: true,
-  imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatRippleModule, MatTabsModule, MatGridListModule, MatCardModule,
+  imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatRippleModule, MatTabsModule, MatGridListModule, MatCardModule, RouterLink,
     ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,MatCheckboxModule
   ],
   templateUrl: './ubicacion-edit.component.html',
@@ -36,6 +36,7 @@ export class UbicacionEditComponent {
   destroy$:Subject<boolean>=new Subject<boolean>();
 
   ubicacionId: any;
+  funcionarios: any[];
 
   constructor(private gService:GenericService,
     private router:Router,
@@ -53,30 +54,38 @@ export class UbicacionEditComponent {
 
   ngOnInit(){
     this.ubicacionId = this.route.snapshot.paramMap.get('id');
-    console.log(this.ubicacionId)
-    this.cargarDatos();
+    this.cargarFuncionarios();
   }
 
   initForm(){
     this.myForm = this.formBuilder.group({
       nombreOficial: ['', [Validators.required, Validators.maxLength(128)]],
       alias: ['', [Validators.required, Validators.maxLength(128)]],
-      funcionario: ['']
+      funcionarioId: ['']
+    });
+  }
+
+  cargarFuncionarios() {
+    this.gService.list('all-funcionarios/')
+    .pipe(takeUntil(this.destroy$))
+    .subscribe((data:any)=>{
+      this.funcionarios = data;
+
+      this.cargarDatos();
     });
   }
   
-    cargarDatos() {
-      this.gService.list(`ubicacion/${this.ubicacionId}/`)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe((data:any)=>{
-          console.log(data);
-          this.myForm.setValue({
-            nombreOficial: data.nombre_oficial,
-            alias: data.alias,
-            funcionario: data.funcionario_id
-          })
-        });
-    }
+  cargarDatos() {
+    this.gService.list(`ubicacion/${this.ubicacionId}/`)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe((data:any)=>{
+      this.myForm.setValue({
+        nombreOficial: data.nombre_oficial,
+        alias: data.alias,
+        funcionarioId: data.funcionario_id
+      })
+    });
+  }
 
   async onSubmit() {
       if (this.myForm.valid) {
@@ -84,7 +93,7 @@ export class UbicacionEditComponent {
         let datas = {
           nombre_oficial: this.myForm.value.nombreOficial,
           alias: this.myForm.value.alias,
-          funcionario_id: this.myForm.value.funcionario
+          funcionario_id: this.myForm.value.funcionarioId
         };
   
   
@@ -95,15 +104,16 @@ export class UbicacionEditComponent {
             Swal.fire({
               icon: 'success',
               title: 'Éxito',
-              text: 'Activo actualizado correctamente',
+              text: 'Ubicación actualizada correctamente',
             });
-            // this.router.navigate(['/activos']);
+            
+            this.router.navigate([`/ubicaciones/${this.ubicacionId}`]);
           },
           error: () => {
             Swal.fire({
               icon: 'error',
               title: 'Error',
-              text: 'Hubo un error al actualizar el activo, por favor intente de nuevo.',
+              text: 'Hubo un error al actualizar la ubicación, por favor intente de nuevo.',
             });
           }
         });
@@ -111,7 +121,7 @@ export class UbicacionEditComponent {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: `La contraseña debe tener menos de 128 carácteres.`,
+          text: `El nombre debe tener menos de 128 carácteres.`,
         });
       }
     }

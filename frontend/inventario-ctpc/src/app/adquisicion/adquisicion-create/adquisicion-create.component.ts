@@ -14,7 +14,7 @@ import { FormGroup, ReactiveFormsModule, FormBuilder, Validators } from '@angula
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { GenericService } from '../../share/generic.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AuthService } from '../../share/auth.service';
@@ -25,7 +25,7 @@ import Swal from 'sweetalert2';
 @Component({
   selector: 'app-adquisicion-create',
   standalone: true,
-  imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatRippleModule, MatTabsModule, MatGridListModule, MatCardModule,
+  imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatRippleModule, MatTabsModule, MatGridListModule, MatCardModule, RouterLink,
     ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,MatCheckboxModule
   ],
   templateUrl: './adquisicion-create.component.html',
@@ -69,7 +69,13 @@ export class AdquisicionCreateComponent {
       this.gService.create('nuevo/modo-adquisicion/', datas)
       .pipe(takeUntil(this.destroy$))
       .subscribe((data:any)=>{
-        console.log(data)
+        Swal.fire({
+          icon: 'success',
+          title: 'Éxito',
+          text: 'La adquisición se ha creado correctamente',
+        });
+
+        this.router.navigate([`/adquisiciones`]);
       });
     } else {
       Swal.fire({

@@ -34,7 +34,7 @@ export interface ActivoData {
   standalone: true,
   imports: [
     MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule, FormsModule, MatButtonModule, MatIconModule,
-    CommonModule,
+    CommonModule, RouterLink,
     MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, MatTooltip, FormsModule, ReactiveFormsModule
   ],
   templateUrl: './usuario-index.component.html',
@@ -98,7 +98,6 @@ export class UsuarioIndexComponent {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data: any) => {
-          console.log(data);
           this.datos = data;
           this.dataSource.data = data;
           this.isLoadingResults = false; // Stop loading

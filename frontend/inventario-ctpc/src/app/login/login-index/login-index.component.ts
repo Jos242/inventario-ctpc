@@ -84,9 +84,6 @@ export class LoginIndexComponent implements OnInit{
         if (response) {
           this.isLoadingResults = false;
           clearTimeout(loadingTimeout); 
-          this.currentUser=this.myForm.get('usuario').value;
-          this.authService.setCurrentUser(this.currentUser);
-
          
           Swal.fire({
             icon: 'success',

@@ -27,11 +27,11 @@ import { HotToastService } from '@ngxpert/hot-toast';
 
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatDialog } from '@angular/material/dialog';
-import { ConfirmationService } from '../../share/confirmation.service';
 import Swal from 'sweetalert2';
+import { ConfirmationService } from '../../share/confirmation.service';
 
 @Component({
-  selector: 'app-adquisicion-detail',
+  selector: 'app-usuario-detail',
   standalone: true,
   imports: [MatGridListModule, MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule, FormsModule, MatButtonModule, MatIconModule,MatDividerModule,
     MatCheckboxModule,
@@ -41,13 +41,13 @@ import Swal from 'sweetalert2';
     CommonModule,ReactiveFormsModule, 
     MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule
   ],
-  templateUrl: './adquisicion-detail.component.html',
-  styleUrl: './adquisicion-detail.component.scss'
+  templateUrl: './usuario-detail.component.html',
+  styleUrl: './usuario-detail.component.scss'
 })
-export class AdquisicionDetailComponent {
+export class UsuarioDetailComponent {
   datos:any;
   destroy$:Subject<boolean>=new Subject<boolean>();
-  adquisicionId: any;
+  usuarioId: any;
 
   constructor(private gService:GenericService,
     private toast: HotToastService,
@@ -64,12 +64,12 @@ export class AdquisicionDetailComponent {
     
 
     ngOnInit(): void {
-      this.adquisicionId = this.route.snapshot.paramMap.get('id');
-      this.loadAdquisicionDetails(this.adquisicionId);
+      this.usuarioId = this.route.snapshot.paramMap.get('id');
+      this.loadUsuarioDetails(this.usuarioId);
     }
 
-    loadAdquisicionDetails(adquisicionId: string): void {
-      this.gService.list(`modo-adquisicion/${adquisicionId}/`)
+    loadUsuarioDetails(usuarioId: string): void {
+      this.gService.list(`funcionario/${usuarioId}/`)
         .pipe(takeUntil(this.destroy$))
         .subscribe((data:any)=>{
           this.datos = data;
@@ -77,30 +77,30 @@ export class AdquisicionDetailComponent {
     }
 
     onEdit(): void {
-      this.router.navigate([`/adquisiciones/${this.adquisicionId}/edit`]);
+      this.router.navigate([`/usuarios/${this.usuarioId}/edit`]);
     }
-        
-    borrarAdquisicion() {
+
+    borrarUsuario() {
       this.confirmationService.confirm()
       .subscribe(result => {
         if (result) {
-          this.gService.delete(`delete/modo-adquisicion/${this.adquisicionId}/`)
+          this.gService.delete(`borrar-usuario/${this.usuarioId}/`)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
               next: () => {
                 Swal.fire({
                   icon: 'success',
                   title: 'Borrado',
-                  text: `Modo de adquisición borrado correctamente`,
+                  text: `Usuario borrado correctamente`,
                 });
 
-                this.router.navigate([`/adquisiciones`]);
+                this.router.navigate([`/usuarios`]);
               },
               error: () => {
                 Swal.fire({
                   icon: 'error',
                   title: 'Error',
-                  text: 'Hubo un problema al borrar el modo de adquisición',
+                  text: 'Hubo un problema al borrar el usuario',
                 });
               }
             });

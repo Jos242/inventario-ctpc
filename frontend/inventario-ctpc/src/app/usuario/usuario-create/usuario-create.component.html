@@ -27,9 +27,12 @@
                         </div>
                         <div class="col-lg-4">
                             <div class="col-lg">    
-                                <mat-form-field appearance="outline" class="inputsForm">
+                                <mat-form-field appearance="outline" class="inputsForm" floatLabel="always">
                                     <mat-label>Contraseña</mat-label>
-                                    <input matInput formControlName="password">
+                                    <input matInput [type]="esconderPassword ? 'password' : 'text'" formControlName="password" placeholder="********">
+                                    <button mat-icon-button color="primary" matSuffix (click)="esconderPassword = !esconderPassword" type="button">
+                                      <mat-icon>{{ esconderPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                                    </button>
                                     <mat-hint>Contraseña con la que inicia sesión</mat-hint>
                                 </mat-form-field>
                             </div>
@@ -65,8 +68,13 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <button mat-flat-button color="primary" type="submit" [disabled]="!myForm.valid">Crear usuario</button>
+                    <div class="row d-flex justify-content-between">
+                        <div class="col-auto">
+                            <button mat-flat-button color="primary" type="submit" [disabled]="!myForm.valid">Crear usuario</button>
+                        </div>
+                        <div class="col-auto">
+                            <button mat-flat-button color="primary" type="button" routerLink="/usuarios">Retornar</button>    
+                        </div>
                     </div>
 
                 </div>

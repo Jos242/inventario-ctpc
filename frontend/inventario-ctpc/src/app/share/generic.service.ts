@@ -49,4 +49,11 @@ export class GenericService {
     // return this.http.post<any | any[]>(this.urlAPI + endopoint, objCreate, { withCredentials: true });
   } 
 
+  //patch crear objeto
+  delete(endopoint: string): Observable<any | any[]> {    
+    
+    return this.http.delete<any | any[]>(this.urlAPI + endopoint);
+    // return this.http.post<any | any[]>(this.urlAPI + endopoint, objCreate, { withCredentials: true });
+  } 
+
 }

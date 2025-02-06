@@ -12,14 +12,19 @@
                                 <mat-form-field appearance="outline" class="inputsForm">
                                     <mat-label>Descripción</mat-label>
                                     <input matInput formControlName="descripcion">
-                                    <mat-hint>Contraseña con la que inicia sesión</mat-hint>
+                                    <mat-hint>La descripción del modo de adquisición</mat-hint>
                                 </mat-form-field>
                             </div>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <button mat-flat-button color="primary" type="submit" [disabled]="!myForm.valid">Crear modo de adquisición</button>
+                    <div class="row d-flex justify-content-between">
+                        <div class="col-auto">
+                            <button mat-flat-button color="primary" type="submit" [disabled]="!myForm.valid">Crear modo de adquisición</button>
+                        </div>
+                        <div class="col-auto">
+                            <button mat-flat-button color="primary" type="button" routerLink="/adquisiciones">Retornar</button>    
+                        </div>
                     </div>
 
                 </div>

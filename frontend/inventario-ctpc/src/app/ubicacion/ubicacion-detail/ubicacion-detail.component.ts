@@ -27,6 +27,8 @@ import { HotToastService } from '@ngxpert/hot-toast';
 
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationService } from '../../share/confirmation.service';
+import Swal from 'sweetalert2';
 
 
 @Component({
@@ -56,6 +58,7 @@ export class UbicacionDetailComponent {
     private sanitizer: DomSanitizer,
     private formBuilder: FormBuilder,
     public dialog: MatDialog,
+    public confirmationService: ConfirmationService
     ){
       
     }
@@ -63,7 +66,6 @@ export class UbicacionDetailComponent {
 
     ngOnInit(): void {
       this.ubicacionId = this.route.snapshot.paramMap.get('id');
-      console.log(this.ubicacionId)
       this.loadUbicacionDetails(this.ubicacionId);
     }
 
@@ -72,11 +74,39 @@ export class UbicacionDetailComponent {
         .pipe(takeUntil(this.destroy$))
         .subscribe((data:any)=>{
           this.datos = data;
-          console.log(this.datos);
         });
     }
 
     onEdit(): void {
       this.router.navigate([`/ubicaciones/${this.ubicacionId}/edit`]);
+    }
+    
+    borrarUbicacion() {
+      this.confirmationService.confirm()
+      .subscribe(result => {
+        console.log(result)
+        if (result) {
+          this.gService.delete(`delete/ubicacion/${this.ubicacionId}/`)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: () => {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Borrado',
+                  text: `Ubicación borrada correctamente`,
+                });
+
+                this.router.navigate([`/ubicaciones`]);
+              },
+              error: () => {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'Hubo un problema al borrar la ubicación',
+                });
+              }
+            });
+        }
+      });
     }
 }

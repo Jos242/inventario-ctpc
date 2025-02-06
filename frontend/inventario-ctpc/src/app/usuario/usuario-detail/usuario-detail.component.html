@@ -1,0 +1,30 @@
+<div>
+    <mat-card>
+        <mat-card-content>
+                <div *ngIf="datos">
+                    <h1>Detalles del Usuario {{ datos.user }}</h1>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h2>Detalles Generales</h2>
+                            <p><strong>Usuario:</strong> {{ datos.user }}</p>
+                            <p><strong>Nombre completo:</strong> {{ datos.nombre_completo }}</p>
+                            <p><strong>Departamento:</strong> {{ datos.departamento }}</p>
+                            <p><strong>Puesto:</strong> {{ datos.puesto }}</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <h2>Acciones</h2>
+                            <p>
+                                <a mat-raised-button color="primary" (click)="onEdit()">Editar Usuario</a>  
+                            </p>  
+                            <p>
+                                <button mat-raised-button style="background-color: red; color: white;" color="primary" (click)="borrarUsuario()">Borrar usuario</button>  
+                            </p>
+                            
+                                             
+                        </div>
+                    </div>    
+                    <button mat-flat-button color="primary" routerLink="/usuarios">Retornar</button>            
+                </div>
+        </mat-card-content>
+    </mat-card>
+</div>
