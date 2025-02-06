@@ -34,7 +34,7 @@ import io
 class UbicacionesView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminUser] 
+    permission_classes = [IsAuthenticated] 
 
 
     def get(self, request:Request, pk:int | None = None) -> Response | HttpResponse:

@@ -11,6 +11,8 @@ import { AuthService } from '../../share/auth.service';
 import Swal from 'sweetalert2';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog } from '@angular/material/dialog';
+import { RevisionCierreDialogComponent } from '../revision-cierre-dialog/revision-cierre-dialog.component';
 
 @Component({
   selector: 'app-revision-index',
@@ -37,6 +39,7 @@ export class RevisionIndexComponent {
     private route:ActivatedRoute,
     private httpClient:HttpClient,
     private authService: AuthService,
+    private dialog: MatDialog
   ){
 
   }
@@ -140,50 +143,18 @@ export class RevisionIndexComponent {
         });
     }
 
-    
-
     iniciarRevision(){
+      const dialogRef = this.dialog.open(RevisionCierreDialogComponent, {
+        width: '600px'
+      });
 
-      this.isLoadingResults = true;  // Start loading
-
-      const loadingTimeout = setTimeout(() => {
-        if (this.isLoadingResults) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Hay problemas...',
-            text: 'La carga de datos esta durando mas de lo esperado... Por favor intente nuevamente',
-          });
-        }
-      }, 15000); // 15 seconds
-
-      let formData;
-      //crear cierre
-      this.gService.create('nuevo-cierre/', formData)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data: any) => {
-          console.log(data);
-          this.datos = data;             
-
-
-          this.isLoadingResults = false; // Stop loading
-          clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
-
-        },
-        error: (error) => {
-          this.isLoadingResults = false; // Stop loading on error
-          clearTimeout(loadingTimeout); // Clear the timeout if there's an error
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. ${error}`,
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          this.router.navigate(['/cierre'], { 
+            queryParams: { funcionarioId: this.currentUserData.id, ubicacionId: this.datosUbi.id } 
           });
         }
       });
-
-      //retorna el create con el id
-      //usar ese id para redireccionar al cierre-nuevo
-      console.log("enlace redireccionamiento: " , `/cierre-nuevo/${this.currentUserData.id}/`,  )
     }
 
   // loadUbicaciones(): void {

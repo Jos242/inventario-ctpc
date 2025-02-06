@@ -22,7 +22,7 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 
 import Swal from 'sweetalert2';
 
-export interface ActivoData {
+export interface UsuarioData {
   user: string;
   nombre_completo: string;
   departamento: string;
@@ -42,7 +42,7 @@ export interface ActivoData {
 })
 export class UsuarioIndexComponent {
   displayedColumns: string[] = ['user', 'nombre_completo', 'departamento', 'puesto'];
-  dataSource: MatTableDataSource<ActivoData> = new MatTableDataSource<ActivoData>();
+  dataSource: MatTableDataSource<UsuarioData> = new MatTableDataSource<UsuarioData>();
   public isLoadingResults = false;
 
 
