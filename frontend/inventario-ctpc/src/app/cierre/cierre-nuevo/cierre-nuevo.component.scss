@@ -10,3 +10,124 @@
   align-items: center;
   justify-content: center;
 }
+
+.scroll-container {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 1000;
+}
+
+.button-container {
+  display: flex;
+  justify-content: end;
+  padding: 12px;
+}
+
+.activos-container {
+  margin: 0;
+}
+
+.card-activo-container {
+  display: flex;
+}
+
+.card-x {
+  display: flex;
+  width: 100%;
+  margin: 12px 0;
+  border: 2px solid transparent;
+}
+
+.card-activo {
+  display: flex;
+  width: 100%;
+  padding-bottom: 12px;
+}
+
+.card-container {
+  display: flex;
+  align-items: start;
+  justify-content: start;
+}
+
+.card-content {
+  flex: 1;
+}
+
+.card-footer {
+  flex: 1;
+  padding: 16px 16px 0;
+}
+
+.content-titles {
+  color: rgb(0, 0, 0, 0.55);
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.footer-titles {
+  color: rgb(0, 0, 0, 0.55);
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.nota-container {
+  margin: 15px;
+}
+
+.nota {
+  width: 100%;
+  font-size: 20px;
+}
+
+@keyframes breathingError {
+  0% {
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0);
+    background-color: rgba(255, 0, 0, 0);
+    border-color: transparent;
+  }
+  13% {
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.8);
+    background-color: rgba(255, 0, 0, 0.1);
+    border-color: red;
+  }
+  26% {
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+    background-color: rgba(255, 0, 0, 0.2);
+  }
+  39% {
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.8);
+    background-color: rgba(255, 0, 0, 0.1);
+  }
+  52% {
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.8);
+    background-color: rgba(255, 0, 0, 0.1);
+  }
+  65% {
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+    background-color: rgba(255, 0, 0, 0.2);
+  }
+  78% {
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.8);
+    background-color: rgba(255, 0, 0, 0.1);
+  }
+  91% {
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.8);
+    background-color: rgba(255, 0, 0, 0.1);
+    border-color: red;
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0);
+    background-color: rgba(255, 0, 0, 0);
+    border-color: transparent;
+  }
+}
+
+.breathing-error {
+  animation: breathingError 3s ease-in-out infinite;
+  border: 2px solid red;
+  transition: opacity 1s ease-out, border-color 1.5s ease-out, box-shadow 1s ease-out;
+}

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, QueryList, ViewChildren } from '@angular/core';
 import {MatPaginator, MatPaginatorModule} from '@angular/material/paginator';
 import {MatSort, MatSortModule} from '@angular/material/sort';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
@@ -19,35 +19,25 @@ import {MatIconModule} from '@angular/material/icon';
 import {FormsModule, FormBuilder, ReactiveFormsModule, FormGroup} from '@angular/forms';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatRadioModule} from '@angular/material/radio';
 
 import Swal from 'sweetalert2';
-
-export interface ActivoData {
-  descripcion: string;
-  marca: string;
-  modelo: string;
-  placa: string;
-}
+import { MatDialog } from '@angular/material/dialog';
+import { CierreNotaDialogComponent } from '../cierre-nota-dialog/cierre-nota-dialog.component';
 
 @Component({
   selector: 'app-cierre-nuevo',
   standalone: true,
   imports: [
     MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule, FormsModule, MatButtonModule, MatIconModule,
-    CommonModule, RouterLink,
-    MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, MatTooltip, FormsModule, ReactiveFormsModule
+    CommonModule, MatRadioModule, MatCardModule,
+    MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, FormsModule, ReactiveFormsModule
   ],
   templateUrl: './cierre-nuevo.component.html',
   styleUrl: './cierre-nuevo.component.scss'
 })
 export class CierreNuevoComponent {
-  displayedColumns: string[] = ['descripcion', 'marca', 'modelo', 'placa', ];
-  dataSource: MatTableDataSource<ActivoData> = new MatTableDataSource<ActivoData>();
   public isLoadingResults = false;
-
-
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild(MatSort) sort: MatSort;
 
   datos:any;
   destroy$:Subject<boolean>=new Subject<boolean>();
@@ -57,9 +47,18 @@ export class CierreNuevoComponent {
   ubicacionId: number;
   datosUbi: any;
 
-  totalItems: number;
+  currentCierre: any;
+  cierresIndex: number;
 
-  pageSizeOptions: number[] = [10, 25, 40, 100];
+  activos: any[] = [];
+  revisiones: any[] = [];
+  storedData: any[] = [];
+
+  highlightErrorIds: number[] = [];
+  
+  @ViewChild('finalizar') finalizarButton!: ElementRef;
+  @ViewChildren('notaField') notaTextareas!: QueryList<ElementRef>;
+  @ViewChildren('card') cards: QueryList<ElementRef>;
 
   constructor(
     private gService:GenericService,
@@ -67,7 +66,8 @@ export class CierreNuevoComponent {
     private router:Router,
     private route:ActivatedRoute,
     private httpClient:HttpClient,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private dialog: MatDialog
   ){
 
   }
@@ -77,17 +77,86 @@ export class CierreNuevoComponent {
       this.funcionarioId = params['funcionarioId'];
       this.ubicacionId = params['ubicacionId'];
 
-      this.getUbicacion()
-    });
-  }
+      this.storedData = JSON.parse(localStorage.getItem('cierres') || '[]');
 
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+      this.getCierre();
+    });
   }
 
   ngOnDestroy(): void {
     this.destroy$.complete();
+  }
+
+  getCierre() {
+    let newCierre = {
+      funcionario: this.funcionarioId,
+      ubicacion: this.ubicacionId,
+      finalizado: false
+    }
+
+    this.cierresIndex = this.storedData.findIndex((item: any) =>
+      item.funcionario == newCierre.funcionario &&
+      item.ubicacion == newCierre.ubicacion &&
+      (item.finalizado == 0 || item.finalizado == false)
+    );
+    
+    const foundCierre = this.cierresIndex !== -1 ? this.storedData[this.cierresIndex] : null;
+
+    if (foundCierre) {
+      this.currentCierre = foundCierre;
+      
+      if (this.currentCierre.revisiones) {
+        this.revisiones = this.currentCierre.revisiones;
+      }
+
+      this.getUbicacion();
+    } else {
+      this.createCierre();
+    }
+  }
+
+  createCierre() {
+    const currentDate = new Date();
+      const fullDate = `${currentDate.getFullYear()}-${currentDate.getMonth()+1}-${currentDate.getDate()}`
+      let tipoRevision = '';
+
+      if (currentDate.getMonth() <= 5) {
+        tipoRevision = 'PRINCIPIO';
+      } else {
+        tipoRevision = 'MEDIO';
+      }
+            
+      let datas = {
+        tipo_revision: tipoRevision,
+        fecha: fullDate,
+        finalizado: 0,
+        funcionario: this.funcionarioId,
+        ubicacion: this.ubicacionId
+      };
+
+      this.gService.create('nuevo-cierre/', datas)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next:(data: any) => {
+          this.currentCierre = data;
+          this.cierresIndex = this.storedData.length;
+
+          this.storedData.push(data);
+          localStorage.setItem('cierres', JSON.stringify(this.storedData));
+      
+          this.getUbicacion();
+        },
+        error:(error) => {
+          console.log(error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Error al crear el cierre de invetario.`,
+          });
+          
+          this.router.navigate([`/revision/`]);
+        }
+      });
   }
 
   getUbicacion() {
@@ -142,7 +211,7 @@ export class CierreNuevoComponent {
       }
     }, 15000); // 15 seconds
 
-    const selectedColumns = ['id_registro', 'no_identificacion', 'descripcion', 'marca', 'modelo', 'placa', 'ubicacion_actual_nombre_oficial']
+    const selectedColumns = ['id', 'id_registro', 'no_identificacion', 'descripcion', 'marca', 'modelo', 'ubicacion_actual_nombre_oficial']
 
     const formData = { fields: selectedColumns };
 
@@ -152,10 +221,20 @@ export class CierreNuevoComponent {
     .pipe(takeUntil(this.destroy$))
     .subscribe({
       next: (data: any) => {
-        this.datos = data;
-        this.datos.filter(a => a.ubicacion_actual_nombre_oficial == this.datosUbi.nombre_oficial);
+        this.datos = data.filter(a => a.ubicacion_actual_nombre_oficial == this.datosUbi.nombre_oficial);
 
-        console.log(this.datos);
+        if (this.currentCierre.revisiones) {
+          this.currentCierre.revisiones.forEach(revision => {
+            const activo = this.datos.find(a => a.id_registro === revision.id_registro);
+            
+            if (activo) {
+              activo.nota = revision.nota;
+              activo.status = revision.status;
+            }
+          });
+        }
+
+        this.activos = this.datos;
         this.isLoadingResults = false; // Stop loading
         clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
 
@@ -174,14 +253,142 @@ export class CierreNuevoComponent {
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-    
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
+
+    this.activos = this.datos.filter(item =>
+      Object.values(item).some(value =>
+        value.toString().toLowerCase().includes(filterValue)
+      )
+    );
+  }
+
+  scrollToFinalizar() {
+    console.log(this.cierresIndex)
+    this.finalizarButton.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  async confirmacion(activo: any) {
+    setTimeout(() => {
+      const filterActivos = this.activos.filter(a => a.status == 'NO EXISTE');
+      const index = filterActivos.findIndex(a => a.id === activo.id);
+      const textareaToFocus = this.notaTextareas.get(index);
+      textareaToFocus?.nativeElement.focus();
+
+      this.confirmarNota(activo);
+    }, 80);
+  }
+
+  async confirmarNota(activo: any) {
+    const index = this.revisiones.findIndex(r => r.id_registro === activo.id_registro);
+    const currentDate = new Date();
+    const fullDate = `${currentDate.getFullYear()}-${currentDate.getMonth()+1}-${currentDate.getDate()}`
+
+
+    const newRevision = {
+      status: activo.status,
+      fecha: fullDate,
+      nota: activo.status == 'NO EXISTE' ? activo.nota : 'SI EXISTE',
+      cierre_inventario_id: this.currentCierre.id,
+      id_registro: activo.id_registro
+    }
+  
+    if (index != -1) {
+      this.revisiones[index] = newRevision;
+    } else {
+      this.revisiones.push(newRevision);
+    }
+
+    this.saveLocalStorage();
+  }
+
+  async saveLocalStorage() {
+    this.currentCierre.revisiones = this.revisiones;
+    this.storedData[this.cierresIndex] = this.currentCierre;
+    localStorage.setItem('cierres', JSON.stringify(this.storedData));
+  }
+  
+  validarStatus() {
+    this.highlightErrorIds = [];
+    let cont = 0;
+    let bandera = true;
+
+    for (const activo of this.activos) {
+      if (activo.status === null || activo.status === undefined || (activo.status == 'NO EXISTE' && (activo.nota === null || activo.nota === undefined || activo.nota.length == 0))) {
+        this.highlightErrorIds.push(activo.id);
+        bandera = false;
+      }
+      if (bandera) {
+        cont++;
+      }
+    }
+    return {index: cont, completo: bandera};
+  }
+
+  scrollToCheck(index: number) {
+    const cardElements = this.cards.toArray();
+    const firstCard = cardElements[index];
+
+    if (firstCard) {
+      firstCard.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }
 
-  verDetalles(id: string): void {
-    this.router.navigate(['usuarios/', id]);
+  async submitCierre() {
+    const validation = this.validarStatus()
+
+    if (!validation.completo) {
+      this.scrollToCheck(validation.index);
+      return;
+    }
+
+    await Promise.all(this.revisiones.map(revision => this.createRevision(revision)));
+    this.updateCierre();
+
+    this.borrarLocalStorage();
+  }
+
+  async createRevision(revision: any) {
+    this.gService.create('nueva-revision/', revision)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data: any) => {
+        
+      },
+      error: (error) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador.',
+        });
+      }
+    });
+  }
+
+  async updateCierre() {
+    this.currentCierre.finalizado = 1;
+
+    this.gService.patch(`update-cierre/${this.currentCierre.id}/`, this.currentCierre)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Éxito',
+          text: 'Cierre actualizado correctamente',
+        });
+        // this.router.navigate(['/activos']);
+      },
+      error: () => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un error al actualizar el cierre, por favor intente de nuevo.',
+        });
+      }
+    });
+  }
+
+  borrarLocalStorage() {
+    this.storedData.splice(this.cierresIndex, 1);
+    localStorage.setItem('cierres', JSON.stringify(this.storedData));
   }
 }

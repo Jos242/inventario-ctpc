@@ -27,7 +27,7 @@ from rest_framework                          import status
 class CierreInventarioView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminUser] 
+    permission_classes = [IsAuthenticated] 
 
     def get(self, request:Request, pk = None) -> Response:
        path = request.path

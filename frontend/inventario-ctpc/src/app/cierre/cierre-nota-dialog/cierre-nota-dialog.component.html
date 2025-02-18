@@ -1,0 +1,12 @@
+<h2 mat-dialog-title>Nota</h2>
+<mat-dialog-content>
+  <p>Que sucedió con este activo?</p>
+  <mat-form-field>
+    <mat-label>Nota</mat-label>
+    <input matInput [(ngModel)]="nota" />
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancelar</button>
+  <button mat-button [mat-dialog-close]="nota()" cdkFocusInitial>Aceptar</button>
+</mat-dialog-actions>

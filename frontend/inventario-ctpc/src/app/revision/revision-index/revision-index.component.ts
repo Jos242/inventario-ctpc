@@ -13,6 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
 import { RevisionCierreDialogComponent } from '../revision-cierre-dialog/revision-cierre-dialog.component';
+import { ConfirmationService } from '../../share/confirmation.service';
 
 @Component({
   selector: 'app-revision-index',
@@ -39,7 +40,8 @@ export class RevisionIndexComponent {
     private route:ActivatedRoute,
     private httpClient:HttpClient,
     private authService: AuthService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private confirmationService: ConfirmationService
   ){
 
   }
@@ -144,18 +146,63 @@ export class RevisionIndexComponent {
     }
 
     iniciarRevision(){
+      const storedData = JSON.parse(localStorage.getItem('cierres') || '[]');
+
+      const index = storedData.findIndex((item: any) =>
+        item.funcionario == this.currentUserData.id &&
+        item.ubicacion == this.datosUbi.id &&
+        (item.finalizado == 0 || item.finalizado == false)
+      );
+      const foundCierre = index !== -1 ? storedData[index] : null;
+      
       const dialogRef = this.dialog.open(RevisionCierreDialogComponent, {
-        width: '600px'
+        width: '600px',
+        data: foundCierre ? 1 : 0
       });
 
       dialogRef.afterClosed().subscribe(result => {
-        if (result) {
+        if (result === true) {
           this.router.navigate(['/cierre'], { 
             queryParams: { funcionarioId: this.currentUserData.id, ubicacionId: this.datosUbi.id } 
           });
+        } else if (result === false) {
+          if (foundCierre) {
+            this.borrarCierre(foundCierre, storedData, index);
+          } else {
+            this.router.navigate(['/cierre'], { 
+              queryParams: { funcionarioId: this.currentUserData.id, ubicacionId: this.datosUbi.id } 
+            });
+          }
         }
       });
     }
+
+    borrarCierre(foundCierre: any, storedData: any, index: any) {
+      this.confirmationService.confirm()
+      .subscribe(result => {
+        if (result) {
+          this.gService.delete(`delete-cierre/${foundCierre.id}/`)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              storedData.splice(index, 1);
+              localStorage.setItem('cierres', JSON.stringify(storedData));
+
+              this.router.navigate(['/cierre'], { 
+                queryParams: { funcionarioId: this.currentUserData.id, ubicacionId: this.datosUbi.id } 
+              });
+            },
+            error: () => {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Hubo un problema al borrar el cierre',
+              });
+            }
+          });
+        }
+      });
+    };
 
   // loadUbicaciones(): void {
   //   this.isLoadingResults = true;
