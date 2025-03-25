@@ -217,7 +217,9 @@ class CierreInventarioSerializer(serializers.ModelSerializer):
 class ReadCierreInventarioSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only = True)
     funcionario = serializers.CharField(read_only = True)
+    funcionario_nombre = serializers.CharField(source="funcionario.nombre_completo", read_only=True)
     ubicacion = serializers.CharField(read_only = True)
+    ubicacion_nombre = serializers.CharField(source="ubicacion.nombre_oficial", read_only=True)
     tipo_revision = serializers.CharField(read_only = True)
     fecha = serializers.CharField(read_only = True)
     finalizado = serializers.BooleanField(read_only = True)

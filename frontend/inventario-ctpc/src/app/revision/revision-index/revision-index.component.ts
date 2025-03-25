@@ -49,8 +49,10 @@ export class RevisionIndexComponent {
   ngOnInit(): void {
     this.authService.getCurrentUser$().subscribe(userId => {
       this.currentUserId = userId;
-
-      this.getFuncionario();
+      
+      if (userId) {
+        this.getFuncionario();
+      }
     });
   }
 

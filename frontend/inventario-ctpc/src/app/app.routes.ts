@@ -32,6 +32,7 @@ import { AdquisicionDetailComponent } from './adquisicion/adquisicion-detail/adq
 import { AdquisicionCreateComponent } from './adquisicion/adquisicion-create/adquisicion-create.component';
 import { AdquisicionEditComponent } from './adquisicion/adquisicion-edit/adquisicion-edit.component';
 import { CierreNuevoComponent } from './cierre/cierre-nuevo/cierre-nuevo.component';
+import { CierreReporteComponent } from './cierre/cierre-reporte/cierre-reporte.component';
 
 
 export const routes: Routes = [
@@ -62,6 +63,8 @@ export const routes: Routes = [
     { path:'revision/admin', component: RevisionAdminComponent, canActivate: [authGuard, adminGuard]} ,
     
     { path:'cierre', component: CierreNuevoComponent, canActivate: [authGuard]} ,
+    { path:'cierre/reporte', component: CierreReporteComponent, canActivate: [authGuard]} ,
+    { path:'cierre/reporte/:id', component: CierreNuevoComponent, canActivate: [authGuard]} ,
 
     { path:'activos/:id/edit', component: ActivoUpdateComponent, canActivate: [authGuard, adminGuard] },
     { path:'activos/:id', component: ActivoDetailComponent },
