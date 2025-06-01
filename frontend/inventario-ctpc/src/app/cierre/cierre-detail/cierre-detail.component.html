@@ -1,0 +1,77 @@
+<div>
+  <mat-card>
+    <mat-card-content>
+      <div *ngIf="cierreInventario">
+        <h2><strong>Funcionario:</strong> {{ cierreInventario.funcionario_nombre }}</h2>
+        <h2><strong>Ubicación:</strong> {{ cierreInventario.ubicacion_nombre }}</h2>
+        <h2><strong>Fecha:</strong> {{ cierreInventario.fecha | date: 'dd-MM-yyyy' }}</h2>
+        <h2><strong>Tipo de revisión:</strong> {{ removeCaps(cierreInventario.tipo_revision) }}</h2>  
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+
+<mat-form-field>
+    <mat-label>Buscar...</mat-label>
+    <input matInput (keyup)="applyFilter($event)" placeholder="Ej. Juan Perez, 101110111" #input>
+  </mat-form-field>
+  @if (isLoadingResults) {
+    <div class="example-loading-shade">
+      @if (isLoadingResults) {
+        <mat-spinner></mat-spinner>
+      }
+    </div>
+  }
+  
+  <div class="mat-elevation-z8 example-table-container">
+    <table mat-table [dataSource]="dataSource" matSort>
+
+      <ng-container matColumnDef="id_registro">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Id registro </th>
+        <td mat-cell *matCellDef="let row"> {{ row.id_registro }} </td>
+      </ng-container>
+  
+      <ng-container matColumnDef="no_identificacion">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Numero de placa </th>
+        <td mat-cell *matCellDef="let row"> {{ row.no_identificacion }} </td>
+      </ng-container>
+  
+      <ng-container matColumnDef="descripcion">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Descripción </th>
+        <td mat-cell *matCellDef="let row"> {{ row.descripcion }} </td>
+      </ng-container>
+  
+      <ng-container matColumnDef="marca">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Marca </th>
+        <td mat-cell *matCellDef="let row"> {{ row.marca }} </td>
+      </ng-container>
+  
+      <ng-container matColumnDef="modelo">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Modelo </th>
+        <td mat-cell *matCellDef="let row"> {{ row.modelo }} </td>
+      </ng-container>
+  
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+        <td mat-cell *matCellDef="let row"> {{ removeCaps(row.status) }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="nota">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Nota </th>
+        <td mat-cell *matCellDef="let row"> {{ row.nota || '-' }} </td>
+      </ng-container>
+  
+      
+    
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    
+      <!-- Row shown when there is no matching data. -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" colspan="4">No se han encontrado datos para "{{input.value}}"</td>
+      </tr>
+    </table>
+  
+    <mat-paginator [pageSizeOptions]="pageSizeOptions"  showFirstLastButtons [pageSize]="10" aria-label="Seleccione pagina de usuarios" ></mat-paginator>
+  </div>

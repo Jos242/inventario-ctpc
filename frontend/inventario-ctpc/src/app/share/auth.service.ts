@@ -14,10 +14,12 @@ export class AuthService {
 
   private baseURL = environment.apiURL; 
   private currentUserKey = 'currentUser';
+  private currentUserName = 'userName';
   private currentUserType = 'userType';
 
   private loggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
   private currentUserSubject = new BehaviorSubject<any>(this.getCurrentUser());
+  private userNameSubject = new BehaviorSubject<string | null>(this.getUserName());
   private userTypeSubject = new BehaviorSubject<string | null>(this.getUserType());
 
   constructor(private http: HttpClient, private router: Router) { 
@@ -30,19 +32,18 @@ export class AuthService {
       .pipe(
         tap(response => {
           localStorage.setItem('authToken', response.access);
-          localStorage.setItem('userType', response.user_type);
-          this.setCurrentUser(response.user);
 
+          this.setUserName(response.user)
+          this.setUserType(response.user_type)
+
+          this.setCurrentUser(response.user_id);
           this.loggedInSubject.next(true);
-          this.userTypeSubject.next(response.user_type);
-          console.log("login");
-          if(this.getUserType()=="Administrador"){
+
+          if (this.getUserType() == "Administrador") {
             this.router.navigate(['/index']);
-          }else{
+          } else {
             this.router.navigate(['/revision']);
           }
-
-          
         }),
         catchError(error => {
 
@@ -64,9 +65,11 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('authToken');
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('userName');
     localStorage.removeItem('userType');
     this.loggedInSubject.next(false);
     this.currentUserSubject.next(null);
+    this.userNameSubject.next(null);
     this.userTypeSubject.next(null);
     this.router.navigate(['/login']);
   }
@@ -85,6 +88,21 @@ export class AuthService {
   // Observable for current user
   getCurrentUser$(): Observable<any> {
     return this.currentUserSubject.asObservable();
+  }
+
+  setUserName(userName: string): void {
+    localStorage.setItem(this.currentUserName, userName);
+    this.userNameSubject.next(userName);  // Notify subscribers about user Name update
+  }
+
+   // Manage user Name
+   getUserName(): string | null {
+    return localStorage.getItem(this.currentUserName);
+  }
+
+  // Observable for user Name
+  getUserName$(): Observable<string | null> {
+    return this.userNameSubject.asObservable();
   }
 
   setUserType(userType: string): void {

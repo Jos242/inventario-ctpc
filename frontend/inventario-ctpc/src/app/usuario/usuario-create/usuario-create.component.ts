@@ -45,6 +45,9 @@ export class UsuarioCreateComponent {
     { id: 'OBSERVADOR', descripcion: 'Observador' }
   ];
 
+  departamentos: any[] = [];
+  puestos: any[] = [];
+
   constructor(private gService:GenericService,
     private router:Router,
     private route:ActivatedRoute,
@@ -58,6 +61,7 @@ export class UsuarioCreateComponent {
 
   ngOnInit(){
     this.initForm();
+    this.getDepartamentos();
   }
 
   initForm(){
@@ -96,6 +100,46 @@ export class UsuarioCreateComponent {
         text: 'Esta apunto de crear un usuario administrador, este usuario tiene acceso a toda la funcionalidad del sistema y no puede ser borrado.',
       });
     }
+  }
+
+  getDepartamentos() {
+    this.gService.list(`all-departamentos/`)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data: any[]) => {
+        this.departamentos = data;
+
+        this.getPuestos();
+      },
+      error: (error) => {
+        if (!error.message.includes(`404 Not Found`)) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. Error: 4. ${error}`,
+          });
+        }
+      }
+    });
+  }
+
+  getPuestos() {
+    this.gService.list(`all-puestos/`)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data: any[]) => {
+        this.puestos = data;
+      },
+      error: (error) => {
+        if (!error.message.includes(`404 Not Found`)) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. Error: 4. ${error}`,
+          });
+        }
+      }
+    });
   }
 
   async onSubmit() {

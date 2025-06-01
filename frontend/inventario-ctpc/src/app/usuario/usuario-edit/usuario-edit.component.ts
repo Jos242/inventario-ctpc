@@ -45,6 +45,9 @@ export class UsuarioEditComponent {
     { id: 'OBSERVADOR', descripcion: 'Observador' }
   ];
 
+  departamentos: any[] = [];
+  puestos: any[] = [];
+
   constructor(private gService:GenericService,
     private router:Router,
     private route:ActivatedRoute,
@@ -61,16 +64,58 @@ export class UsuarioEditComponent {
 
   ngOnInit(){
     this.usuarioId = this.route.snapshot.paramMap.get('id');
-    this.cargarDatos();
+    this.getDepartamentos();
   }
 
   initForm(){
     this.myForm = this.formBuilder.group({
       usuario: ['', [Validators.required, Validators.maxLength(128)]],
-      password: ['', Validators.required],
+      password: [null],
       nombreCompleto: ['', [Validators.required, Validators.maxLength(100)]],
       departamento: ['', Validators.required],
       puesto: ['',  Validators.required],
+    });
+  }
+  
+  getDepartamentos() {
+    this.gService.list(`all-departamentos/`)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data: any[]) => {
+        this.departamentos = data;
+
+        this.getPuestos();
+      },
+      error: (error) => {
+        if (!error.message.includes(`404 Not Found`)) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. Error: 4. ${error}`,
+          });
+        }
+      }
+    });
+  }
+
+  getPuestos() {
+    this.gService.list(`all-puestos/`)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data: any[]) => {
+        this.puestos = data;
+
+        this.cargarDatos();
+      },
+      error: (error) => {
+        if (!error.message.includes(`404 Not Found`)) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. Error: 4. ${error}`,
+          });
+        }
+      }
     });
   }
   
@@ -80,7 +125,7 @@ export class UsuarioEditComponent {
       .subscribe((data:any)=>{
         this.myForm.setValue({
           usuario: data.user,
-          password: '',
+          password: null,
           nombreCompleto: data.nombre_completo,
           departamento: data.departamento,
           puesto: data.puesto,
@@ -93,7 +138,10 @@ export class UsuarioEditComponent {
         
         let datas = {
           username: this.myForm.value.usuario,
-          password: 'xd'
+          password: this.myForm.value.password,
+          nombre_completo: this.myForm.value.nombreCompleto,
+          departamento: this.myForm.value.departamento,
+          puesto: this.myForm.value.puesto
         };
   
   

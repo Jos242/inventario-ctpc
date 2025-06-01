@@ -57,7 +57,7 @@ export class CierreReporteComponent {
   destroy$:Subject<boolean>=new Subject<boolean>();
   baseUrl: string = environment.apiURL;
 
-  displayedColumns: string[] = ['ubicacion_nombre', 'funcionario_nombre', 'finalizado'];
+  displayedColumns: string[] = ['ubicacion_nombre', 'funcionario_nombre', 'fecha', 'finalizado'];
   dataSource: MatTableDataSource<CierreData> = new MatTableDataSource<CierreData>();
   public isLoadingResults = false;
 
@@ -75,6 +75,8 @@ export class CierreReporteComponent {
 
   totalItems: number;
 
+  selected: any;
+
   pageSizeOptions: number[] = [10, 25, 40, 100];
   loading = false; // Add a loading state flag
 
@@ -87,9 +89,14 @@ export class CierreReporteComponent {
     private route:ActivatedRoute,
     private httpClient:HttpClient,
     private sanitizer: DomSanitizer
-    ){
-      this.loadcierres();
-    }
+  ){
+    this.loadcierres();
+  }
+
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
     
   loadcierres(): void {
     this.isLoadingResults = true;
@@ -104,7 +111,7 @@ export class CierreReporteComponent {
       }
     }, 15000);
   
-    this.gService.list('all-cierres/')
+    this.gService.list('cierres/finalizado')
     .pipe(takeUntil(this.destroy$))
     .subscribe({
       next: (data: any[]) => {
@@ -120,6 +127,8 @@ export class CierreReporteComponent {
           }
           return a.tipo === "PRINCIPIO" ? 1 : -1; // Sort PRINCIPIO before MEDIO
         });
+        this.selected = this.fechaCierres[0];
+        this.applyFilter(this.selected);
 
         this.dataSource.data = data;
 
@@ -149,9 +158,22 @@ export class CierreReporteComponent {
     }
   }
 
-  applyFilter(fecha: any) {
-    console.log(fecha)
-    this.dataSource.filter = this.filterValue.trim().toLowerCase();
+  applyFilter(filtro: any) {
+    const fechaFiltro = filtro?.fecha || '';  // Extract the year from JSON, default to empty if not provided
+    const tipoFiltro = filtro?.tipo ? filtro.tipo.toLowerCase() : '';
+
+    this.dataSource.filterPredicate = (data: any, filter: string) => {
+      if (!fechaFiltro && !tipoFiltro) {
+        return true; 
+      }
+
+      const fecha = new Date(data.fecha).getFullYear().toString();
+      
+      const tipo = data.tipo_revision.toLowerCase();
+  
+      return fecha === filtro.fecha && tipo.includes(filtro.tipo.toLowerCase());
+    };
+    this.dataSource.filter = Math.random().toString();
     
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();

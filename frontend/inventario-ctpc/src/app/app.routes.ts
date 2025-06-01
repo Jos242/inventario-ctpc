@@ -33,6 +33,7 @@ import { AdquisicionCreateComponent } from './adquisicion/adquisicion-create/adq
 import { AdquisicionEditComponent } from './adquisicion/adquisicion-edit/adquisicion-edit.component';
 import { CierreNuevoComponent } from './cierre/cierre-nuevo/cierre-nuevo.component';
 import { CierreReporteComponent } from './cierre/cierre-reporte/cierre-reporte.component';
+import { CierreDetailComponent } from './cierre/cierre-detail/cierre-detail.component';
 
 
 export const routes: Routes = [
@@ -64,7 +65,7 @@ export const routes: Routes = [
     
     { path:'cierre', component: CierreNuevoComponent, canActivate: [authGuard]} ,
     { path:'cierre/reporte', component: CierreReporteComponent, canActivate: [authGuard]} ,
-    { path:'cierre/reporte/:id', component: CierreNuevoComponent, canActivate: [authGuard]} ,
+    { path:'cierre/reporte/:id', component: CierreDetailComponent, canActivate: [authGuard]} ,
 
     { path:'activos/:id/edit', component: ActivoUpdateComponent, canActivate: [authGuard, adminGuard] },
     { path:'activos/:id', component: ActivoDetailComponent },

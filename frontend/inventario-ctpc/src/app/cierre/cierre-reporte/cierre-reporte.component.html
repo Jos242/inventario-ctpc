@@ -10,7 +10,7 @@
   <div class="example-table-container">
     <mat-form-field>
       <mat-label>Fecha</mat-label>
-      <mat-select placeholder="Seleccione una ubicacion" (selectionChange)="applyFilter($event.value)">
+      <mat-select placeholder="Seleccione una ubicacion" (selectionChange)="applyFilter($event.value)" [(value)]="selected">
         <mat-option *ngFor="let fechaCierre of fechaCierres" [value]="fechaCierre">
           {{ fechaCierre.fecha + ' - ' + fechaCierre.tipo }}
         </mat-option>
@@ -27,6 +27,11 @@
         <ng-container matColumnDef="funcionario_nombre">
           <th mat-header-cell *matHeaderCellDef mat-sort-header> Funcionario </th>
           <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.funcionario_nombre}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="fecha">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha </th>
+          <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.fecha}} </td>
         </ng-container>
 
         <ng-container matColumnDef="finalizado">

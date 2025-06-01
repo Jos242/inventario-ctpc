@@ -22,7 +22,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 @Component({
   selector: 'app-login-index',
   standalone: true,
-  imports: [MatButtonModule, MatCardModule, FormsModule, RouterLink,CommonModule, ReactiveFormsModule, MatFormFieldModule,
+  imports: [MatButtonModule, MatCardModule, FormsModule,CommonModule, ReactiveFormsModule, MatFormFieldModule,
     MatGridListModule, MatIconModule,  MatInputModule, MatProgressSpinnerModule
   ],
   templateUrl: './login-index.component.html',
@@ -79,7 +79,6 @@ export class LoginIndexComponent implements OnInit{
           });
         }
       }, 15000);
-      console.log(this.myForm.get('usuario').value +" sdx "+ this.myForm.get('password').value)
       this.authService.login({ username: this.myForm.get('usuario').value, password: this.myForm.get('password').value }).subscribe(response => {
         if (response) {
           this.isLoadingResults = false;
@@ -90,7 +89,6 @@ export class LoginIndexComponent implements OnInit{
             title: 'Exito',
             text: 'Sesion Iniciada Correctamente',
           });
-          this.router.navigate(['/index']);
         } else {
           this.isLoadingResults = false;
           clearTimeout(loadingTimeout); 

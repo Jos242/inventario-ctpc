@@ -1,7 +1,7 @@
 #inventario modules--------------------------------------
 from inventario.models                       import User, Funcionarios, Ubicaciones, Departamentos, Puestos
 from inventario.permissions                  import IsAdminUser
-from inventario.serializers                  import ReadFuncionariosSerializer
+from inventario.serializers                  import ReadFuncionariosSerializer, FuncionariosSerializer
 #--------------------------------------------------------
 
 #Django modules------------------------------------------
@@ -121,7 +121,20 @@ class FuncionariosView(APIView):
 def get_funcionario_by_id(request:Request, pk: int | None = None) -> Response:
     try: 
         funcionario = Funcionarios.objects.get(id = pk)
-        serializer = ReadFuncionariosSerializer(instance = funcionario)
+        serializer = FuncionariosSerializer(instance = funcionario)
+        return Response(serializer.data, 
+                       status = status.HTTP_200_OK)
+
+    except Funcionarios.DoesNotExist:
+        return Response({"error": "funcionario does not exist"},
+                        status = status.HTTP_404_NOT_FOUND)
+    
+@api_view(['GET'])
+@permission_classes([])
+def get_funcionario_by_id_usuario(request:Request, pk: int | None = None) -> Response:
+    try: 
+        funcionario = Funcionarios.objects.filter(user = pk).first()
+        serializer = FuncionariosSerializer(instance = funcionario)
         return Response(serializer.data, 
                        status = status.HTTP_200_OK)
 
@@ -135,7 +148,7 @@ def get_funcionario_by_id(request:Request, pk: int | None = None) -> Response:
 def get_all_funcionarios(request:Request) -> Response:
         try:
             funcionarios = Funcionarios.objects.all()
-            serializer = ReadFuncionariosSerializer(instance = funcionarios,
+            serializer = FuncionariosSerializer(instance = funcionarios,
                                                     many = True)
             return Response(serializer.data,
                            status = status.HTTP_200_OK)

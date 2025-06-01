@@ -1,60 +1,64 @@
-<mat-form-field>
-  <mat-label>Buscar...</mat-label>
-  <input matInput (keyup)="applyFilter($event)" placeholder="Ej. Juan Perez, 101110111" #input>
-</mat-form-field>
-@if (isLoadingResults) {
-  <div class="example-loading-shade">
-    @if (isLoadingResults) {
-      <mat-spinner></mat-spinner>
-    }
+<div class="example-container">
+  @if (isLoadingResults) {
+    <div class="example-loading-shade">
+      @if (isLoadingResults) {
+        <mat-spinner></mat-spinner>
+      }
+    </div>
+  }
+  <div class="scroll-container">
+    <button mat-fab color="primary" (click)="scrollToFinalizar()">
+      <mat-icon>arrow_upward</mat-icon>
+    </button>
   </div>
-}
-<div class="scroll-container">
-  <button mat-fab color="primary" (click)="scrollToFinalizar()">
-    <mat-icon>arrow_upward</mat-icon>
-  </button>
-</div>
 
-<div class="button-container" #finalizar>
-  <button mat-flat-button color="primary" type="submit" [disabled]="activos.length != revisiones.length" (click)="submitCierre()">Finalizar cierre de inventario</button>
-</div>
+  <div class="button-container" #finalizar>
+    <button mat-flat-button color="primary" routerLink="/revision">Retornar</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="activos.length != revisiones.length" (click)="submitCierre()">Finalizar cierre de inventario</button>
+  </div>
 
-<div class="mat-elevation-z8">
-  <div class="row activos-container">
-    <div class="col-md-6 col-lg-4 card-activo-container" *ngFor="let activo of activos">
-      <div class="card-x" #card [class.breathing-error]="highlightErrorIds.includes(activo.id)">
-        <mat-card class="card-activo" appearance="outlined">
-          <mat-card-header class="card-header">
-            <mat-card-title>{{activo.descripcion}}</mat-card-title>
-          </mat-card-header>
-          <div class="card-container">
-            <mat-card-content class="card-content">
-              <div>
-                <h3 class="m-0"><span class="content-titles">Placa: </span>{{activo.no_identificacion}}</h3>
-              </div>
-              <div>
-                <h3 class="m-0"><span class="content-titles">Marca: </span>{{activo.marca}}</h3>
-              </div>
-              <div>
-                <h3 class="m-0"><span class="content-titles">Modelo: </span>{{activo.modelo}}</h3>
-              </div>
-            </mat-card-content>
-            <mat-card-footer class="card-footer">
-              <h3 class="footer-titles">Checkeo</h3>
-              <mat-radio-group [(ngModel)]="activo.status" (ngModelChange)="confirmacion(activo)" required>
-                  <mat-radio-button [value]="'SI EXISTE'">Sí</mat-radio-button>
-                  <mat-radio-button [value]="'NO EXISTE'">No</mat-radio-button>
-              </mat-radio-group>
-            </mat-card-footer>
-          </div>
-  
-          <div class="nota-container" *ngIf="activo.status == 'NO EXISTE'">
-            <mat-form-field class="nota" appearance="outline">
-              <mat-label>Agregue la razón de marcar "No"</mat-label>
-              <textarea matInput #notaField [(ngModel)]="activo.nota" (change)="confirmarNota(activo)" required></textarea>
-            </mat-form-field>
-          </div>
-        </mat-card>
+  <mat-form-field class="buscar">
+    <mat-label>Buscar...</mat-label>
+    <input matInput (keyup)="applyFilter($event)" placeholder="Ej. Juan Perez, 101110111" #input>
+  </mat-form-field>
+
+  <div class="mat-elevation-z8">
+    <div class="row activos-container">
+      <div class="col-md-6 col-lg-4 card-activo-container" *ngFor="let activo of activos">
+        <div class="card-x" #card [class.breathing-error]="highlightErrorIds.includes(activo.id)">
+          <mat-card class="card-activo" appearance="outlined">
+            <mat-card-header class="card-header">
+              <mat-card-title>{{activo.descripcion}}</mat-card-title>
+            </mat-card-header>
+            <div class="card-container">
+              <mat-card-content class="card-content">
+                <div>
+                  <h3 class="m-0"><span class="content-titles">Placa: </span>{{activo.no_identificacion}}</h3>
+                </div>
+                <div>
+                  <h3 class="m-0"><span class="content-titles">Marca: </span>{{activo.marca}}</h3>
+                </div>
+                <div>
+                  <h3 class="m-0"><span class="content-titles">Modelo: </span>{{activo.modelo}}</h3>
+                </div>
+              </mat-card-content>
+              <mat-card-footer class="card-footer">
+                <h3 class="footer-titles">Checkeo</h3>
+                <mat-radio-group [(ngModel)]="activo.status" (ngModelChange)="confirmacion(activo)" required>
+                    <mat-radio-button [value]="'SI EXISTE'">Sí</mat-radio-button>
+                    <mat-radio-button [value]="'NO EXISTE'">No</mat-radio-button>
+                </mat-radio-group>
+              </mat-card-footer>
+            </div>
+    
+            <div class="nota-container" *ngIf="activo.status == 'NO EXISTE'">
+              <mat-form-field class="nota" appearance="outline">
+                <mat-label>Agregue la razón de marcar "No"</mat-label>
+                <textarea matInput #notaField [(ngModel)]="activo.nota" (change)="confirmarNota(activo)" required></textarea>
+              </mat-form-field>
+            </div>
+          </mat-card>
+        </div>
       </div>
     </div>
   </div>

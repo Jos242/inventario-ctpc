@@ -6,7 +6,7 @@
         <br>
         <mat-form-field appearance="outline" class="inputsForm" style="margin-top: 6px;">
           <mat-label>Descripción</mat-label>
-          <textarea matInput formControlName="descripcion" placeholder="Ej. El activo con placa 1234-1234 ha..."></textarea>
+          <textarea matInput formControlName="descripcion" placeholder="Ej. El activo con activo 1234-1234 ha..."></textarea>
         </mat-form-field>
       </div>
       <div class="row">
@@ -14,13 +14,18 @@
         <section class="example-section">
           <div class="row">
             <div class="col-sm-10">
-              <mat-form-field appearance="outline" class="inputsForm" >
+              <mat-form-field appearance="outline" class="inputsForm custom-dropdown">
                 <mat-label>Numero de Placa</mat-label>
-                <mat-select formControlName="no_identificacion" placeholder="Seleccione un activo">
-                  <mat-option *ngFor="let activo of datosActivos" [value]="activo">
-                    {{ activo.no_identificacion }}
+                <input #activoInput matInput type="text" placeholder="Seleccione un activo" formControlName="no_identificacion" 
+                [matAutocomplete]="autoActivo" #autoTriggerActivo="matAutocompleteTrigger"
+                (keyup)="filterActivo(activoInput.value)" (blur)="validateActivoInput()" (keydown.enter)="onEnterPressedActivo(); activoInput.blur(); autoTriggerActivo.closePanel()">
+                <span class="arrow"></span>
+                <mat-autocomplete #autoActivo="matAutocomplete" [displayWith]="displayActivo">
+                  <mat-option *ngFor="let activo of filteredActivos" [value]="activo">
+                  {{ activo.no_identificacion }}
                   </mat-option>
-                </mat-select>
+                </mat-autocomplete>
+                <mat-hint>Manera mediante la cual se obtuvo el activo</mat-hint>
               </mat-form-field>
             </div>
             <div class="col-sm-2">

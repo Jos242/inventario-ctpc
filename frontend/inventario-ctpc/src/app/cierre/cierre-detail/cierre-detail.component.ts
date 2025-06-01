@@ -22,34 +22,38 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 
 import Swal from 'sweetalert2';
 
-export interface UbicacionData {
-  nombre_oficial: string;
-  alias: string;
-  funcionario_id: string;
+export interface RevisionData {
+  status: string;
+  fecha: Date;
+  nota: string;
+  cierre_inventario_id: string;
+  id_registro: string;
 }
 
 @Component({
-  selector: 'app-ubicacion-index',
+  selector: 'app-cierre-detail',
   standalone: true,
   imports: [
     MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule, FormsModule, MatButtonModule, MatIconModule,
-    RouterLink, 
     CommonModule,
-    MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, MatTooltip, FormsModule, ReactiveFormsModule
+    MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, FormsModule, ReactiveFormsModule
   ],
-  templateUrl: './ubicacion-index.component.html',
-  styleUrl: './ubicacion-index.component.scss'
+  templateUrl: './cierre-detail.component.html',
+  styleUrl: './cierre-detail.component.scss'
 })
-export class UbicacionIndexComponent {
-  displayedColumns: string[] = ['nombre_oficial', 'alias', 'funcionario_nombre'];
-  dataSource: MatTableDataSource<UbicacionData> = new MatTableDataSource<UbicacionData>();
+export class CierreDetailComponent {
+  displayedColumns: string[] = ['id_registro', 'no_identificacion', 'descripcion', 'marca', 'modelo', 'status', 'nota'];
+  dataSource: MatTableDataSource<RevisionData> = new MatTableDataSource<RevisionData>();
   public isLoadingResults = false;
 
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
-  datos:any;
+  cierreId: any;
+  cierreInventario: any;
+
+  datos: any;
   destroy$:Subject<boolean>=new Subject<boolean>();
   baseUrl: string = environment.apiURL;
 
@@ -65,7 +69,12 @@ export class UbicacionIndexComponent {
     private httpClient:HttpClient,
     private sanitizer: DomSanitizer
   ){
-    this.getUbicaciones()
+  }
+  
+
+  ngOnInit(){
+    this.cierreId = this.route.snapshot.paramMap.get('id');
+    this.getRevisionesByCierreId()
   }
 
   ngAfterViewInit() {
@@ -78,7 +87,7 @@ export class UbicacionIndexComponent {
     this.destroy$.complete();
   }
 
-  getUbicaciones(){
+  getRevisionesByCierreId(){
     this.isLoadingResults = true;  // Start loading
 
     const loadingTimeout = setTimeout(() => {
@@ -94,10 +103,14 @@ export class UbicacionIndexComponent {
  
 
     // Make the request
-    this.gService.list('all-ubicaciones/')
+    this.gService.list(`revision/cierre/${this.cierreId}/`)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data: any) => {
+          console.log(data)
+          if (data && data.length > 0 && data[0].cierre_inventario) {
+            this.cierreInventario = data[0].cierre_inventario;
+          }
           this.datos = data;
           this.dataSource.data = data;
           this.isLoadingResults = false; // Stop loading
@@ -125,7 +138,8 @@ export class UbicacionIndexComponent {
     }
   }
 
-  verDetalles(id: string): void {
-    this.router.navigate(['ubicaciones/', id]);
+  removeCaps(text: string): string {
+    if (!text) return ''; 
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
   }
 }

@@ -30,7 +30,7 @@ import { CierreNotaDialogComponent } from '../cierre-nota-dialog/cierre-nota-dia
   standalone: true,
   imports: [
     MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule, FormsModule, MatButtonModule, MatIconModule,
-    CommonModule, MatRadioModule, MatCardModule,
+    CommonModule, MatRadioModule, MatCardModule, RouterLink,
     MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, FormsModule, ReactiveFormsModule
   ],
   templateUrl: './cierre-nuevo.component.html',
@@ -280,13 +280,13 @@ export class CierreNuevoComponent {
   async confirmarNota(activo: any) {
     const index = this.revisiones.findIndex(r => r.id_registro === activo.id_registro);
     const currentDate = new Date();
-    const fullDate = `${currentDate.getFullYear()}-${currentDate.getMonth()+1}-${currentDate.getDate()}`
+    const fullDate = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`
 
 
     const newRevision = {
       status: activo.status,
       fecha: fullDate,
-      nota: activo.status == 'NO EXISTE' ? activo.nota : 'SI EXISTE',
+      nota: activo.status == 'NO EXISTE' ? activo.nota : null,
       cierre_inventario_id: this.currentCierre.id,
       id_registro: activo.id_registro
     }
@@ -375,7 +375,8 @@ export class CierreNuevoComponent {
           title: 'Éxito',
           text: 'Cierre actualizado correctamente',
         });
-        // this.router.navigate(['/activos']);
+
+        this.router.navigate(['/revision']);
       },
       error: () => {
         Swal.fire({

@@ -52,7 +52,9 @@
                             <div class="col-lg">    
                                 <mat-form-field appearance="outline" class="inputsForm">
                                     <mat-label>Departamento</mat-label>
-                                    <input matInput formControlName="departamento" >
+                                    <mat-select formControlName="departamento" placeholder="Seleccione un departamento">
+                                        <mat-option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.descripcion }}</mat-option>
+                                    </mat-select>
                                     <mat-hint>Departamento del usuario</mat-hint>
                                 </mat-form-field>
                             </div>
@@ -61,7 +63,9 @@
                             <div class="col-lg">    
                                 <mat-form-field appearance="outline" class="inputsForm">
                                     <mat-label>Puesto</mat-label>
-                                    <input matInput formControlName="puesto" >
+                                    <mat-select formControlName="puesto" placeholder="Seleccione un puesto">
+                                        <mat-option *ngFor="let puesto of puestos" [value]="puesto.id">{{ puesto.descripcion }}</mat-option>
+                                    </mat-select>
                                     <mat-hint>Puesto del usuario</mat-hint>
                                 </mat-form-field>
                             </div>

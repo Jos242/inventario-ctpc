@@ -29,7 +29,7 @@ from rest_framework.decorators               import api_view, permission_classes
 @authentication_classes([JWTAuthentication])
 def get_all_revisiones(request:Request) -> Response:
     try:
-        revisiones = Revisiones.objects.all()
+        revisiones = Revisiones.objects.all().order_by('id_registro')
         serializer = RevisionesSerializer(instance = revisiones,
                                           many = True)
         return Response(serializer.data,
@@ -51,6 +51,17 @@ class RevisionesView(APIView):
             try: 
                 revision = Revisiones.objects.get(id = pk)
                 serializer = RevisionesSerializer(instance = revision)
+                return Response(serializer.data, 
+                                status = status.HTTP_200_OK)
+
+            except Revisiones.DoesNotExist:
+                return Response({"error": "revision does not exist"},
+                                status = status.HTTP_404_NOT_FOUND)
+            
+        if f"/revision/cierre/{pk}/" == path:
+            try: 
+                revision = Revisiones.objects.filter(cierre_inventario_id = pk).order_by('id_registro')
+                serializer = RevisionesSerializer(instance = revision, many = True)
                 return Response(serializer.data, 
                                 status = status.HTTP_200_OK)
 

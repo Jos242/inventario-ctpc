@@ -13,6 +13,7 @@ from django.db.models import F, Value, CharField, OuterRef, Subquery, Func
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 from django.db.models.query import QuerySet
+from django.db import transaction
 #----------------------------------------------
 
 #Django rest frameworks herramientas-----------
@@ -256,23 +257,55 @@ class ActivosActions():
 
         if serializer.is_valid():      
             # activo:Activos = serializer.create(serializer.validated_data)
-            a_ver = Activos(**serializer.validated_data)
-            a_ver.save()
-            print(f"a_ver:Activos id: {a_ver.id}") 
+            activo = Activos(**serializer.validated_data)
+            activo.save()
+            print(f"activo: Activos id: {activo.id}") 
             # print(f"activo:Activos id: {activo.id}")
             # return Response(ReadActivoSerializerIncomplete(instance = activo).data,
                             # status= status.HTTP_200_OK)
-            return Response("A ver")
+            return Response(activo.id, status=status.HTTP_201_CREATED)
+        
         print(f"This are the serializer errors: \n\n{serializer.errors}") 
         return Response(serializer.errors,
                         status = status.HTTP_400_BAD_REQUEST)
 
+    #Metodos para el HTTP POST-------------------------------
+    def add_activos(self, request) -> Response: #Working
+        data_list = request.data
+        
+        if not isinstance(data_list, list):
+            return Response({"detail": "Expected a list of items."},
+                            status = status.HTTP_400_BAD_REQUEST)
+        results = []
+
+        with transaction.atomic():
+            for item in data_list:
+                remaining_fields = get_remaining_fields() 
+                serializer = ActivoSerializer(data = item | remaining_fields)
+
+                if not serializer.is_valid():
+                    print(f"Validation error for item: {serializer.errors}")
+                    # If any error occurs, rollback all changes
+                    transaction.set_rollback(True)
+                    return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+
+                # Save the instance
+                activo = Activos(**serializer.validated_data)
+                activo.save()
+                results.append(activo.no_identificacion)
+
+        return Response(results, status=status.HTTP_201_CREATED)
+    
     def select_columns_to_filter(self, request) -> Response:
         FIELDS = request.data.get('fields', [])
+        ALWAYS_INCLUDED_FIELDS = ['id_registro', 'baja']
+        missing_fields = [f for f in ALWAYS_INCLUDED_FIELDS if f not in FIELDS]
+        QUERY_FIELDS = FIELDS + missing_fields
+
         RELATED_FIELDS = ["ubicacion_original_nombre_oficial", "ubicacion_actual_nombre_oficial", "modo_adquisicion_desc"]
         SELECT_RELATED = ['ubicacion_original', 'ubicacion_actual', 'modo_adquisicion']
         related_map = dict(zip(RELATED_FIELDS, SELECT_RELATED))
-        related_fields = [related_map[column] for column in RELATED_FIELDS if column in FIELDS]
+        related_fields = [related_map[column] for column in RELATED_FIELDS if column in QUERY_FIELDS]
         annotations = {
                 'ubicacion_original_nombre_oficial': F('ubicacion_original__nombre_oficial'),
                 'ubicacion_actual_nombre_oficial': F('ubicacion_actual__nombre_oficial'),
@@ -285,11 +318,11 @@ class ActivosActions():
 
         activos = Activos.objects.select_related(*related_fields) \
                                  .annotate(**annotations) \
-                                 .values(*FIELDS) \
+                                 .values(*QUERY_FIELDS) \
                                  .order_by('-id')
         
         serializer = DynamicReadActivosSerializer(instance = activos,
-                                                  many = True, fields = FIELDS)
+                                                  many = True, fields = QUERY_FIELDS)
 
         return Response(serializer.data, 
                         status= status.HTTP_200_OK)
@@ -456,7 +489,7 @@ class ObservacionesActions():
 
 #Metodos para el HTTP POST-------------------------------
     def add_new_observacion(self, request) -> Response:
-        remaining_fields:dict = get_remaining_fields()
+        remaining_fields: dict = get_remaining_fields()
         remaining_fields.pop('no_identificacion')
         serializer = ObservacionesSerializer(data = request.data)
         

@@ -19,6 +19,7 @@ urlpatterns = [
     path("activo/ubicacion-actual/<int:ubicacion_actual>/", views.ActivosViewNoAuth.as_view()),
     path("excel/todos-los-activos/", views.ActivosView.as_view()),
     path("agregar-activo/", views.ActivosView.as_view()),
+    path("agregar-multiples-activos/", views.ActivosView.as_view()),
     path("activos/excel/by/nos-identificacion/", views.ActivosView.as_view()),
     path("activos/select-columns/", views.ActivosViewNoAuth.as_view()),
     path("update-activo/<int:pk>/", views.ActivosView.as_view()),
@@ -43,12 +44,15 @@ urlpatterns = [
     #Endpoints relacionados a los cierres de inventarios----------------------
     path("cierre/<int:pk>/", _views.CierreInventarioView.as_view()),
     path("all-cierres/", _views.CierreInventarioView.as_view()), 
+    path("cierres/finalizado", _views.CierreInventarioView.as_view()), 
     path("nuevo-cierre/", _views.new_cierre, name = 'new_cierre'),
     path("update-cierre/<int:pk>/", _views.update_cierre, name = 'update_cierre'),
     path("delete-cierre/<int:pk>/", _views.CierreInventarioView.as_view()),
+    path("delete-all-progreso-cierre/<int:fId>/<int:uId>/", _views.CierreInventarioView.as_view()),
 
     #Endpoints relacionados a las Revisiones----------------------------------
     path("revision/<int:pk>/", _views.RevisionesView.as_view()),
+    path("revision/cierre/<int:pk>/", _views.RevisionesView.as_view()),
     path("no-existe/revisiones/", _views.RevisionesView.as_view()),
     path("all-revisiones/", _views.get_all_revisiones, name = "get_all_revisiones"),
     path("nueva-revision/", _views.RevisionesView.as_view()),
@@ -70,6 +74,9 @@ urlpatterns = [
     path("funcionario/<int:pk>/",
          _views.get_funcionario_by_id,
          name = 'get_funcionario_by_id'),
+    path("funcionario/usuario/<int:pk>/",
+         _views.get_funcionario_by_id_usuario,
+         name = 'get_funcionario_by_id_usuario'),
     path("all-funcionarios/",
          _views.get_all_funcionarios,
          name = 'get_all_funcionarios'),
@@ -88,6 +95,12 @@ urlpatterns = [
     path("nueva-plantilla/", _views.PlantillasView.as_view()),
     path("update-plantilla/<int:pk>/", _views.PlantillasView.as_view()),
     path("delete-plantilla/<int:pk>/", _views.PlantillasView.as_view()),
+
+    #Endpoints relaciondos a los departamentos----------------------------
+    path("all-departamentos/", _views.DepartamentosView.as_view()),
+
+    #Endpoints relaciondos a los puestos----------------------------
+    path("all-puestos/", _views.PuestosView.as_view()),
 
 
     #Endpoints relaciondos a el historial de acceso----------------------------

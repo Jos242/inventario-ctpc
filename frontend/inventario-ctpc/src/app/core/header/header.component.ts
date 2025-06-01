@@ -17,11 +17,12 @@ export class HeaderComponent {
 
   logged: any;
   currentUser: any;
+  userName: string | null;
   userType: string | null;
 
   constructor(private authService: AuthService, private router: Router) {
     this.authService.isLoggedIn$().subscribe((x) => {
-      this.logged=x;
+      this.logged = x;
     })
 
     
@@ -29,9 +30,9 @@ export class HeaderComponent {
   }
 
   ngOnInit(): void {
-    this.authService.getCurrentUser$().subscribe(user => {
-      this.currentUser = user;
-      console.log('Current User Updated: ', this.currentUser);
+    this.authService.getUserName$().subscribe(userName => {
+      this.userName = userName;
+      console.log('Current User Updated: ', this.userName);
     });
 
     // Subscribe to user type changes

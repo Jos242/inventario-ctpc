@@ -62,24 +62,22 @@ class ModoAdquisicionView(APIView):
 
                 
     def patch(self, request:Request, pk:int | None = None) -> Response:
-        serializer = ModoAdquisicionSerializer(data = request.data)
+        try:
+            adquisicion = ModoAdquisicion.objects.get(id = pk)
+        except ModoAdquisicion.DoesNotExist:
+            return Response({"error": "modo adquisicion does not exist"},
+                            status = status.HTTP_404_NOT_FOUND)
+        
+        serializer = ModoAdquisicionSerializer(instance = adquisicion, data = request.data)
 
         if not serializer.is_valid():
             return Response(serializer.errors,
                             status = status.HTTP_400_BAD_REQUEST)
 
-        try:
-            adquisicion = ModoAdquisicion.objects.get(id = pk)
-            revision = serializer.update(instance = adquisicion,
-                                         validated_data= serializer.validated_data)
-            revision.save()
-            serializer = ModoAdquisicionSerializer(instance = adquisicion)
-            return Response(serializer.data,
-                       status = status.HTTP_200_OK) 
-            
-        except ModoAdquisicion.DoesNotExist:
-            return Response({"error": "modo adquisicion does not exist"},
-                            status = status.HTTP_404_NOT_FOUND)
+        revision = serializer.update(instance = adquisicion, validated_data = serializer.validated_data)
+        revision.save()
+        return Response(serializer.data,
+                status = status.HTTP_200_OK) 
                    
     def delete(self, request:Request, pk:int | None = None) -> Response:
 

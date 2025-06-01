@@ -51,7 +51,19 @@ class CierreInventarioView(APIView):
 
        if '/all-cierres/' == path:
             try: 
-                cierres = CierreInventario.objects.all()
+                cierres = CierreInventario.objects.all().order_by('-fecha')
+                serializer = ReadCierreInventarioSerializer(instance = cierres,
+                                                            many = True) 
+                return Response(serializer.data, 
+                                status = status.HTTP_200_OK)
+
+            except CierreInventario.DoesNotExist:
+                return Response({"error": "cierre inventario db is empty"},
+                                status = status.HTTP_404_NOT_FOUND)
+
+       if '/cierres/finalizado' == path:
+            try: 
+                cierres = CierreInventario.objects.filter(finalizado = 1).order_by('-fecha')
                 serializer = ReadCierreInventarioSerializer(instance = cierres,
                                                             many = True) 
                 return Response(serializer.data, 
@@ -62,16 +74,34 @@ class CierreInventarioView(APIView):
                                 status = status.HTTP_404_NOT_FOUND)
 
 
-    def delete(self, request:Request, pk = None) -> Response:
-        try: 
-            cierre = CierreInventario.objects.get(id = pk)
-            cierre.delete()
-            return Response({"status": "entry was deleted"}, 
-                        status = status.HTTP_200_OK)
- 
-        except CierreInventario.DoesNotExist:
-            return Response({"error": "cierre inventario db is empty"},
-                            status = status.HTTP_404_NOT_FOUND)
+    def delete(self, request:Request, pk = None, fId = None, uId = None) -> Response:
+        path = request.path
+        
+        if f'/delete-cierre/{pk}/' == path:
+            try: 
+                cierre = CierreInventario.objects.get(id = pk)
+                cierre.delete()
+                return Response({"status": "entry was deleted"}, 
+                            status = status.HTTP_200_OK)
+
+            except CierreInventario.DoesNotExist:
+                return Response({"error": "cierre inventario db is empty"},
+                                status = status.HTTP_404_NOT_FOUND)
+            
+        if f'/delete-all-progreso-cierre/{fId}/{uId}/' == path:
+            try: 
+                cierre = CierreInventario.objects.filter(funcionario = fId, ubicacion = uId, finalizado = 0).first()
+                if not cierre:
+                    return Response({"status": "nothing to delelete jiji"}, 
+                            status = status.HTTP_200_OK)
+                
+                cierre.delete()
+                return Response({"status": "entry was deleted"}, 
+                            status = status.HTTP_200_OK)
+
+            except CierreInventario.DoesNotExist:
+                return Response({"error": "cierre inventario db is empty"},
+                                status = status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['POST'])

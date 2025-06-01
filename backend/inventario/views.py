@@ -9,6 +9,8 @@ from rest_framework.parsers     import FormParser, MultiPartParser, JSONParser
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .permissions import IsAdminOrFuncionarioUser, IsAdminUser
+from django.http import JsonResponse
+import json
 #----------------------------------------------
 from .utils import *
 #----------------------------------------------
@@ -61,6 +63,10 @@ class ActivosView(APIView):
             print(request.data)
             resp = self.activos_do.add_activo(request)  
             return resp
+
+        if path == "/agregar-multiples-activos/":
+            res = self.activos_do.add_activos(request)  
+            return res
         
                 
         if path == "/activos/excel/by/nos-identificacion/":

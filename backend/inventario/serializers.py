@@ -68,23 +68,26 @@ class UserSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         return 1
     
-class UpdateUserSerializer(serializers.Serializer):
-    username = serializers.CharField(required = False)
-    password = serializers.CharField(required = False)
-    nombre_completo = serializers.CharField(required = False)
+#class UpdateUserSerializer(serializers.Serializer):
+#    username = serializers.CharField(required = False)
+#    password = serializers.CharField(required = False)
+#    nombre_completo = serializers.CharField(required = False)
 
 class FuncionariosSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    departamento_descripcion = serializers.CharField(source='departamento.descripcion', read_only=True)
+    puesto_descripcion = serializers.CharField(source='puesto.descripcion', read_only=True)
     
     class Meta:
         model = Funcionarios 
-        fields = ['user', 'nombre_completo', 'departamento',
-                  'puesto']
+        fields = ['id', 'user', 'username', 'nombre_completo', 'departamento', 'departamento_descripcion',
+                  'puesto', 'puesto_descripcion']
 
 class UpdateUserSerializer(serializers.Serializer):
     #auth_user fields
     username = serializers.CharField(required = False, max_length = 150)
 
-    password = serializers.CharField(required = False, max_length = 128)
+    password = serializers.CharField(required = False, max_length = 128, allow_null = True, allow_blank = True)
 
     #funcionarios fields
     user_id = serializers.PrimaryKeyRelatedField(queryset = User.objects.all(),
@@ -101,9 +104,9 @@ class UpdateUserSerializer(serializers.Serializer):
             raise ValidationError("no data or not valid fields")  
         return attrs 
 
-    def update(self, instance:User, validated_data:dict) -> User:
-        funcionarios_keys = ['nombre_completo', "user_id",
-                             "departamento", "puesto"] 
+    def update(self, instance: User, validated_data: dict) -> User:
+        funcionarios_keys = ['nombre_completo', 'user_id',
+                             'departamento', 'puesto'] 
         check_for_password = validated_data.get("password", None)
         new_username = validated_data.get("username", instance.username)
 
@@ -116,19 +119,20 @@ class UpdateUserSerializer(serializers.Serializer):
             instance.set_password(check_for_password)
 
         
-
-        update_funcionario = self.check_keys(dictionary = validated_data,
-                                             required_keys = funcionarios_keys)
+        
+        update_funcionario = self.check_keys(dictionary = validated_data, required_keys = funcionarios_keys)
 
         if update_funcionario: 
             try: 
-                funcionario:Funcionarios    = Funcionarios.objects.get(user_id = instance.id)
+                funcionario: Funcionarios = Funcionarios.objects.get(id = instance.id)
                 new_user_id = validated_data.get("user_id", funcionario.user_id)
 
                 if new_user_id != funcionario.user_id and Funcionarios.objects.filter(user_id = new_user_id).exists():
                     raise ValidationError({"error": "user_id already in use by another funcionario"})
-
-                funcionario.user            = new_user_id
+                print(funcionario.departamento)
+                print(funcionario.departamento_id)
+                print(validated_data)
+                funcionario.user_id         = new_user_id
                 funcionario.nombre_completo = validated_data.get("nombre_completo", funcionario.nombre_completo) 
                 funcionario.departamento    = validated_data.get("departamento", funcionario.departamento)
                 funcionario.puesto          = validated_data.get("puesto", funcionario.puesto) 
@@ -208,10 +212,12 @@ class ReadDocSerializer(serializers.ModelSerializer):
         fields = ['id', 'titulo', 'tipo', 'ruta', 'impreso', 'creado_el']
 
 class CierreInventarioSerializer(serializers.ModelSerializer):
+    funcionario_nombre = serializers.CharField(source='funcionario.nombre_completo', read_only=True)
+    ubicacion_nombre = serializers.CharField(source='ubicacion.nombre_oficial', read_only=True)
     class Meta:
         model = CierreInventario
-        fields = ['id', 'tipo_revision', 'funcionario',
-                  'ubicacion', 'fecha', 'finalizado']
+        fields = ['id', 'tipo_revision', 'funcionario', 'funcionario_nombre',
+                  'ubicacion', 'ubicacion_nombre', 'fecha', 'finalizado']
         read_only_fields = ['id']
 
 class ReadCierreInventarioSerializer(serializers.Serializer):
@@ -225,11 +231,16 @@ class ReadCierreInventarioSerializer(serializers.Serializer):
     finalizado = serializers.BooleanField(read_only = True)
       
 class RevisionesSerializer(serializers.ModelSerializer):
+    cierre_inventario = CierreInventarioSerializer(source='cierre_inventario_id', read_only=True)
+    no_identificacion = serializers.CharField(source='id_registro.no_identificacion', read_only=True)
+    descripcion = serializers.CharField(source='id_registro.descripcion', read_only=True)
+    marca = serializers.CharField(source='id_registro.marca', read_only=True)
+    modelo = serializers.CharField(source='id_registro.modelo', read_only=True)
   
     class Meta:
         model = Revisiones
         fields = ['id', 'id_registro', 'status',
-                  'fecha', 'nota', 'cierre_inventario_id'] 
+                  'fecha', 'nota', 'cierre_inventario_id', 'cierre_inventario', 'no_identificacion', 'descripcion', 'marca', 'modelo'] 
 
     def is_valid(self, *, raise_exception=False) -> bool:
         valid:bool = super().is_valid(raise_exception = raise_exception)
@@ -268,11 +279,12 @@ class WhatTheExcelNameIs(serializers.Serializer):
 
 class UbicacionesSerializer(serializers.ModelSerializer):
     img_path = serializers.FileField(required = False)
+    funcionario_nombre = serializers.CharField(source='funcionario_id.nombre_completo', read_only=True)
 
     class Meta:
         model = Ubicaciones
         fields = ['id', 'nombre_oficial',
-                  'alias', 'funcionario_id',
+                  'alias', 'funcionario_id', 'funcionario_nombre',
                   'img_path']
 
     def create(self, ubicacion_files:list[InMemoryUploadedFile],
@@ -296,16 +308,13 @@ class UbicacionesSerializer(serializers.ModelSerializer):
         ubicacion.save() 
         return ubicacion 
 
-    def update(self, instance:Ubicaciones,
-               ubicacion_files:list[InMemoryUploadedFile],
-               validated_data:dict):
-        old_folder_name:str = instance.nombre_oficial.replace(" ", "_")
-        new_folder_name:str = validated_data.get('nombre_oficial',
-                                                 instance.nombre_oficial).replace(" ", "_")
+    def update(self, instance: Ubicaciones, ubicacion_files: list[InMemoryUploadedFile], validated_data: dict):
+        old_folder_name: str = instance.nombre_oficial.replace(" ", "_")
+        new_folder_name: str = validated_data.get('nombre_oficial', instance.nombre_oficial).replace(" ", "_")
 
         old_dir = os.path.join(MEDIA_ROOT, "uploads", "ubicaciones", old_folder_name)
         new_dir = os.path.join(MEDIA_ROOT, "uploads", "ubicaciones", new_folder_name) 
-        relative_new_dir =  os.path.join("uploads", "ubicaciones", new_folder_name)
+        relative_new_dir = os.path.join("uploads", "ubicaciones", new_folder_name)
 
         if not os.path.exists(old_dir):
             os.makedirs(new_dir)
@@ -328,11 +337,12 @@ class UbicacionesSerializer(serializers.ModelSerializer):
 
 class ReadUbicacionesSerializer(serializers.ModelSerializer):
     img_path = serializers.CharField(required = False)
+    funcionario_nombre = serializers.CharField(source='funcionario_id.nombre_completo', read_only=True)
 
     class Meta:
         model = Ubicaciones
         fields = ['id', 'nombre_oficial',
-                  'alias', 'funcionario_id',
+                  'alias', 'funcionario_id', 'funcionario_nombre',
                   'img_path']
 
 class ModoAdquisicionSerializer(serializers.ModelSerializer):
@@ -387,3 +397,15 @@ class HistorialDeAccesoSerializer(serializers.ModelSerializer):
 class NoIdentificacionSerializer(serializers.Serializer):
     nos_identificacion = serializers.ListField(child = serializers.CharField(),
                                 min_length = 1)
+
+class DepartamentosSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Departamentos
+        fields = '__all__'
+
+class PuestosSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Puestos
+        fields = '__all__'

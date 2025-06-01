@@ -1,11 +1,11 @@
 table {
-    width: 100%;
-  }
-  
-  .mat-mdc-form-field {
-    font-size: 14px;
-    width: 100%;
-  }
+  width: 100%;
+}
+
+.mat-mdc-form-field {
+  font-size: 14px;
+  width: 100%;
+}
   
   // td, th {
   //   width: 25%;
@@ -22,7 +22,6 @@ table {
   position: relative;
   // min-height: 200px;
   // max-height: 400px;
-  overflow: auto;
 }
 
 .mat-mdc-row .mat-mdc-cell {
@@ -36,9 +35,9 @@ table {
 }
 
 .textFiltros{
-  margin:0px;
-  padding:0px;
-  width:100%;
+  padding: 0px;
+  margin: 0px;
+  width: 100%;
   text-align: right;
   padding-right: 5px;
 }
@@ -47,6 +46,9 @@ table {
   color: black;
 }
 
+.table-container {
+  overflow: auto;
+}
 
 table {
   width: 100%;

@@ -8,12 +8,27 @@
   }
 <div class="mainDiv">
      <img class="imgLogo" src="assets/images/logocole.png" alt="CTPC">
-    <h2 *ngIf="currentUserData">Funcionario: {{ currentUserData.user}}  </h2>
+    <h2 *ngIf="currentUserData">Funcionario: {{ currentUserData.nombre_completo}}  </h2>
     <div *ngIf="hasUbicacion; else noUbicacion">
-      <H1>Su Ubicacion Asignada Es: </H1>
+      <h1 *ngIf="ubicaciones.length > 1">Usted tiene más de una ubicación asignada, asegurese de realizar ambas: </h1>
+      <h1 *ngIf="ubicaciones.length == 1">Su Ubicacion Asignada Es: </h1>
+      <h2>Puede seleccionar las aulas en el menú desplegable</h2>
+      <mat-form-field appearance="outline" class="inputsForm">
+        <mat-label>Ubicaciones</mat-label>
+        <mat-select  [(value)]="datosUbi">
+            <mat-option *ngFor="let ubicacion of ubicaciones" [value]="ubicacion">{{ ubicacion.nombre_oficial }}</mat-option>
+        </mat-select>
+      </mat-form-field>
       <h2 *ngIf="datosUbi"> {{datosUbi.nombre_oficial}} ({{datosUbi.alias}})</h2>
-      <h3>Una vez presionado el boton de iniciar, sera rederigido al Inventario de su aula. Debe finalizar de realizar la revision antes de cerrar la pagina. </h3>
-      <button mat-flat-button color="primary" (click)="iniciarRevision()">Iniciar Revision de Inventario</button>
+      <div  *ngIf="datosUbi && !datosUbi.cierre; else noCierre">
+        <h3>Una vez presionado el boton de iniciar, sera rederigido al Inventario de su aula. Debe finalizar de realizar la revision antes de cerrar la pagina. </h3>
+        <button mat-flat-button color="primary" (click)="iniciarRevision()">Iniciar Revision de Inventario</button>
+      </div>
+      <ng-template #noCierre>
+        <h3>Ya completó el cierre de inventario en esta ubicación. </h3>
+      </ng-template>
+      <br>
+      <h2 [ngClass]="{'rojo': getCierreCount() < ubicaciones.length, 'verde': getCierreCount() == ubicaciones.length}">{{ getCierreCount() + '/' + ubicaciones.length }} completados</h2>
     </div>
 
     <ng-template #noUbicacion>

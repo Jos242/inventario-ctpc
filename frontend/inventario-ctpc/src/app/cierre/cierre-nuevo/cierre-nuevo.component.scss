@@ -1,3 +1,13 @@
+.example-container {
+  width: 90%;
+  margin: 50px auto 0;
+}
+
+.buscar {
+  font-size: 14px;
+  width: 100%;
+}
+
 .example-loading-shade {
   position: absolute;
   top: 73px; /* Adjust this to match your header height */
@@ -20,12 +30,13 @@
 
 .button-container {
   display: flex;
-  justify-content: end;
-  padding: 12px;
+  justify-content: space-between;
+  padding: 12px 0;
 }
 
 .activos-container {
   margin: 0;
+  padding: 12px 0;
 }
 
 .card-activo-container {

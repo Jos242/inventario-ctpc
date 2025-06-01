@@ -32,6 +32,7 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { MatTooltip } from '@angular/material/tooltip';
 import { DialogRef } from '@angular/cdk/dialog';
 import { HotToastService } from '@ngxpert/hot-toast';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 @Component({
   selector: 'app-add-annotation-dialog',
@@ -44,25 +45,30 @@ import { HotToastService } from '@ngxpert/hot-toast';
     MatMenuModule,MatDialogModule,
     RouterLink, MatSelectModule,
     CommonModule,ReactiveFormsModule,
-    MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, MatTooltip
+    MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, MatTooltip, MatAutocompleteModule
   ],
   templateUrl: './add-annotation-dialog.component.html',
   styleUrl: './add-annotation-dialog.component.scss'
 })
 export class AddAnnotationDialogComponent {
+  destroy$: Subject<boolean> = new Subject<boolean>();
   myForm: FormGroup;
   filtros: FormGroup;
+
+  activos: any;
+  filteredActivos: any;
+
   activoIdRegistro: any;
   currentActivo: any;
-  activoId:any;
+  activoId: any;
   datosActivos: any; // This should be populated with the actual data
   activosACrear: any[] = [];
-  public isLoadingResults = false;
-  destroy$:Subject<boolean>=new Subject<boolean>();
-  activosEnLista:any;
-  listaActi:any[] = [];;
 
-  
+  public isLoadingResults = false;
+
+  activosEnLista: any;
+  listaActi: any[] = [];;
+
   constructor(
     private router:Router,
     private route:ActivatedRoute,
@@ -111,7 +117,7 @@ export class AddAnnotationDialogComponent {
   }
 
   activosList(): void {
-    this.activosEnLista= this.listaActi.map(activo => activo).join(', '); 
+    this.activosEnLista = this.listaActi.map(activo => activo).join(', '); 
   }
 
   loadActivos(){
@@ -211,25 +217,25 @@ export class AddAnnotationDialogComponent {
       }
 
       const splitDescripcion = (text: string, chunkSize: number) => {
-          const chunks = [];
-          let start = 0;
+        const chunks = [];
+        let start = 0;
 
-          while (start < text.length) {
-              let end = start + chunkSize;
-              if (end >= text.length) {
-                  chunks.push(text.slice(start));
-                  break;
-              }
-              if (text.charAt(end) !== ' ' && text.charAt(end) !== '.') {
-                  let spaceIndex = text.lastIndexOf(' ', end);
-                  if (spaceIndex > start) {
-                      end = spaceIndex;
-                  }
-              }
-              chunks.push(text.slice(start, end));
-              start = end + 1;
-          }
-          return chunks;
+        while (start < text.length) {
+            let end = start + chunkSize;
+            if (end >= text.length) {
+                chunks.push(text.slice(start));
+                break;
+            }
+            if (text.charAt(end) !== ' ' && text.charAt(end) !== '.') {
+                let spaceIndex = text.lastIndexOf(' ', end);
+                if (spaceIndex > start) {
+                    end = spaceIndex;
+                }
+            }
+            chunks.push(text.slice(start, end));
+            start = end + 1;
+        }
+        return chunks;
       };
 
       const chunks = splitDescripcion(descripcion, 98);
@@ -275,4 +281,25 @@ export class AddAnnotationDialogComponent {
   }
   }
 
+  
+
+  filterActivo(value: string) {
+    this.filteredActivos = this.activos.filter(u => u.nombre_oficial.toLowerCase().includes(value.toLowerCase()));
+  }
+  onEnterPressedActivo() {
+    if (this.filteredActivos.length === 1) {
+      this.myForm.get('ubicacion_original')?.setValue(this.filteredActivos[0]);
+    }
+  }
+  displayActivo(ubicacion: any): string {
+    return ubicacion?.nombre_oficial || '';
+  }
+  validateActivoInput() {
+    const value = this.myForm.get('ubicacion_original')?.value;
+  
+    if (!value || typeof value !== 'object' || !value.id) {
+      this.myForm.get('ubicacion_original')?.setValue(null);
+      this.filteredActivos("");
+    }
+  }
 }

@@ -14,21 +14,22 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
 import { RevisionCierreDialogComponent } from '../revision-cierre-dialog/revision-cierre-dialog.component';
 import { ConfirmationService } from '../../share/confirmation.service';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-revision-index',
   standalone: true,
-  imports: [MatButtonModule, CommonModule, MatProgressSpinnerModule],
+  imports: [MatButtonModule, CommonModule, MatProgressSpinnerModule, MatSelectModule],
   templateUrl: './revision-index.component.html',
   styleUrl: './revision-index.component.scss'
 })
 export class RevisionIndexComponent {
 
-  destroy$:Subject<boolean>=new Subject<boolean>();
-  datos:any;
+  destroy$: Subject<boolean> = new Subject<boolean>();
+  datos: any;
+  ubicaciones: any[] = [];
   datosUbi: any;
 
-  ubicaciones: any;
   isLoadingResults: boolean = false;
   hasUbicacion: boolean = true;
 
@@ -51,12 +52,12 @@ export class RevisionIndexComponent {
       this.currentUserId = userId;
       
       if (userId) {
-        this.getFuncionario();
+        this.getFuncionarioByIdUsuario();
       }
     });
   }
 
-    getFuncionario(): void {
+    getFuncionarioByIdUsuario(): void {
       this.isLoadingResults = true;
     
       const loadingTimeout = setTimeout(() => {
@@ -69,22 +70,15 @@ export class RevisionIndexComponent {
         }
       }, 15000);
     
-      this.gService.list(`all-funcionarios/`)
+      this.gService.list(`funcionario/usuario/${this.currentUserId}/`)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (data: any[]) => {
             this.datos = data;
             console.log(this.datos);
-    
-            // Get the current user
-            const currentUser = this.authService.getCurrentUser();
-            console.log(currentUser)
-    
-            // Find the current user in the funcionarios list
-            const matchedUser = this.datos.find((funcionario: any) => funcionario.user === currentUser);
-    
+
             // Save the matched user to a variable
-            this.currentUserData = matchedUser;
+            this.currentUserData = data;
             console.log(this.currentUserData);
 
             this.loadUbiByFunc();
@@ -123,12 +117,12 @@ export class RevisionIndexComponent {
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (data: any[]) => {
-            this.datosUbi = data;
-            console.log(this.datosUbi);
+            this.ubicaciones = data;
+            this.datosUbi = data[0];
+            console.log(this.ubicaciones);
+
             this.isLoadingResults = false;
             clearTimeout(loadingTimeout);
-            
-            
           },
           error: (error) => {
             this.isLoadingResults = false;
@@ -148,6 +142,7 @@ export class RevisionIndexComponent {
     }
 
     iniciarRevision(){
+      console.log(this.datosUbi.id)
       const storedData = JSON.parse(localStorage.getItem('cierres') || '[]');
 
       const index = storedData.findIndex((item: any) =>
@@ -164,17 +159,30 @@ export class RevisionIndexComponent {
 
       dialogRef.afterClosed().subscribe(result => {
         if (result === true) {
-          this.router.navigate(['/cierre'], { 
-            queryParams: { funcionarioId: this.currentUserData.id, ubicacionId: this.datosUbi.id } 
-          });
-        } else if (result === false) {
           if (foundCierre) {
-            this.borrarCierre(foundCierre, storedData, index);
-          } else {
             this.router.navigate(['/cierre'], { 
               queryParams: { funcionarioId: this.currentUserData.id, ubicacionId: this.datosUbi.id } 
             });
+          } else {
+            this.gService.delete(`delete-all-progreso-cierre/${this.currentUserData.id}/${this.datosUbi.id}/`)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: () => {
+                this.router.navigate(['/cierre'], { 
+                  queryParams: { funcionarioId: this.currentUserData.id, ubicacionId: this.datosUbi.id } 
+                });
+              },
+              error: () => {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'Hubo un problema con el cierre de inventario',
+                });
+              }
+            });
           }
+        } else if (result === false && foundCierre) {
+          this.borrarCierre(foundCierre, storedData, index);
         }
       });
     }
@@ -204,7 +212,11 @@ export class RevisionIndexComponent {
           });
         }
       });
-    };
+    }
+
+    getCierreCount(): number {
+      return this.ubicaciones.filter(item => item.cierre).length;
+    }
 
   // loadUbicaciones(): void {
   //   this.isLoadingResults = true;

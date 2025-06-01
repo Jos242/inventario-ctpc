@@ -1,5 +1,5 @@
 #inventario modules--------------------------------------
-from inventario.models                       import Ubicaciones
+from inventario.models                       import Ubicaciones, CierreInventario
 from inventario.permissions                  import IsAdminUser
 from inventario.serializers                  import ReadUbicacionesSerializer, UbicacionesSerializer
 #--------------------------------------------------------
@@ -8,6 +8,7 @@ from inventario.serializers                  import ReadUbicacionesSerializer, U
 from django.db.models                        import F, Value
 from django.http                             import HttpResponse
 from django.db.models.functions              import Coalesce
+from django.utils                            import timezone
 #--------------------------------------------------------
 
 #Django rest frameworks modules--------------------------
@@ -90,7 +91,7 @@ class UbicacionesView(APIView):
    
         if path == "/all-ubicaciones/":
             try:
-                ubicaciones = Ubicaciones.objects.all()
+                ubicaciones = Ubicaciones.objects.all().order_by('nombre_oficial')
                 serializer = UbicacionesSerializer(instance = ubicaciones,
                                                    many = True)
                 return Response(serializer.data,
@@ -119,21 +120,21 @@ class UbicacionesView(APIView):
         return Response(serializer.data, 
                         status = status.HTTP_200_OK)
 
-    def patch(self, request:Request, pk:int) -> Response:
-        serializer = UbicacionesSerializer(data = request.data)
-
+    def patch(self, request: Request, pk: int) -> Response:
         try:
             ubicacion = Ubicaciones.objects.get(id = pk)
-           
         except Ubicaciones.DoesNotExist:
             return Response({"error": "ubicacion does not exist"},
                             status = status.HTTP_404_NOT_FOUND)
-            
-        if not serializer.is_valid(): 
-            return Response(serializer.errors,
-                            status = status.HTTP_400_BAD_REQUEST)
+        
         files = request.FILES.getlist('img_path')
-        ubicacion:Ubicaciones = serializer.update(instance = ubicacion,
+        
+        serializer = UbicacionesSerializer(instance = ubicacion, data = request.data)
+
+        if not serializer.is_valid(): 
+            return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+        
+        ubicacion: Ubicaciones = serializer.update(instance = ubicacion,
                                                   ubicacion_files = files,
                                                   validated_data = serializer.validated_data) 
 
@@ -157,9 +158,31 @@ class UbicacionesView(APIView):
 def get_ubicacion_by_funcionarios(request:Request,
                                   funcionario_id: int | None = None) -> Response:
     try: 
-        ubicacion = Ubicaciones.objects.get(funcionario_id = funcionario_id)
-        serializer = UbicacionesSerializer(instance = ubicacion)
-        return Response(serializer.data, 
+        ubicaciones = Ubicaciones.objects.filter(funcionario_id = funcionario_id)
+        
+        current_year = timezone.now().year
+        current_month = timezone.now().month
+        
+        ubicaciones_data = []
+        for ubicacion in ubicaciones:
+            print(ubicacion.id)
+            cierre = CierreInventario.objects.filter(
+                ubicacion = ubicacion.id,
+                fecha__year = current_year,
+                fecha__month = current_month,
+                finalizado = 1
+            ).first()
+
+            ubicacion_serializer = UbicacionesSerializer(instance = ubicacion).data
+            print(cierre)
+            if cierre:
+                ubicacion_serializer['cierre'] = True
+            else:
+                ubicacion_serializer['cierre'] = False
+                
+            ubicaciones_data.append(ubicacion_serializer)
+
+        return Response(ubicaciones_data, 
                         status = status.HTTP_200_OK)
 
     except Ubicaciones.DoesNotExist:

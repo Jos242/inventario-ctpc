@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy, ElementRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy, ElementRef, HostListener } from '@angular/core';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardActions, MatCardModule} from '@angular/material/card';
@@ -55,15 +55,15 @@ export interface ActivoData {
     MatCheckboxModule,
     MatSliderModule,
     MatMenuModule,
-    RouterLink, 
     CommonModule,
-    MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, MatTooltip, FormsModule, ReactiveFormsModule, JsonPipe, BooleanToYesNoPipe
+    MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, MatTooltip, FormsModule, ReactiveFormsModule, BooleanToYesNoPipe
   ],
   templateUrl: './activo-index.component.html',
   styleUrl: './activo-index.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ActivoIndexComponent implements AfterViewInit  {
+  isSmallScreen = false;
 
   displayedColumns: string[] = ['id_registro', 'no_identificacion', 'descripcion', 'ubicacion'];
   dataSource: MatTableDataSource<ActivoData> = new MatTableDataSource<ActivoData>();
@@ -77,21 +77,19 @@ export class ActivoIndexComponent implements AfterViewInit  {
 
   @ViewChild('input') input: ElementRef;
 
-  datos:any;
-  destroy$:Subject<boolean>=new Subject<boolean>();
+  datos :any;
+  destroy$: Subject<boolean>=new Subject<boolean>();
   baseUrl: string = environment.apiURL;
 
-  observaciones: any[] = []; // Store all observaciones
+  observaciones: any[] = [];
 
   totalItems: number;
 
   pageSizeOptions: number[] = [10, 25, 40, 100];
-  loading = false; // Add a loading state flag
+  loading = false;
 
   filtros: FormGroup;
   ubicaciones: any;
-
-
 
   constructor(private gService:GenericService,
     private fb: FormBuilder,
@@ -106,10 +104,10 @@ export class ActivoIndexComponent implements AfterViewInit  {
         descripcion: true,
         marca: true,
         modelo: true,
-        serie: false,
+        serie: true,
         estado: false,
         ubicacion_original_nombre_oficial: true,
-        ubicacion_actual_nombre_oficial: false,
+        ubicacion_actual_nombre_oficial: true,
         modo_adquisicion_desc: false,
         precio: false,
         conectividad: false,
@@ -125,48 +123,46 @@ export class ActivoIndexComponent implements AfterViewInit  {
         this.filtros.patchValue(cachedFilters);
       }
 
-      
-      
       this.checks(); 
-      // Initialize displayedColumns based on initial filter values
       this.updateDisplayedColumns();
     }
 
-    
-
     ngOnInit(): void {
-       // Fetch observaciones on initialization
-      // this.input.nativeElement.value = localStorage.getItem('lastSearch') ? localStorage.getItem('lastSearch') : '';
-
+      this.checkScreenSize();
       
       this.filtros.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
-        this.updateDisplayedColumns();
         this.displayMessage = true;
       });
-      
     }
 
     ngAfterViewInit() {
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
-      if(localStorage.getItem('lastSearch')){
-        console.log(localStorage.getItem('lastSearch'))
-        console.log(this.input)
+
+      if (localStorage.getItem('lastSearch')) {
         this.input.nativeElement.value = localStorage.getItem('lastSearch');
-        this.applyFilter(null,localStorage.getItem('lastSearch'))
-      }else{
-        this.input.nativeElement.value=null;
+        this.applyFilter(null,localStorage.getItem('lastSearch'));
+      } else{
+        this.input.nativeElement.value = null;
       }
     }
 
     ngOnDestroy(): void {
-      if(this.filterValue){
+      if (this.filterValue) { 
         localStorage.setItem('lastSearch', this.filterValue);
-      }else{
+      } else {
         localStorage.setItem('lastSearch', '');
       }
-      
       this.destroy$.complete();
+    }
+
+    @HostListener('window:resize', [])
+    onResize() {
+      this.checkScreenSize();
+    }
+
+    private checkScreenSize(): void {
+      this.isSmallScreen = window.innerWidth < 1024;
     }
 
     updateDisplayedColumns(): void {
@@ -174,34 +170,31 @@ export class ActivoIndexComponent implements AfterViewInit  {
     }
 
     fetchObservaciones(): void {
-      this.isLoadingResults = true; // Stop loading
+      this.isLoadingResults = true;
       this.gService.list('todas-las-observaciones/')
         .pipe(takeUntil(this.destroy$))
         .subscribe((data: any) => {
-          this.observaciones = data; // Store all observaciones
-          console.log(this.observaciones)
-          for(let element of this.datos){
-            element.class=this.getRowClass(element);
+          this.observaciones = data;
+          
+          for (let element of this.datos) {
+            element.class = this.getRowClass(element);
           }
           this.dataSource.data = this.datos;
-            this.totalItems = this.datos.length;
-            this.updatePageSizeOptions();
-          this.isLoadingResults = false; // Stop loading
-        });
-      
+          this.totalItems = this.datos.length;
+          
+          this.updatePageSizeOptions();
 
+          this.isLoadingResults = false;
+        });
     }
 
     hasObservaciones(activoId: string): boolean {
-      // Check if activo has observaciones by matching the id_registros
-    //  console.log(activoId, "regisgtro que se esta matcheando")
-    //  console.log(this.observaciones.some(obs => obs.activo == activoId))
       return this.observaciones.some(obs => obs.activo == activoId);
     }
 
     getRowClass(row: any): string {
       this.isLoadingResults = true;
-      if (  row.baja == 'DADO DE BAJA CON PLACA' || row.baja == 'DADO DE BAJA SIN PLACA') {
+      if (row.baja == 'DADO DE BAJA CON PLACA' || row.baja == 'DADO DE BAJA SIN PLACA') {
         return 'row-red';
       } else if (row.baja == 'A DAR DE BAJA') {
         return 'row-orange';
@@ -228,8 +221,8 @@ export class ActivoIndexComponent implements AfterViewInit  {
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (data: any[]) => {
+            this.updateDisplayedColumns();
             this.ubicaciones = data;
-            console.log(this.ubicaciones);
     
             // Match ubicacion fields and attach aliases for both original and actual ubicaciones
             this.datos.forEach((element: any) => {
@@ -260,10 +253,6 @@ export class ActivoIndexComponent implements AfterViewInit  {
         });
     }
     
-    
-    
-    
-    
     checks(){
       this.isLoadingResults = true;  // Start loading
 
@@ -290,20 +279,18 @@ export class ActivoIndexComponent implements AfterViewInit  {
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (data: any) => {
-            console.log(data);
             this.datos = data;
+
             this.fetchObservaciones();
             this.displayMessage = true;
-            // data.for(element => {
-              
-            // });
-           
             this.dataSource.data = this.datos;
             this.totalItems = data.length;
             this.updatePageSizeOptions();
+
             this.isLoadingResults = false; // Stop loading
             clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
             this.displayMessage = false;
+
             this.loadUbicaciones();
           },
           error: (error) => {
@@ -316,8 +303,6 @@ export class ActivoIndexComponent implements AfterViewInit  {
             });
           }
         });
-        
-        
     }
 
     updatePageSizeOptions() {
@@ -325,12 +310,11 @@ export class ActivoIndexComponent implements AfterViewInit  {
     }
 
     applyFilter(event: Event, flag: string) {
-      if(flag){
-        this.filterValue=flag;
-      }else{
+      if (flag) {
+        this.filterValue = flag;
+      } else { 
         this.filterValue = (event.target as HTMLInputElement).value;
       }
-
       
       this.dataSource.filter = this.filterValue.trim().toLowerCase();
       
@@ -340,14 +324,8 @@ export class ActivoIndexComponent implements AfterViewInit  {
     }
 
     onMiddleClick(event: MouseEvent, no_identificacion: string): void {
-      console.log(event)
       if (event.button === 1) {  // Middle-click detection
-        console.log(event)
         event.preventDefault();  // Prevent default behavior (scrolling)
-        
-        // Open the page in a new tab
-        // this.router.navigate(['activos/',no_identificacion, '_blank']);
-        // this.router.navigate(['activos', no_identificacion]);
         window.open(`/activos/${no_identificacion}`, '_blank');
       }
     }
@@ -355,8 +333,4 @@ export class ActivoIndexComponent implements AfterViewInit  {
     verDetalles(id: string): void {
       this.router.navigate(['activos/', id]);
     }
-
-    
-
-  
 }

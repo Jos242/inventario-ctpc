@@ -81,8 +81,9 @@ class UserView(APIView):
         return Response(serializer.errors,
                          status = status.HTTP_200_OK)    
 
-    def patch(self, request:Request, pk:int) -> Response:
-        serializer:UpdateUserSerializer = UpdateUserSerializer(data = request.data)
+    def patch(self, request: Request, pk: int) -> Response:
+        print(request.data)
+        serializer: UpdateUserSerializer = UpdateUserSerializer(data = request.data)
         
         if not serializer.is_valid():
             return Response(serializer.errors, 
@@ -94,7 +95,7 @@ class UserView(APIView):
         except User.DoesNotExist:
             return Response({"error": "user does not exist"},
                             status = status.HTTP_400_BAD_REQUEST)
-
+        
         user = serializer.update(instance = user,
                                  validated_data = serializer.validated_data)
         

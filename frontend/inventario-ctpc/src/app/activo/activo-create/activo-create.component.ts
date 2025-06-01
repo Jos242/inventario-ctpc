@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
 import {MatPaginator, MatPaginatorModule} from '@angular/material/paginator';
 import {MatSort, MatSortModule} from '@angular/material/sort';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
@@ -10,9 +10,9 @@ import {MatGridListModule} from '@angular/material/grid-list';
 import {MatCardModule} from '@angular/material/card';
 import {MatButtonModule} from '@angular/material/button';
 import {MatSelectModule} from '@angular/material/select';
-import { FormGroup, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { Subject, takeUntil } from 'rxjs';
+import { FormGroup, ReactiveFormsModule, FormBuilder, Validators, FormControl } from '@angular/forms';
+import { AsyncPipe, CommonModule } from '@angular/common';
+import { map, Observable, startWith, Subject, takeUntil } from 'rxjs';
 import { GenericService } from '../../share/generic.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -23,12 +23,13 @@ import { MatDialog } from '@angular/material/dialog';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { ActivoSerieDialogComponent } from '../activo-serie-dialog/activo-serie-dialog.component';
+import { MatAutocompleteModule, MatAutocompleteTrigger } from '@angular/material/autocomplete';
 
 @Component({
   selector: 'app-activo-create',
   standalone: true,
   imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatRippleModule, MatTabsModule, MatGridListModule, MatCardModule,
-    ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,MatCheckboxModule
+    ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,MatCheckboxModule, MatAutocompleteModule
   ],
   templateUrl: './activo-create.component.html',
   styleUrl: './activo-create.component.scss'
@@ -37,18 +38,18 @@ export class ActivoCreateComponent {
   myForm: FormGroup;
   destroy$:Subject<boolean>=new Subject<boolean>();
 
-  ubicaciones: any;
-  modosAdquisicion: any;
+  ubicaciones: any[] = [];
+  filteredUbicaciones: any[] = [];
+  modosAdquisiciones: any[] = [];
+  filteredModos: any[] = [];
   isLoadingResults: boolean = false;
-
-  cantidadActivosIguales: number = 1; // Add this property
 
   estados: { id: string, descripcion: string }[] = [
     { id: 'BUENO', descripcion: 'Bueno' },
     { id: 'MALO', descripcion: 'Malo' },
     { id: 'REGULAR', descripcion: 'Regular' }
   ];
-
+  
   constructor(private gService:GenericService,
     private router:Router,
     private route:ActivatedRoute,
@@ -58,13 +59,9 @@ export class ActivoCreateComponent {
     private authService: AuthService,
     private dialog: MatDialog // Add this
   ) {
-
     this.loadUbicaciones();
     this.loadModosAdquisicion();
-
   }
-
-  
 
   ngOnInit(){
     this.initForm();
@@ -82,18 +79,10 @@ export class ActivoCreateComponent {
       estado:['', Validators.required ],
       precio: ['', Validators.pattern(/^\d+(\.\d{1,2})?$/)],
       conectividad: [false],
-      seguridad: [false, ],
+      seguridad: [false],
       cantidadActivosIguales: [1, [Validators.min(1), Validators.required]],
       
     });
-  }
-
-  checkCantidadActivosIguales() {
-    // if (this.cantidadActivosIguales > 1) {
-    //   this.myForm.get('serie').disable();
-    // } else {
-    //   this.myForm.get('serie').enable();
-    // }
   }
 
   loadUbicaciones(): void {
@@ -114,8 +103,8 @@ export class ActivoCreateComponent {
       .subscribe({
         next: (data: any[]) => {
           this.ubicaciones = data;
-          this.ubicaciones.sort();
-          console.log(this.ubicaciones)
+          this.filteredUbicaciones = data;
+          
           this.isLoadingResults = false;
           clearTimeout(loadingTimeout);
         },
@@ -148,8 +137,9 @@ export class ActivoCreateComponent {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data: any[]) => {
-          this.modosAdquisicion = data;
-          console.log(this.modosAdquisicion)
+          this.modosAdquisiciones = data;
+          this.filteredModos = data;
+          
           this.isLoadingResults = false;
           clearTimeout(loadingTimeout);
         },
@@ -167,7 +157,6 @@ export class ActivoCreateComponent {
 
   formatearPrecio(): void {
     const precio = this.myForm.get('precio');
-
     const digitos = precio.value.replace(/\D/g, '');
 
     precio.setValue(digitos);
@@ -175,98 +164,123 @@ export class ActivoCreateComponent {
 
   async onSubmit() {
     if (this.myForm.valid) {
-
-      const formData = new FormData();
-
       let datas: { [key: string]: any } = {
         descripcion: this.myForm.value.descripcion,
-        ubicacion_original: this.myForm.value.ubicacion_original,
-        modo_adquisicion: this.myForm.value.modo_adquisicion,
+        ubicacion_original: this.myForm.value.ubicacion_original.id,
+        modo_adquisicion: this.myForm.value.modo_adquisicion.id,
         estado: this.myForm.value.estado,
         precio: this.myForm.value.precio,
         conectividad: this.myForm.value.conectividad,
-        seguridad: this.myForm.value.seguridad,
-
-        
+        seguridad: this.myForm.value.seguridad
       };
 
-      if (this.myForm.value.marca !== "") {
-        datas = { ...datas, marca: this.myForm.value.marca };
+      if (this.myForm.value.marca?.trim()) {
+        datas['marca'] = this.myForm.value.marca;
       }
-      if(this.myForm.value.modelo!==""){
-        datas = { ...datas, modelo: this.myForm.value.modelo };
+      if (this.myForm.value.modelo?.trim()) {
+        datas['modelo'] = this.myForm.value.modelo;
       }
-
-
-      
-
-
-  
-      console.log("data a enviar: ");
-      console.log(datas);
-      console.log("-----------------------");
 
       const tieneSerie = this.myForm.value.hasNumeroSerie;
-      this.cantidadActivosIguales=this.myForm.value.cantidadActivosIguales;
-      let exitosos = 0;
+      const cantidadActivosIguales = this.myForm.value.cantidadActivosIguales;
 
-      for (let i = 0; i < this.cantidadActivosIguales; i++) {
-        if (tieneSerie) {
+      let dataList = Array.from({ length: cantidadActivosIguales }, () =>
+        JSON.parse(JSON.stringify(datas))
+      );
+      
+      if (tieneSerie) {
+        for (let i = 0; i < cantidadActivosIguales; i++) {
           const dialogRef = this.dialog.open(ActivoSerieDialogComponent, {
             width: '270px',
             height: '200px',
-            data: { index: i + 1, total: this.cantidadActivosIguales }
+            data: { index: i + 1, total: cantidadActivosIguales }
           });
   
           const result = await firstValueFrom(dialogRef.afterClosed());
           if (result) {
-            datas = { ...datas, serie: result.serie };
+            dataList[i].serie = result.serie;
           } else {
             Swal.fire({
               icon: 'info',
               title: 'Cancelado',
               text: 'Proceso cancelado por el usuario',
             });
+            dataList = null;
             return;
           }
         }
-  
-        try {
-          const data = await firstValueFrom(this.gService.create('agregar-activo/', datas));
-          console.log(`Activo ${i + 1} creado:`, data);
-          exitosos++;
-        } catch (error) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: `Hubo un error de servidor al crear el activo ${i + 1}, por favor intente otra vez o contacte a su administrador si el problema persiste.`,
-          });
-          return;
-        }
       }
-  
-      // TypeScript Code Change in onSubmit method
-        if (exitosos === this.cantidadActivosIguales) {
+      
+      try {
+        if ( dataList != null && dataList.length > 0) {
+          const data = await firstValueFrom(this.gService.create('agregar-multiples-activos/', dataList));
+          let text = `
+            <div>
+              Los siguientes activos se han creado correctamente:<br>
+              <div style="max-height: 200px; overflow-y: auto; margin-top: 12px;">
+                ${data.map(no => `${no}<br>`).join('')}
+              </div>
+            </div>
+          `;
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Éxito',
+            html: text,
+          });
           if (!this.myForm.value.mantener) {
             this.myForm.reset();
             this.initForm();
           }
-          this.cantidadActivosIguales = 1;
-          Swal.fire({
-            icon: 'success',
-            title: 'Éxito',
-            text: 'Se han creado los activos correctamente',
-          });
-        } else {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Parcialmente exitoso',
-            text: `Se han creado ${exitosos} del total de ${this.cantidadActivosIguales} activos correctamente. Por favor revise la tabla de activos y agregue los faltantes nuevamente. `,
-          });
         }
-      
-      console.log("completo el proceso");
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: `Hubo un error de servidor al crear el activo, por favor intente otra vez o contacte a su administrador si el problema persiste.`,
+        });
+        return;
+      }
+    }
+  }
 
+  filterUbicacion(value: string) {
+    this.filteredUbicaciones = this.ubicaciones.filter(u => u.nombre_oficial.toLowerCase().includes(value.toLowerCase()));
+  }
+  onEnterPressedUbicacion() {
+    if (this.filteredUbicaciones.length === 1) {
+      this.myForm.get('ubicacion_original')?.setValue(this.filteredUbicaciones[0]);
+    }
+  }
+  displayUbicacion(ubicacion: any): string {
+    return ubicacion?.nombre_oficial || '';
+  }
+  validateUbicacionInput() {
+    const value = this.myForm.get('ubicacion_original')?.value;
+  
+    if (!value || typeof value !== 'object' || !value.id) {
+      this.myForm.get('ubicacion_original')?.setValue(null);
+      this.filterUbicacion("");
+    }
+  }
+
+  filterModo(value: string) {
+    this.filteredModos = this.modosAdquisiciones.filter(u => u.descripcion.toLowerCase().includes(value.toLowerCase()));
+  }
+  onEnterPressedModo() {
+    if (this.filteredModos.length === 1) {
+      this.myForm.get('modo_adquisicion')?.setValue(this.filteredModos[0]);
+    }
+  }
+  displayModo(modo: any): string {
+    return modo?.descripcion || '';
+  }
+  validateModoInput() {
+    const value = this.myForm.get('modo_adquisicion')?.value;
+  
+    if (!value || typeof value !== 'object' || !value.id) {
+      this.myForm.get('modo_adquisicion')?.setValue(null);
+      this.filterModo("");
     }
   }
 }
