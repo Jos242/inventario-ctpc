@@ -191,9 +191,9 @@ class ObservacionesViewNoAuth(APIView):
             count = self.observaciones_do.mover_observaciones() 
 
             if count > 0:
-                return Response(f"Se moveieron {count} observaciones", status = status.HTTP_200_OK)
+                return Response(f"Se movieron {count} observaciones", status = status.HTTP_200_OK)
             else:
-                return Response(f"No se moveieron observaciones", status = status.HTTP_200_OK)
+                return Response(f"No se movieron observaciones", status = status.HTTP_200_OK)
 
 class ActivoObservacionView(APIView):
     parser_classes = (FormParser, MultiPartParser, JSONParser)

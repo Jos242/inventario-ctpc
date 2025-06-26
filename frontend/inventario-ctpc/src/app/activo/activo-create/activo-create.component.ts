@@ -14,7 +14,7 @@ import { FormGroup, ReactiveFormsModule, FormBuilder, Validators, FormControl } 
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { map, Observable, startWith, Subject, takeUntil } from 'rxjs';
 import { GenericService } from '../../share/generic.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AuthService } from '../../share/auth.service';
@@ -24,12 +24,13 @@ import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { ActivoSerieDialogComponent } from '../activo-serie-dialog/activo-serie-dialog.component';
 import { MatAutocompleteModule, MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-activo-create',
   standalone: true,
   imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatRippleModule, MatTabsModule, MatGridListModule, MatCardModule,
-    ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,MatCheckboxModule, MatAutocompleteModule
+    ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,MatCheckboxModule, MatAutocompleteModule, MatIconModule, RouterLink
   ],
   templateUrl: './activo-create.component.html',
   styleUrl: './activo-create.component.scss'

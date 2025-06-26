@@ -13,8 +13,8 @@
           <input matInput formControlName="serie">
         </mat-form-field>
         <div mat-dialog-actions>
-          <button mat-flat-button color="primary" type="submit" (click)="onSubmit()" [disabled]="!serieForm.valid">Guardar</button>
           <button mat-flat-button color="warning" class="cancelar" (click)="onCancel()">Cancelar</button>
+          <button mat-flat-button color="primary" type="submit" (click)="onSubmit()" [disabled]="!serieForm.valid">Guardar</button>
         </div>
       </form>
     </div>

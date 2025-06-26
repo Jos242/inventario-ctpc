@@ -41,7 +41,7 @@ export interface UsuarioData {
   styleUrl: './usuario-index.component.scss'
 })
 export class UsuarioIndexComponent {
-  displayedColumns: string[] = ['user', 'nombre_completo', 'departamento_descripcion', 'puesto_descripcion'];
+  displayedColumns: string[] = ['username', 'nombre_completo', 'departamento_descripcion', 'puesto_descripcion'];
   dataSource: MatTableDataSource<UsuarioData> = new MatTableDataSource<UsuarioData>();
   public isLoadingResults = false;
 

@@ -1,133 +1,142 @@
-<div class="titulo d-flex justify-content-center">
-    <h1>Editar Activo {{ activoNo }}</h1>
-</div>
-<div class="formEditar">
-    <mat-card>
-        <mat-card-content>
-            <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-8">   
-                            <mat-form-field appearance="outline" class="inputsForm">
-                                <mat-label>Descripcion</mat-label>
-                                <input matInput formControlName="descripcion" placeholder="Monitor">
-                                <mat-hint>Descripcion del activo</mat-hint>
-                            </mat-form-field> 
-                        </div>
-                        
-                        <div class="col-lg-2">
-                            <mat-checkbox id="conectividad" class="checks" formControlName="conectividad">Es Conectividad?</mat-checkbox>
-                        </div>
-                        <div class="col-lg-2">
-                              <mat-checkbox id="seguridad" class="checks" formControlName="seguridad">Es Seguridad?</mat-checkbox>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg">
-                            <mat-form-field appearance="outline" class="inputsForm custom-dropdown">
-                                <mat-label>Ubicacion</mat-label>
-                                <input #ubicacionInput matInput type="text" placeholder="Ubicación" formControlName="ubicacion_actual" 
-                                [matAutocomplete]="autoUbicacion" #autoTriggerUbicacion="matAutocompleteTrigger"
-                                (keyup)="filterUbicacion(ubicacionInput.value)" (blur)="onUbicacionBlur()" (keydown.enter)="onEnterPressedUbicacion(); ubicacionInput.blur(); autoTriggerUbicacion.closePanel()">
-                                <span class="arrow"></span>
-                                <mat-autocomplete #autoUbicacion="matAutocomplete" [displayWith]="displayUbicacion">
-                                    <mat-option *ngFor="let ubicacion of filteredUbicaciones" [value]="ubicacion">
-                                    {{ ubicacion.nombre_oficial }}
-                                    </mat-option>
-                                </mat-autocomplete>
-                                <mat-hint>Ubicacion fisica del activo en el colegio</mat-hint>
-                            </mat-form-field>
-                        </div>
-
-                        <div class="col-lg">
-                            <mat-form-field appearance="outline" class="inputsForm custom-dropdown">
-                                <mat-label>Modo de Adquisicion</mat-label>
-                                <input #modoInput matInput type="text" placeholder="Donacion" formControlName="modo_adquisicion" 
-                                [matAutocomplete]="autoModo" #autoTriggerModo="matAutocompleteTrigger"
-                                (keyup)="filterModo(modoInput.value)" (blur)="onModoBlur()" (keydown.enter)="onEnterPressedModo(); modoInput.blur(); autoTriggerModo.closePanel()">
-                                <span class="arrow"></span>
-                                <mat-autocomplete #autoModo="matAutocomplete" [displayWith]="displayModo">
-                                    <mat-option *ngFor="let modo of filteredModos" [value]="modo">
-                                    {{ modo.descripcion }}
-                                    </mat-option>
-                                </mat-autocomplete>
-                                <mat-hint>Manera mediante la cual se obtuvo el activo</mat-hint>
-                            </mat-form-field>
-                        </div>
-                        <div class="col-lg">
-                            <mat-form-field appearance="outline" class="inputsForm">
-                                <mat-label>Precio</mat-label>
-                                <input matInput formControlName="precio" placeholder="100000.99">
-                                <mat-hint>Precio en Colones del Producto, utilizando puntos para las decimas</mat-hint>
-                            </mat-form-field> 
-                        </div>
-                        
-                    </div>
-                    <div class="row">
-                        <div class="col-lg">
-                            <mat-form-field appearance="outline" class="inputsForm">
-                                <mat-label>Marca</mat-label>
-                                <input matInput formControlName="marca" placeholder="Dell">
-                                <mat-hint>Marca del activo</mat-hint>
-                            </mat-form-field>
-                        </div>
-                        <div class="col-lg">
-                            <mat-form-field appearance="outline" class="inputsForm">
-                                <mat-label>Modelo</mat-label>
-                                <input matInput formControlName="modelo" placeholder="29H2E1">
-                                <mat-hint>Modelo especifico del activo</mat-hint>
-                            </mat-form-field>
-                        </div>
-                        <div class="col-lg">
-                            <mat-form-field appearance="outline" class="inputsForm">
-                                <mat-label>Serie</mat-label>
-                                <input matInput formControlName="serie" placeholder="32647728384">
-                                <mat-hint>Numero de serie del activo</mat-hint>
-                            </mat-form-field>
-                        </div>
-
-                    </div>
-                    <div class="row">
-                        <div class="col-lg">
-                            <mat-form-field appearance="outline" class="inputsForm">
-                                <mat-label>Placa Impresa</mat-label>
-                                <mat-select formControlName="placa" placeholder="Si">
-                                    <mat-option *ngFor="let placa of placas" [value]="placa.id">{{ placa.descripcion }}</mat-option>
-                                    </mat-select>
-                                <mat-hint>El activo tiene su placa de inventario impresa y pegada?</mat-hint>
-                                
-                            </mat-form-field> 
-                        </div>
-                        <div class="col-lg">
-                            
+<div class="content-title-container">
+    <div class="titulo d-flex justify-content-center">
+        <h1>Editar Activo {{ activoNo }}</h1>
+    </div>
+    <div class="formEditar">
+        <mat-card>
+            <mat-card-content>
+                <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-8">   
                                 <mat-form-field appearance="outline" class="inputsForm">
-                                    <mat-label>Dado de Baja</mat-label>
-                                    <mat-select formControlName="baja" placeholder="NO DADO DE BAJA">
-                                        <mat-option *ngFor="let baja of bajas" [value]="baja.id">{{ baja.descripcion }}</mat-option>
-                                        </mat-select>
-                                    <mat-hint>Se ha dado de baja el activo?</mat-hint>
-
-                                    
-
+                                    <mat-label>Descripcion</mat-label>
+                                    <input matInput formControlName="descripcion" placeholder="Monitor">
+                                    <mat-hint>Descripcion del activo</mat-hint>
                                 </mat-form-field> 
-                           
+                            </div>
+                            
+                            <div class="col-lg-2">
+                                <mat-checkbox id="conectividad" class="checks" formControlName="conectividad">Es Conectividad?</mat-checkbox>
+                            </div>
+                            <div class="col-lg-2">
+                                <mat-checkbox id="seguridad" class="checks" formControlName="seguridad">Es Seguridad?</mat-checkbox>
+                            </div>
                         </div>
-                        <div class="col-lg">
-                            <mat-form-field appearance="outline" class="inputsForm">
-                                <mat-label>Estado</mat-label>
-                                <mat-select formControlName="estado" placeholder="BUENO">
-                                    <mat-option *ngFor="let estado of estados" [value]="estado.id">{{ estado.descripcion }}</mat-option>
-                                </mat-select>
-                                <mat-hint>Estado actual del activo</mat-hint>
-                            </mat-form-field>
-                        </div>
-                    </div>
+                        <div class="row">
+                            <div class="col-lg">
+                                <mat-form-field appearance="outline" class="inputsForm custom-dropdown">
+                                    <mat-label>Ubicacion</mat-label>
+                                    <input #ubicacionInput matInput type="text" placeholder="Ubicación" formControlName="ubicacion_actual" 
+                                    [matAutocomplete]="autoUbicacion" #autoTriggerUbicacion="matAutocompleteTrigger"
+                                    (keyup)="filterUbicacion(ubicacionInput.value)" (blur)="onUbicacionBlur()" (keydown.enter)="onEnterPressedUbicacion(); ubicacionInput.blur(); autoTriggerUbicacion.closePanel()">
+                                    <span class="arrow"></span>
+                                    <mat-autocomplete #autoUbicacion="matAutocomplete" [displayWith]="displayUbicacion">
+                                        <mat-option *ngFor="let ubicacion of filteredUbicaciones" [value]="ubicacion">
+                                        {{ ubicacion.nombre_oficial }}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                    <mat-hint>Ubicacion fisica del activo en el colegio</mat-hint>
+                                </mat-form-field>
+                            </div>
 
-                    <div class="row">
-                        <button mat-flat-button color="primary" type="submit" [disabled]="!myForm.valid">Actualizar Activo</button>
+                            <div class="col-lg">
+                                <mat-form-field appearance="outline" class="inputsForm custom-dropdown">
+                                    <mat-label>Modo de Adquisicion</mat-label>
+                                    <input #modoInput matInput type="text" placeholder="Donacion" formControlName="modo_adquisicion" 
+                                    [matAutocomplete]="autoModo" #autoTriggerModo="matAutocompleteTrigger"
+                                    (keyup)="filterModo(modoInput.value)" (blur)="onModoBlur()" (keydown.enter)="onEnterPressedModo(); modoInput.blur(); autoTriggerModo.closePanel()">
+                                    <span class="arrow"></span>
+                                    <mat-autocomplete #autoModo="matAutocomplete" [displayWith]="displayModo">
+                                        <mat-option *ngFor="let modo of filteredModos" [value]="modo">
+                                        {{ modo.descripcion }}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                    <mat-hint>Manera mediante la cual se obtuvo el activo</mat-hint>
+                                </mat-form-field>
+                            </div>
+                            <div class="col-lg">
+                                <mat-form-field appearance="outline" class="inputsForm">
+                                    <mat-label>Precio</mat-label>
+                                    <input matInput formControlName="precio" placeholder="100000.99">
+                                    <mat-hint>Precio en Colones del Producto, utilizando puntos para las decimas</mat-hint>
+                                </mat-form-field> 
+                            </div>
+                            
+                        </div>
+                        <div class="row">
+                            <div class="col-lg">
+                                <mat-form-field appearance="outline" class="inputsForm">
+                                    <mat-label>Marca</mat-label>
+                                    <input matInput formControlName="marca" placeholder="Dell">
+                                    <mat-hint>Marca del activo</mat-hint>
+                                </mat-form-field>
+                            </div>
+                            <div class="col-lg">
+                                <mat-form-field appearance="outline" class="inputsForm">
+                                    <mat-label>Modelo</mat-label>
+                                    <input matInput formControlName="modelo" placeholder="29H2E1">
+                                    <mat-hint>Modelo especifico del activo</mat-hint>
+                                </mat-form-field>
+                            </div>
+                            <div class="col-lg">
+                                <mat-form-field appearance="outline" class="inputsForm">
+                                    <mat-label>Serie</mat-label>
+                                    <input matInput formControlName="serie" placeholder="32647728384">
+                                    <mat-hint>Numero de serie del activo</mat-hint>
+                                </mat-form-field>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-lg">
+                                <mat-form-field appearance="outline" class="inputsForm">
+                                    <mat-label>Placa Impresa</mat-label>
+                                    <mat-select formControlName="placa" placeholder="Si">
+                                        <mat-option *ngFor="let placa of placas" [value]="placa.id">{{ placa.descripcion }}</mat-option>
+                                        </mat-select>
+                                    <mat-hint>El activo tiene su placa de inventario impresa y pegada?</mat-hint>
+                                    
+                                </mat-form-field> 
+                            </div>
+                            <div class="col-lg">
+                                
+                                    <mat-form-field appearance="outline" class="inputsForm">
+                                        <mat-label>Dado de Baja</mat-label>
+                                        <mat-select formControlName="baja" placeholder="NO DADO DE BAJA">
+                                            <mat-option *ngFor="let baja of bajas" [value]="baja.id">{{ baja.descripcion }}</mat-option>
+                                            </mat-select>
+                                        <mat-hint>Se ha dado de baja el activo?</mat-hint>
+
+                                        
+
+                                    </mat-form-field> 
+                            
+                            </div>
+                            <div class="col-lg">
+                                <mat-form-field appearance="outline" class="inputsForm">
+                                    <mat-label>Estado</mat-label>
+                                    <mat-select formControlName="estado" placeholder="BUENO">
+                                        <mat-option *ngFor="let estado of estados" [value]="estado.id">{{ estado.descripcion }}</mat-option>
+                                    </mat-select>
+                                    <mat-hint>Estado actual del activo</mat-hint>
+                                </mat-form-field>
+                            </div>
+                        </div>
+<br>
+                        <div class="boton-container">
+                            <a mat-flat-button color="primary" type="button" [routerLink]="'/activos/' + activoId">
+                                <mat-icon>reply</mat-icon>
+                                Retornar
+                            </a>  
+                            <button mat-flat-button color="primary" type="submit" [disabled]="!myForm.valid">
+                                <mat-icon>edit</mat-icon>
+                                Actualizar Activo
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </form>
-        </mat-card-content>
-    </mat-card>
+                </form>
+            </mat-card-content>
+        </mat-card>
+    </div>
 </div>

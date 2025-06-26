@@ -1,57 +1,60 @@
-<div class="titulo d-flex justify-content-center">
-    <h1>Editar Ubicación</h1>
-</div>
-<div class="formAgregar">
-    <mat-card>
-        <mat-card-content>
-            <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">
-                <div class="container">
-                    <div class="row">
-                        
-                        <div class="col-lg-4">
-                            <div class="col-lg">    
-                                <mat-form-field appearance="outline" class="inputsForm">
-                                    <mat-label>Nombre oficial</mat-label>
-                                    <input matInput formControlName="nombreOficial" >
-                                    <mat-hint>El nombre oficial de la ubicación</mat-hint>
-                                </mat-form-field>
+<div class="content-title-container">
+    <div class="titulo d-flex justify-content-center">
+        <h1>Editar Ubicación</h1>
+    </div>
+    <div class="formAgregar">
+        <mat-card>
+            <mat-card-content>
+                <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">
+                    <div class="container">
+                        <div class="row">
+                            
+                            <div class="col-lg-4">
+                                <div class="col-lg">    
+                                    <mat-form-field appearance="outline" class="inputsForm">
+                                        <mat-label>Nombre oficial</mat-label>
+                                        <input matInput formControlName="nombreOficial" >
+                                        <mat-hint>El nombre oficial de la ubicación</mat-hint>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="col-lg">    
+                                    <mat-form-field appearance="outline" class="inputsForm">
+                                        <mat-label>Alias</mat-label>
+                                        <input matInput formControlName="alias" >
+                                        <mat-hint>El nombre por el cual se le conoce a la ubicación</mat-hint>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="col-lg">    
+                                    <mat-form-field appearance="outline" class="inputsForm">
+                                        <mat-label>Funcionario</mat-label>
+                                        <mat-select formControlName="funcionarioId" placeholder="Seleccione una funcionario">
+                                            <mat-option *ngFor="let funcionario of funcionarios" [value]="funcionario.id">
+                                                {{ funcionario.nombre_completo }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-hint>Funcionario encargado de la ubicación</mat-hint>
+                                    </mat-form-field>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-lg-4">
-                            <div class="col-lg">    
-                                <mat-form-field appearance="outline" class="inputsForm">
-                                    <mat-label>Alias</mat-label>
-                                    <input matInput formControlName="alias" >
-                                    <mat-hint>El nombre por el cual se le conoce a la ubicación</mat-hint>
-                                </mat-form-field>
-                            </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="col-lg">    
-                                <mat-form-field appearance="outline" class="inputsForm">
-                                    <mat-label>Funcionario</mat-label>
-                                    <mat-select formControlName="funcionarioId" placeholder="Seleccione una funcionario">
-                                        <mat-option *ngFor="let funcionario of funcionarios" [value]="funcionario.id">
-                                            {{ funcionario.nombre_completo }}
-                                        </mat-option>
-                                    </mat-select>
-                                    <mat-hint>Funcionario encargado de la ubicación</mat-hint>
-                                </mat-form-field>
-                            </div>
+
+                        <div class="boton-container">
+                            <a mat-flat-button color="primary" type="button" [routerLink]="'/ubicaciones/' + ubicacionId">
+                                <mat-icon>reply</mat-icon>
+                                Retornar
+                            </a>  
+                            <button mat-flat-button color="primary" type="submit" [disabled]="!myForm.valid">
+                                <mat-icon>edit</mat-icon>
+                                Editar ubicación
+                            </button>
                         </div>
                     </div>
-
-                    <div class="row d-flex justify-content-between">
-                        <div class="col-auto">
-                            <button mat-flat-button color="primary" type="submit" [disabled]="!myForm.valid">Editar ubicación</button>
-                        </div>
-                        <div class="col-auto">
-                            <button mat-flat-button color="primary" type="button" [routerLink]="'/ubicaciones/' + ubicacionId">Retornar</button>    
-                        </div>
-                    </div>
-
-                </div>
-            </form>
-        </mat-card-content>
-    </mat-card>
+                </form>
+            </mat-card-content>
+        </mat-card>
+    </div>
 </div>

@@ -136,7 +136,7 @@ class UpdateUserSerializer(serializers.Serializer):
         new_username = validated_data.get("username", instance.username)
 
         if new_username != instance.username and User.objects.filter(username = new_username).exists():
-            raise ValidationError({"error": "username already in use by another user"})
+            raise ValidationError({"error": "El usuario ya es utilizado por otro Usuario"})
 
         instance.username = new_username 
 
@@ -144,19 +144,15 @@ class UpdateUserSerializer(serializers.Serializer):
             instance.set_password(check_for_password)
 
         
-        
         update_funcionario = self.check_keys(dictionary = validated_data, required_keys = funcionarios_keys)
 
         if update_funcionario: 
             try: 
-                funcionario: Funcionarios = Funcionarios.objects.get(id = instance.id)
+                funcionario: Funcionarios = Funcionarios.objects.get(id = instance.funcionario_id)
                 new_user_id = validated_data.get("user_id", funcionario.user_id)
 
                 if new_user_id != funcionario.user_id and Funcionarios.objects.filter(user_id = new_user_id).exists():
                     raise ValidationError({"error": "user_id already in use by another funcionario"})
-                print(funcionario.departamento)
-                print(funcionario.departamento_id)
-                print(validated_data)
                 funcionario.user_id         = new_user_id
                 funcionario.nombre_completo = validated_data.get("nombre_completo", funcionario.nombre_completo) 
                 funcionario.departamento    = validated_data.get("departamento", funcionario.departamento)
@@ -164,7 +160,8 @@ class UpdateUserSerializer(serializers.Serializer):
                 funcionario.save() 
             except Funcionarios.DoesNotExist:
                 raise ValidationError({"error": "funcionario does not exist, delete extra fields"})
-
+            
+        print(vars(instance))
         instance.save()  
         return instance
 
@@ -423,13 +420,15 @@ class DynamicReadActivosSerializer(serializers.ModelSerializer):
     def get_ubicacion_original(self, obj):
         return {
             'id': getattr(obj, 'ubicacion_original_id_val', None),
-            'nombre_oficial': getattr(obj, 'ubicacion_original_nombre_oficial', '')
+            'nombre_oficial': getattr(obj, 'ubicacion_original_nombre_oficial', ''),
+            'alias': getattr(obj, 'ubicacion_original_alias', '')
         }
 
     def get_ubicacion_actual(self, obj):
         return {
             'id': getattr(obj, 'ubicacion_actual_id_val', None),
-            'nombre_oficial': getattr(obj, 'ubicacion_actual_nombre_oficial', '')
+            'nombre_oficial': getattr(obj, 'ubicacion_actual_nombre_oficial', ''),
+            'alias': getattr(obj, 'ubicacion_actual_alias', '')
         }
 
     def get_modo_adquisicion(self, obj):

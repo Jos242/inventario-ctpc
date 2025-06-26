@@ -1,4 +1,4 @@
-<div>
+<div class="content-container">
     <mat-card>
         <mat-card-content>
                 <div *ngIf="datos">
@@ -6,23 +6,32 @@
                     <div class="row">
                         <div class="col-sm-6">
                             <h2>Detalles Generales</h2>
-                            <p><strong>Nombre oficial:</strong> {{ datos.nombre_oficial }}</p>
-                            <p><strong>Alias:</strong> {{ datos.alias }}</p>
-                            <p><strong>Funcionario:</strong> {{ datos.funcionario_nombre }}</p>
+                            <p><strong>Nombre oficial:</strong> {{ datos.nombre_oficial || 'N/A' }}</p>
+                            <p><strong>Alias:</strong> {{ datos.alias || 'N/A' }}</p>
+                            <p><strong>Funcionario:</strong> {{ datos.funcionario_nombre || 'N/A' }}</p>
                         </div>
                         <div class="col-sm-6">
                             <h2>Acciones</h2>
                             <p>
-                                <a mat-raised-button color="primary" (click)="onEdit()">Editar Ubicacion</a>  
+                                <a mat-raised-button color="primary" (click)="onEdit()">
+                                    <mat-icon>edit</mat-icon>
+                                    Editar Ubicación
+                                </a>   
                             </p>  
                             <p>
-                                <button mat-raised-button style="background-color: red; color: white;" color="primary" (click)="borrarUbicacion()">Borrar ubicación</button>  
+                                <button mat-raised-button style="background-color: red; color: white;" color="primary" (click)="borrarUbicacion()">
+                                    <mat-icon>delete</mat-icon>
+                                    Borrar Ubicación
+                                </button>   
                             </p>
                             
                                              
                         </div>
                     </div>    
-                    <button mat-flat-button color="primary" routerLink="/ubicaciones">Retornar</button>            
+                    <button mat-flat-button color="primary" routerLink="/ubicaciones">
+                        <mat-icon>reply</mat-icon>
+                        Retornar
+                    </button>            
                 </div>
         </mat-card-content>
     </mat-card>

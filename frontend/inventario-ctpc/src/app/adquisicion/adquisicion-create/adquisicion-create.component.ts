@@ -21,12 +21,13 @@ import { AuthService } from '../../share/auth.service';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
 import Swal from 'sweetalert2';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-adquisicion-create',
   standalone: true,
   imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatRippleModule, MatTabsModule, MatGridListModule, MatCardModule, RouterLink,
-    ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,MatCheckboxModule
+    ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,MatCheckboxModule, MatIconModule
   ],
   templateUrl: './adquisicion-create.component.html',
   styleUrl: './adquisicion-create.component.scss'

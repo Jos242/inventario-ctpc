@@ -1,5 +1,6 @@
 import os
 from sgica.settings          import MEDIA_ROOT
+from pathlib import Path
 
 def count_files_in_directory(directory):
     count = 1
@@ -14,28 +15,23 @@ def handle_file_directories(doc_type:str | None = None,
         it returns the path for the specified product
     """
     if doc_type is None:
-        absolute_path:str = f"{MEDIA_ROOT}\\uploads\\actas\\"
-        relative_path:str = f"uploads\\actas\\"
+        absolute_path = Path(MEDIA_ROOT) / "uploads" / "actas"
+        relative_path = Path("uploads") / "actas"
 
     if doc_type == "ubicacion_img":
-        absolute_path:str = f"{MEDIA_ROOT}\\uploads\\ubicaciones\\{folder_name}\\"
-        relative_path:str = f"uploads\\ubicaciones\\{folder_name}\\"
- 
-    if os.path.exists(absolute_path):
-        return [relative_path, absolute_path]
+        absolute_path = Path(MEDIA_ROOT) / "uploads" / "ubicaciones" / folder_name
+        relative_path = Path("uploads") / "ubicaciones" / folder_name
 
-    os.makedirs(absolute_path)
-    return [relative_path, absolute_path]
+    if absolute_path.exists():
+        return [str(relative_path), str(absolute_path)]
+
+    absolute_path.mkdir(parents = True, exist_ok = True)
+    return [str(relative_path), str(absolute_path)]
 
 
 def handle_uploaded_file(files: list,
                          doc_type:str | None = None,
                          **kwargs) -> str:
-    """
-        saves the file following this structure:
-        uploads\\{model pk}\\{file_name.ext}
-    """
-
     nombre_oficial:str = kwargs.get("nombre_oficial", "")
     nombre_oficial = nombre_oficial.replace(" ", "_") if nombre_oficial != "" else ""
        
@@ -70,13 +66,18 @@ def handle_uploaded_file(files: list,
     return relative_path
 
 def store_acta(file, file_name: str):
-    relative_path = os.path.join(f"media\\uploads\\actas\\", file_name)
-    path_to_write = os.path.join(f"{MEDIA_ROOT}\\uploads\\actas\\", file_name) 
+    # Build paths
+    absolute_dir = Path(MEDIA_ROOT) / "uploads" / "actas"
+    absolute_dir.mkdir(parents = True, exist_ok = True)  # Ensure directory exists
 
-    with open(path_to_write, 'wb') as destination: 
+    path_to_write = absolute_dir / file_name
+    relative_path = Path("media") / "uploads" / "actas" / file_name
+
+    # Write the file
+    with open(path_to_write, 'wb') as destination:
         destination.write(file.read())
 
-    return relative_path
+    return str(relative_path)
 
 
 

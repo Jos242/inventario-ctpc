@@ -1,13 +1,22 @@
-.example-table-container {
-  position: relative;
-  // min-height: 200px;
-  // max-height: 400px;
-  overflow: auto;
+mat-card{
+  margin-left: 20px;
 }
 
-mat-card{
-    margin: 0 auto;
-    margin-top: 25px;
-    box-shadow: none;
-    width: 90%;
+.info-container {
+  display: flex;
+  justify-content: stretch;
+  gap: 75px;
+}
+
+h3 strong {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  color: #673ab7;
+}
+
+@media (max-width: 900px) {
+  .info-container{
+    flex-wrap: wrap;
+  }
 }

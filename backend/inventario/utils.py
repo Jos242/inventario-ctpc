@@ -317,6 +317,9 @@ class ActivosActions():
         RELATED_FIELDS = ["ubicacion_original", "ubicacion_actual", "modo_adquisicion"]
         
         activos = Activos.objects.select_related(*RELATED_FIELDS).annotate(
+            ubicacion_original_alias = F('ubicacion_original__alias'),
+            ubicacion_actual_alias = F('ubicacion_actual__alias'),
+            
             ubicacion_original_nombre_oficial = F('ubicacion_original__nombre_oficial'),
             ubicacion_actual_nombre_oficial = F('ubicacion_actual__nombre_oficial'),
             modo_adquisicion_desc = F('modo_adquisicion__descripcion'),
@@ -686,11 +689,11 @@ class ObservacionesActions():
     def mover_observaciones(self):
         activo_observaciones = []
 
-        if (not ActivoObservacion.objects.exists() and has_field(Observaciones, 'activo_id')):
+        if (not ActivoObservacion.objects.exists() and has_field(Observaciones, 'activo')):
             try:
                 with transaction.atomic():
-                    for observacion in Observaciones.objects.only('id', 'activo_id'):
-                        activo = getattr(observacion, 'activo_id', None)
+                    for observacion in Observaciones.objects.only('id', 'activo'):
+                        activo = getattr(observacion, 'activo', None)
                         if activo is not None:
                             activo_observaciones.append(ActivoObservacion(
                                 observacion_id = observacion.id,

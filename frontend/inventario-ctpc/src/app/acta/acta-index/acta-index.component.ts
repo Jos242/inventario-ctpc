@@ -3,11 +3,12 @@ import { RouterLink } from '@angular/router';
 import {MatButtonModule} from '@angular/material/button';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatCardModule} from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-acta-index',
   standalone: true,
-  imports: [RouterLink, MatCardModule, MatDividerModule, MatButtonModule,],
+  imports: [RouterLink, MatCardModule, MatDividerModule, MatButtonModule, MatIconModule],
   templateUrl: './acta-index.component.html',
   styleUrl: './acta-index.component.scss'
 })

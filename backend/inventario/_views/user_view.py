@@ -1,7 +1,7 @@
 # using this path to search for modules
 # >>> ~/Desktop/projects/inventario-ctpc/backend/ 
 
-from inventario.models                       import User
+from inventario.models                       import User, Funcionarios
 from inventario.serializers                  import UpdateUserSerializer, UserSerializer, FuncionariosSerializer
 from rest_framework.response                 import Response
 from rest_framework                          import status
@@ -82,7 +82,6 @@ class UserView(APIView):
                          status = status.HTTP_200_OK)    
 
     def patch(self, request: Request, pk: int) -> Response:
-        print(request.data)
         serializer: UpdateUserSerializer = UpdateUserSerializer(data = request.data)
         
         if not serializer.is_valid():
@@ -90,22 +89,25 @@ class UserView(APIView):
                             status = status.HTTP_400_BAD_REQUEST)
 
         try:
-            user = User.objects.get(id = pk)
+            funcionario = Funcionarios.objects.get(id = pk)
+            user = User.objects.get(id = funcionario.user_id)
 
         except User.DoesNotExist:
             return Response({"error": "user does not exist"},
                             status = status.HTTP_400_BAD_REQUEST)
         
+        user.funcionario_id = pk
         user = serializer.update(instance = user,
                                  validated_data = serializer.validated_data)
         
         return Response({"success": "user was updated"},
                          status = status.HTTP_200_OK ) 
         
-    def delete(self, request:Request, pk:int) -> Response:
+    def delete(self, request:Request, pk: int) -> Response:
         
         try: 
-            user = User.objects.get(id = pk)
+            funcionario = Funcionarios.objects.get(id = pk)
+            user = User.objects.get(id = funcionario.user_id)
             user.delete()
         
         except User.DoesNotExist:

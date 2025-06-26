@@ -35,7 +35,7 @@ export interface RevisionData {
   standalone: true,
   imports: [
     MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule, FormsModule, MatButtonModule, MatIconModule,
-    CommonModule,
+    CommonModule, RouterLink,
     MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, FormsModule, ReactiveFormsModule
   ],
   templateUrl: './cierre-detail.component.html',

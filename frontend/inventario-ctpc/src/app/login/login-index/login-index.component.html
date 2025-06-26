@@ -3,7 +3,7 @@
         <h1>Sistema de Invetarios y Gestion de Activos</h1>
     </div>
     @if (isLoadingResults) {
-        <div class="example-loading-shade">
+        <div class="loading-shade">
           @if (isLoadingResults) {
             <mat-spinner></mat-spinner>
           }
@@ -25,12 +25,14 @@
             
                 <div class="container">
                     <div class="row">
-                        <mat-form-field appearance="outline" class="inputsForm">
+                        <mat-form-field class="inputsForm">
+                            <mat-icon matTextPrefix class="search-icon">person</mat-icon>
                             <mat-label>Nombre de Usuario</mat-label>
                             <input matInput formControlName="usuario" placeholder="Admin123">
                         </mat-form-field>
 
-                        <mat-form-field appearance="outline" class="inputsForm">
+                        <mat-form-field class="inputsForm">
+                            <mat-icon matTextPrefix class="search-icon">lock</mat-icon>
                             <mat-label>Contraseña</mat-label>
                             <input matInput formControlName="password" type="password" placeholder="********">
                         </mat-form-field>
@@ -38,7 +40,10 @@
                 </div>
         </mat-card-content>
         <mat-card-actions style="margin-left: 15px ;">
-          <button mat-raised-button color="primary" type="submit">Entrar</button>
+          <button mat-raised-button color="primary" type="submit">
+            <mat-icon>login</mat-icon>
+            Entrar
+        </button>
           <!-- <button mat-raised-button style="background-color: red; color: white;" (click)="limpiar()">Limpiar</button> -->
           
         </mat-card-actions>

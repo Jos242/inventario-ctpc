@@ -1,4 +1,8 @@
-<div class="outerDiv">
+<div class="content-container">
+  <a routerLink="/actas/excels" class="go-back back-absolute" matTooltip="Ir atras">
+    <mat-icon>arrow_back</mat-icon>
+  </a>
+
   <div class="row">
     <div class="col-sm-7">
       <mat-card appearance="outlined" style="margin-top: 15px;">
@@ -32,7 +36,7 @@
         <h1>Agregar Activos Individuales</h1>
         <div class="example-container mat-elevation-z8">
             @if (isLoadingResults) {
-              <div class="example-loading-shade">
+              <div class="loading-shade">
                 @if (isLoadingResults) {
                   <mat-spinner></mat-spinner>
                 }

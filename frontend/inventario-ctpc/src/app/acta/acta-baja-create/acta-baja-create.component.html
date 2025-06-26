@@ -1,6 +1,10 @@
 <div>
+  <a routerLink="/actas" class="go-back back-absolute" matTooltip="Ir atras">
+    <mat-icon>arrow_back</mat-icon>
+  </a>
+
   @if (isLoadingResults) {
-    <div class="example-loading-shade">
+    <div class="loading-shade">
         <mat-spinner></mat-spinner>
     </div>
   }   

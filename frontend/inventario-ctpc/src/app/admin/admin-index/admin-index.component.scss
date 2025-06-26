@@ -1,14 +1,22 @@
 .row{ 
     margin: 0 auto;
-    margin-top:50px ;
-    width: 80%;
+    margin-bottom: 50px;
 }
 
 mat-card{
-
     text-align: justify;
     min-height:200px;
     margin-bottom: 10px;
+}
+
+mat-card-title {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+
+    mat-icon {
+        margin-right: 10px;
+    }
 }
 
 button{

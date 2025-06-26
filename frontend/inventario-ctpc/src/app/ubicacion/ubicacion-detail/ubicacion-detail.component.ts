@@ -74,6 +74,7 @@ export class UbicacionDetailComponent {
         .pipe(takeUntil(this.destroy$))
         .subscribe((data:any)=>{
           this.datos = data;
+          console.log(data)
         });
     }
 

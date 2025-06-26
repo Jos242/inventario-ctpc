@@ -44,11 +44,17 @@
       </div>
       <br>
       <div class="row">
-        <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="myForm.invalid || selectedActivos.length == 0">Agregar Anotación</button>
+        <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="myForm.invalid || selectedActivos.length == 0">
+          <mat-icon>add_comment</mat-icon>
+          Agregar Anotación
+        </button>
       </div>
     </div>
   </form>
 </div>
 <div mat-dialog-actions align="end">
-  <button mat-flat-button color="primary" [mat-dialog-close]="false" style="margin-right: 16px;">Cerrar</button>
+  <button mat-flat-button color="primary" [mat-dialog-close]="false" style="margin-right: 16px;">
+    <mat-icon>close</mat-icon>
+    Cerrar
+  </button>
 </div>

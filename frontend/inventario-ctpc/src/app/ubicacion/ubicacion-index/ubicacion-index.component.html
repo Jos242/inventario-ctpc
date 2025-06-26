@@ -1,49 +1,59 @@
-<mat-form-field>
-    <mat-label>Buscar...</mat-label>
-    <input matInput (keyup)="applyFilter($event)" placeholder="Ej. AULA 01 (Lab. Institucional N°1)" #input>
-  </mat-form-field>
+<div class="content-container mat-elevation-z8">
   @if (isLoadingResults) {
-    <div class="example-loading-shade">
-      @if (isLoadingResults) {
+    <div class="loading-shade">
         <mat-spinner></mat-spinner>
-      }
     </div>
   }
 
-  <a routerLink="/ubicaciones/crear"  mat-raised-button color="primary">Crear Ubicación</a> 
+  <div class="boton-container">
+    <a routerLink="/admin" class="go-back" matTooltip="Ir atras">
+      <mat-icon>arrow_back</mat-icon>
+    </a>
+    <a routerLink="/ubicaciones/crear" mat-raised-button color="primary" class="boton-crear">
+      <mat-icon>add_home</mat-icon>
+      Crear Ubicación
+    </a> 
+  </div>
   
-  <div class="mat-elevation-z8">
-    <table mat-table [dataSource]="dataSource" matSort>
+  <mat-form-field class="buscar">
+    <mat-icon matTextPrefix class="search-icon">search</mat-icon>
+    <mat-label>Buscar...</mat-label>
+    <input matInput (keyup)="applyFilter($event)" placeholder="Ej. Monitor, Aula 01, 6105-1234" #input>
+  </mat-form-field>
 
-      <ng-container matColumnDef="nombre_oficial">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Nombre oficial </th>
-        <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre esta ubicación"> {{row.nombre_oficial}} </td>
-      </ng-container>
-  
-      <ng-container matColumnDef="alias">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Alias </th>
-        <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre esta ubicación"> {{row.alias}} </td>
-      </ng-container>
-  
-      <ng-container matColumnDef="funcionario_nombre">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Funcionario </th>
-        <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre esta ubicación"> {{row.funcionario_nombre || '-'}} </td>
-      </ng-container>
-  
+  <div class="">
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource" matSort>
+        <ng-container matColumnDef="nombre_oficial">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Nombre oficial </th>
+          <td mat-cell *matCellDef="let row"> {{row.nombre_oficial}} </td>
+        </ng-container>
+    
+        <ng-container matColumnDef="alias">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Alias </th>
+          <td mat-cell *matCellDef="let row"> {{row.alias}} </td>
+        </ng-container>
+    
+        <ng-container matColumnDef="funcionario_nombre">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Funcionario </th>
+          <td mat-cell *matCellDef="let row"> {{row.funcionario_nombre || '-'}} </td>
+        </ng-container>
+    
+        
       
-    
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="verDetalles(row.id)"></tr>
-    
-      <!-- Row shown when there is no matching data. -->
-      <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell" colspan="4">
-          <div>
-            No se han encontrado datos para "{{input.value}}"
-          </div>
-        </td>
-      </tr>
-    </table>
-  
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="verDetalles(row.id)" matTooltip="Presione para ver más información sobre esta ubicación"></tr>
+      
+        <!-- Row shown when there is no matching data. -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="4">
+            <div>
+              No se han encontrado datos para "{{input.value}}"
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
     <mat-paginator [pageSizeOptions]="pageSizeOptions"  showFirstLastButtons [pageSize]="10" aria-label="Seleccione pagina de ubicaciones" ></mat-paginator>
   </div>
+</div>

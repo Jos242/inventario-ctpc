@@ -38,17 +38,20 @@ interface ExampleFlatNode extends doc {
 @Component({
   selector: 'app-acta-listado',
   standalone: true,
-  imports: [MatTreeModule, MatButtonModule, MatIconModule, CommonModule, MatCardModule],
+  imports: [MatTreeModule, MatButtonModule, MatIconModule, CommonModule, MatCardModule, RouterLink],
   templateUrl: './acta-listado.component.html',
   styleUrl: './acta-listado.component.scss'
 })
 export class ActaListadoComponent {
 
   public isLoadingResults = false;
-  datos:any;
-  destroy$:Subject<boolean>=new Subject<boolean>();
+  datos: any;
+  destroy$: Subject<boolean>=new Subject<boolean>();
 
   selectedDocument: any = null;
+
+  lastTraslado: any;
+  lastBaja: any;
 
   private _transformer = (node: DocumentNode, level: number) => ({
     ...node,
@@ -99,7 +102,17 @@ export class ActaListadoComponent {
     .subscribe({
       next: (data: any) => {
         this.datos = data;
-        console.log(this.datos)
+
+        const bajas = data.filter(doc =>
+          doc.titulo?.toLowerCase().includes('baja')
+        );
+        const traslados = data.filter(doc =>
+          doc.titulo?.toLowerCase().includes('traslado')
+        );
+
+        this.lastBaja = this.getItemWithBiggestId(bajas);
+        this.lastTraslado = this.getItemWithBiggestId(traslados);
+
         this.isLoadingResults = false;
         clearTimeout(loadingTimeout);
         this.processData();
@@ -114,6 +127,11 @@ export class ActaListadoComponent {
         });
       }
     });
+  }
+
+  getItemWithBiggestId(data: any[]): any | null {
+    if (!data || data.length === 0) return null;
+    return data.reduce((max, current) => current.id > max.id ? current : max);
   }
 
   processData() {
@@ -186,28 +204,85 @@ export class ActaListadoComponent {
     }, 15000);
 
     this.gService.patch(`update-doc-info/${this.selectedDocument.id}/`, updateData)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data: any) => {
-          this.selectedDocument.impreso = true;
-          console.log(data)
-          clearTimeout(loadingTimeout);
-          Swal.fire({
-            icon: 'success',
-            title: 'Éxito',
-            text: `Documento ${this.selectedDocument.titulo} marcado como impreso.`,
-          });
-        },
-        error: () => {
-          this.isLoadingResults = false;
-          clearTimeout(loadingTimeout);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Hubo un error al marcar el documento como impreso. Por favor intente nuevamente.',
-          });
-        }
-      });
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data: any) => {
+        this.selectedDocument.impreso = true;
+        
+        clearTimeout(loadingTimeout);
+        Swal.fire({
+          icon: 'success',
+          title: 'Éxito',
+          text: `Documento ${this.selectedDocument.titulo} marcado como impreso.`,
+        });
+      },
+      error: () => {
+        this.isLoadingResults = false;
+        clearTimeout(loadingTimeout);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un error al marcar el documento como impreso. Por favor intente nuevamente.',
+        });
+      }
+    });
   }
 
+  checkBorrar(doc: any) {
+    if (doc?.id != this.lastBaja?.id && doc?.id != this.lastTraslado?.id) {
+      if (doc.tipo == "EXCEL") {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      return false;
+    }
+  }
+
+  
+
+  async deleteDocumento(doc: any){
+    const confirmation = this.confirmationService.confirm();
+    const result = await firstValueFrom(confirmation);
+
+    if (!doc || !result) return;
+
+    this.isLoadingResults = true;
+
+    const loadingTimeout = setTimeout(() => {
+      if (this.isLoadingResults) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Hay problemas...',
+          text: 'La carga de datos está durando más de lo esperado... Por favor intente nuevamente',
+        });
+      }
+    }, 15000);
+
+    this.gService.delete(`delete-document/${doc.id}/`)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data: any) => {
+        clearTimeout(loadingTimeout);
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Éxito',
+          text: `Documento ${this.selectedDocument.titulo} marcado como impreso.`,
+        });
+
+        this.loadDocs();
+      },
+      error: () => {
+        this.isLoadingResults = false;
+        clearTimeout(loadingTimeout);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un error al marcar el documento como impreso. Por favor intente nuevamente.',
+        });
+      }
+    });
+  }
 }

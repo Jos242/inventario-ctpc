@@ -2,77 +2,44 @@ table {
   width: 100%;
 }
 
-.mat-mdc-form-field {
-  font-size: 14px;
-  width: 100%;
-}
-  
-  // td, th {
-  //   width: 25%;
-  // }
-
-  /* Structure */
-.example-container {
-  margin: 0 auto;
-  width: 90%;
-  margin-top: 50px;
-}
-
-.example-table-container {
-  position: relative;
-  // min-height: 200px;
-  // max-height: 400px;
-}
-
-.mat-mdc-row .mat-mdc-cell {
-  // border-bottom: 1px solid transparent;
-  // border-top: 1px solid transparent;
-  cursor: pointer;
-}
-
 .mat-mdc-row:hover .mat-mdc-cell {
   background-color: rgb(207, 207, 207);
 }
 
-.textFiltros{
+.textFiltros {
+  display: flex;
+  align-items: center;
+  justify-content: end;
   padding: 0px;
   margin: 0px;
   width: 100%;
-  text-align: right;
   padding-right: 5px;
+}
+
+.textFiltros mat-icon{
+  margin-right: 10px;
 }
 
 .accordion-button::after{
   color: black;
 }
 
-.table-container {
-  overflow: auto;
-}
-
 table {
   width: 100%;
 }
 
-.mensaje{
+.mensaje {
   color: red;
 }
 
-.confirmar{
+.confirmar {
   margin-left: 11px;
 }
 
-.row-red {
-  background-color: red;
-  color: white;
-}
-
-.row-orange {
-  background-color: orange;
-}
-
-.row-yellow {
-  background-color: rgb(255, 251, 0);
+.confirmar mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
 }
 
 @media (max-width: 1435px) {

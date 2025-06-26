@@ -10,11 +10,9 @@ export const adminGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: 
   const currentUser = authService.getUserType();  // Assuming getCurrentUser() returns the current user's details
 
   if (currentUser && currentUser == 'Administrador') {
-    console.log('permitio admin')
     return true;  // Allow access if the user is an admin
   } else {
     router.navigate(['/revision']);  // Redirect to unauthorized page
-    console.log('NO es admin')
     return false;
   }
 };

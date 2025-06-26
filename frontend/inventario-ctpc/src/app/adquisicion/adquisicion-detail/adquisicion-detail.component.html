@@ -1,4 +1,4 @@
-<div>
+<div class="content-container">
     <mat-card>
         <mat-card-content>
                 <div *ngIf="datos">
@@ -11,16 +11,25 @@
                         <div class="col-sm-6">
                             <h2>Acciones</h2>
                             <p>
-                                <a mat-raised-button color="primary" (click)="onEdit()">Editar Modo de Adquisición</a>  
+                                <a mat-raised-button color="primary" (click)="onEdit()">
+                                    <mat-icon>edit</mat-icon>
+                                    Editar Modo de Adquisición
+                                </a>  
                             </p>  
                             <p>
-                                <button mat-raised-button style="background-color: red; color: white;" color="primary" (click)="borrarAdquisicion()">Borrar adquisición</button>  
+                                <button mat-raised-button style="background-color: red; color: white;" color="primary" (click)="borrarAdquisicion()">
+                                    <mat-icon>delete</mat-icon>
+                                    Borrar adquisición
+                                </button>  
                             </p>
                             
                                              
                         </div>
                     </div>    
-                    <button mat-flat-button color="primary" routerLink="/adquisiciones">Retornar</button>            
+                    <button mat-flat-button color="primary" routerLink="/adquisiciones">
+                        <mat-icon>reply</mat-icon>
+                        Retornar
+                    </button>            
                 </div>
         </mat-card-content>
     </mat-card>

@@ -39,7 +39,7 @@ export interface ActivoData {
   estado: string;
   ubicacion_original: any;
   ubicacion_actual: any;
-  modo_adquisicionany: any;
+  modo_adquisicion: any;
   precio: string;
   conectividad: string;
   seguridad: string;
@@ -63,8 +63,6 @@ export interface ActivoData {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ActivoIndexComponent implements AfterViewInit  {
-  isSmallScreen = false;
-
   displayedColumns: string[] = ['id_registro', 'no_identificacion', 'descripcion', 'ubicacion'];
   dataSource: MatTableDataSource<ActivoData> = new MatTableDataSource<ActivoData>();
   public isLoadingResults = false;
@@ -77,7 +75,7 @@ export class ActivoIndexComponent implements AfterViewInit  {
 
   @ViewChild('input') input: ElementRef;
 
-  datos :any;
+  datos: any;
   destroy$: Subject<boolean>=new Subject<boolean>();
   baseUrl: string = environment.apiURL;
 
@@ -123,24 +121,33 @@ export class ActivoIndexComponent implements AfterViewInit  {
     if (Object.keys(cachedFilters).length) {
       this.filtros.patchValue(cachedFilters);
     }
-
-    this.checks(); 
+    //this.moverObservaciones()
+    this.loadActivos(); 
     this.updateDisplayedColumns();
   }
 
   ngOnInit(): void {
-    this.checkScreenSize();
-    
     this.filtros.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.displayMessage = true;
     });
-
-    //this.moverObservaciones();
   }
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+
+    this.dataSource.sortingDataAccessor = (item, property) => {
+      switch (property) {
+        case 'ubicacion_original':
+          return item.ubicacion_original?.nombre_oficial || '';
+        case 'ubicacion_actual':
+          return item.ubicacion_actual?.nombre_oficial || '';
+        case 'modo_adquisicion':
+          return item.modo_adquisicion?.descripcion || '';
+        default:
+          return item[property];
+      }
+    };
 
     if (localStorage.getItem('lastSearch')) {
       this.input.nativeElement.value = localStorage.getItem('lastSearch');
@@ -158,70 +165,33 @@ export class ActivoIndexComponent implements AfterViewInit  {
     }
     this.destroy$.complete();
   }
-
-  @HostListener('window:resize', [])
-  onResize() {
-    this.checkScreenSize();
-  }
-
-  private checkScreenSize(): void {
-    this.isSmallScreen = window.innerWidth < 1024;
+    
+  moverObservaciones(): void {
+    this.gService.list('mover-observaciones/')
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data: any[]) => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Éxito',
+          text: `${data}`,
+        });
+      },
+      error: (error) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: `${error}`,
+        });
+      }
+    });
   }
 
   updateDisplayedColumns(): void {
     this.displayedColumns = Object.keys(this.filtros.value).filter(key => this.filtros.value[key]);
   }
-
-  loadUbicaciones(): void {
-    this.isLoadingResults = true;
   
-    const loadingTimeout = setTimeout(() => {
-      if (this.isLoadingResults) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Hay problemas...',
-          text: 'La carga de datos esta durando mas de lo esperado... Por favor intente nuevamente',
-        });
-      }
-    }, 15000);
-  
-    this.gService.list('all-ubicaciones/')
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (data: any[]) => {
-        this.updateDisplayedColumns();
-        this.ubicaciones = data;
-
-        // Match ubicacion fields and attach aliases for both original and actual ubicaciones
-        this.datos.forEach((element: any) => {
-          const ubicacionOriginal = this.ubicaciones.find(
-            (ubi: any) => ubi.nombre_oficial === element.ubicacion_original.nombre_oficial
-          );
-          const ubicacionActual = this.ubicaciones.find(
-            (ubi: any) => ubi.nombre_oficial === element.ubicacion_actual.nombre_oficial
-          );
-
-          // Assign aliasOriginal and aliasActual if found
-          element.aliasOriginal = ubicacionOriginal?.alias || null;
-          element.aliasActual = ubicacionActual?.alias || null;
-        });
-
-        this.isLoadingResults = false;
-        clearTimeout(loadingTimeout);
-      },
-      error: (error) => {
-        this.isLoadingResults = false;
-        clearTimeout(loadingTimeout);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador.',
-        });
-      }
-    });
-  }
-  
-  checks(){
+  loadActivos(){
     this.isLoadingResults = true;  // Start loading
 
     const loadingTimeout = setTimeout(() => {
@@ -260,8 +230,6 @@ export class ActivoIndexComponent implements AfterViewInit  {
           this.dataSource.data = this.datos;
           this.totalItems = data.length;
           this.updatePageSizeOptions();
-
-          this.loadUbicaciones();
 
           this.isLoadingResults = false; // Stop loading
           clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
@@ -317,28 +285,56 @@ export class ActivoIndexComponent implements AfterViewInit  {
   }
 
   verDetalles(id: Number): void {
-    console.log(id)
     this.router.navigate(['activos/', id]);
   }
-    
-  moverObservaciones(): void {
-    this.gService.list('mover-observaciones/')
+}
+/*
+  loadUbicaciones(): void {
+    this.isLoadingResults = true;
+  
+    const loadingTimeout = setTimeout(() => {
+      if (this.isLoadingResults) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Hay problemas...',
+          text: 'La carga de datos esta durando mas de lo esperado... Por favor intente nuevamente',
+        });
+      }
+    }, 15000);
+  
+    this.gService.list('all-ubicaciones/')
     .pipe(takeUntil(this.destroy$))
     .subscribe({
       next: (data: any[]) => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Éxito',
-          text: `${data}`,
+        this.updateDisplayedColumns();
+        this.ubicaciones = data;
+
+        // Match ubicacion fields and attach aliases for both original and actual ubicaciones
+        this.datos.forEach((element: any) => {
+          const ubicacionOriginal = this.ubicaciones.find(
+            (ubi: any) => ubi.nombre_oficial === element.ubicacion_original.nombre_oficial
+          );
+          const ubicacionActual = this.ubicaciones.find(
+            (ubi: any) => ubi.nombre_oficial === element.ubicacion_actual.nombre_oficial
+          );
+
+          // Assign aliasOriginal and aliasActual if found
+          element.aliasOriginal = ubicacionOriginal?.alias || null;
+          element.aliasActual = ubicacionActual?.alias || null;
         });
+
+        this.isLoadingResults = false;
+        clearTimeout(loadingTimeout);
       },
       error: (error) => {
+        this.isLoadingResults = false;
+        clearTimeout(loadingTimeout);
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: `${error}`,
+          text: 'Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador.',
         });
       }
     });
   }
-}
+*/

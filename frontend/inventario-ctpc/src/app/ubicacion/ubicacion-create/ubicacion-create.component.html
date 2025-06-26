@@ -1,62 +1,71 @@
-<div class="titulo d-flex justify-content-center">
-    <h1>Crear Nueva Ubicación</h1>
-</div>
-<div class="formAgregar">
-    <mat-card>
-        <mat-card-content>
-            <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">
-                <div class="container">
-                    <div class="row">
-                        
-                        <div class="col-lg-4">
-                            <div class="col-lg">    
-                                <mat-form-field appearance="outline" class="inputsForm">
-                                    <mat-label>Nombre oficial</mat-label>
-                                    <input matInput formControlName="nombreOficial" >
-                                    <mat-hint>El nombre oficial de la ubicación</mat-hint>
-                                </mat-form-field>
+<div class="content-title-container">
+    <div class="titulo d-flex justify-content-center">
+        <h1>Crear Nueva Ubicación</h1>
+    </div>
+    <div class="formAgregar">
+        <mat-card>
+            <mat-card-content>
+                <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">
+                    <div class="container">
+                        <div class="row">
+                            
+                            <div class="col-lg-4">
+                                <div class="col-lg">    
+                                    <mat-form-field appearance="outline" class="inputsForm">
+                                        <mat-label>Nombre oficial</mat-label>
+                                        <input matInput formControlName="nombreOficial" >
+                                        <mat-hint>El nombre oficial de la ubicación</mat-hint>
+                                    </mat-form-field>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="col-lg">    
-                                <mat-form-field appearance="outline" class="inputsForm">
-                                    <mat-label>Alias</mat-label>
-                                    <input matInput formControlName="alias" >
-                                    <mat-hint>El nombre por el cual se le conoce a la ubicación</mat-hint>
-                                </mat-form-field>
+                            <div class="col-lg-4">
+                                <div class="col-lg">    
+                                    <mat-form-field appearance="outline" class="inputsForm">
+                                        <mat-label>Alias</mat-label>
+                                        <input matInput formControlName="alias" >
+                                        <mat-hint>El nombre por el cual se le conoce a la ubicación</mat-hint>
+                                    </mat-form-field>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="col-lg">    
-                                <mat-form-field appearance="outline" class="inputsForm">
-                                    <mat-label>Funcionario</mat-label>
-                                    <mat-select formControlName="funcionarioId" placeholder="Seleccione una funcionario">
-                                        <mat-option *ngFor="let funcionario of funcionarios" [value]="funcionario.id">
-                                            {{ funcionario.nombre_completo }}
-                                        </mat-option>
-                                    </mat-select>
-                                    <mat-hint>Funcionario encargado de la ubicación</mat-hint>
-                                </mat-form-field>
+                            <div class="col-lg-4">
+                                <div class="col-lg">    
+                                    <mat-form-field appearance="outline" class="inputsForm">
+                                        <mat-label>Funcionario</mat-label>
+                                        <mat-select formControlName="funcionarioId" placeholder="Seleccione una funcionario">
+                                            <mat-option *ngFor="let funcionario of funcionarios" [value]="funcionario.id">
+                                                {{ funcionario.nombre_completo }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-hint>Funcionario encargado de la ubicación</mat-hint>
+                                    </mat-form-field>
+                                </div>
                             </div>
+                            
+                            <label matTooltip="Agregar imagen" class="upload-button-wrapper">
+                                <div class="upload-button-wrapper">
+                                    <button mat-icon-button color="primary" type="button">
+                                        <mat-icon>image</mat-icon>
+                                    </button>
+                                    Subir imagenes
+                                </div>
+                                <input type="file" (change)="seleccionarArchivo($event)" accept="image/*" class="upload-input" />
+                            </label>
                         </div>
-                        
-                        <label mat-icon-button class="subir-archivo-label" class="quiz-boton-agregar" matTooltip="Agregar imagen">
-                            <input type="file" (change)="seleccionarArchivo($event)" class="subir-archivo" accept="image/*"/>
-                            <mat-icon>image</mat-icon>
-                        </label>
-                    </div>
+                        <br>
 
-                    <div class="row d-flex justify-content-between">
-                        <div class="col-auto">
-                            <button mat-flat-button color="primary" type="submit" [disabled]="!myForm.valid">Crear ubicación</button>
-                        </div>
-                        <div class="col-auto">
-                            <button mat-flat-button color="primary" type="button" routerLink="/ubicaciones">Retornar</button>    
+                        <div class="boton-container">
+                            <a mat-flat-button color="primary" type="button" routerLink="/ubicaciones">
+                                <mat-icon>reply</mat-icon>
+                                Retornar
+                            </a>  
+                            <button mat-flat-button color="primary" type="submit" [disabled]="!myForm.valid">
+                                <mat-icon>add_home</mat-icon>
+                                Crear ubicación
+                            </button>
                         </div>
                     </div>
-
-                </div>
-            </form>
-        </mat-card-content>
-    </mat-card>
+                </form>
+            </mat-card-content>
+        </mat-card>
+    </div>
 </div>

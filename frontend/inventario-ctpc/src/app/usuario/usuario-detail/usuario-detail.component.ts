@@ -62,7 +62,6 @@ export class UsuarioDetailComponent {
       
     }
     
-
     ngOnInit(): void {
       this.usuarioId = this.route.snapshot.paramMap.get('id');
       this.loadUsuarioDetails(this.usuarioId);

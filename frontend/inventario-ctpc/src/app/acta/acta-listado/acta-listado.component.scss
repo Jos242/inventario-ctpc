@@ -1,7 +1,33 @@
 
 .mainCont{
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 30px;
   width: 70%;
   margin: 0 auto;
+}
+
+@media (max-width: 1200px) {
+  .mainCont{
+  width: 80%;
+  }
+}
+
+@media (max-width: 1000px) {
+  .mainCont{
+    width: 90%;
+  }
+}
+
+@media (max-width: 768px) {
+  .mainCont{
+    flex-wrap: wrap-reverse;
+  }
+}
+
+.card-container {
+  width: 100%;
 }
 
 mat-card{

@@ -12,13 +12,16 @@ from django.http                             import HttpResponse, HttpResponseBa
 from django.db.models.functions              import Coalesce
 from django.db.models                        import CharField, OuterRef, Subquery, Func
 from django.db import transaction
+from django.conf import settings
 
 from datetime import datetime
 from docxtpl import DocxTemplate
 from io import BytesIO
+from pathlib import Path
 
 from ..utils import ObservacionesActions
 
+import platform
 import tempfile
 import os
 import subprocess
@@ -56,7 +59,7 @@ class DocsView(APIView):
         path = request.path
 
         if path == "/obtener-documentos/":  
-            docs:Docs = Docs.objects.all()
+            docs = Docs.objects.all()
             serializer =  ReadDocSerializer(instance = docs,
                                             many = True)  
             return Response(serializer.data,
@@ -294,8 +297,12 @@ class DocsView(APIView):
 
 
                         if formato == 'pdf':
-                            #CAMBIAR EN PRODUCCION, /usr/bin/libreoffice
-                            libreoffice_cmd = r'C:\\Program Files\\LibreOffice\\program\\soffice.exe'
+                            # Detect OS
+                            if platform.system() == "Windows":
+                                libreoffice_cmd = r'C:\Program Files\LibreOffice\program\soffice.exe'
+                            else:
+                                libreoffice_cmd = '/usr/bin/libreoffice'  # or '/usr/bin/soffice'
+
                             if not os.path.exists(libreoffice_cmd):
                                 return HttpResponseServerError(f"LibreOffice not found at {libreoffice_cmd}")
                             
@@ -384,23 +391,31 @@ class DocsView(APIView):
 
 
 
-    def delete(self, request:Docs, pk:int | None =  None) -> Response:
+    def delete(self, request: Docs, pk: int | None =  None) -> Response:
         try:
-            doc:Docs = Docs.objects.get(id = pk)
-            path = str(doc.ruta).split(sep = "/")
-            document_absolute_path:str = os.path.join(BASE_DIR, path[0],
-                                                      path[1], path[2])
-            exist = os.path.exists(document_absolute_path)
+            base_dir = settings.BASE_DIR
+            doc: Docs = Docs.objects.get(id = pk)
+
+            # Use pathlib for clean path handling
+            ruta_path = Path(doc.ruta)
+
+            # Join with BASE_DIR using only relevant parts
+            document_absolute_path = os.path.join(base_dir, *ruta_path.parts)
+            print(document_absolute_path)
             
-            if not exist:
+            if not os.path.exists(document_absolute_path):
                 doc.delete()
-                return Response({"status": "doc entry exists but not the file, entry deleted"},
-                                status = status.HTTP_200_OK)
+                return Response(
+                    {"status": "doc entry exists but not the file, entry deleted"},
+                    status=status.HTTP_200_OK
+                )
 
             os.remove(document_absolute_path)
             doc.delete()
-            return Response({"success": "doc entry and file have been deleted"},
-                            status = status.HTTP_200_OK)
+            return Response(
+                {"success": "doc entry and file have been deleted"},
+                status=status.HTTP_200_OK
+            )
 
         except Docs.DoesNotExist:
             return Response({"error": "document does not exist"},

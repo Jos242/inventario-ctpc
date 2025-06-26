@@ -22,12 +22,13 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
 import Swal from 'sweetalert2';
 import { MatIconModule } from '@angular/material/icon';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 @Component({
   selector: 'app-usuario-create',
   standalone: true,
   imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatRippleModule, MatTabsModule, MatGridListModule, MatCardModule, RouterLink,
-    ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,MatCheckboxModule, MatIconModule
+    ReactiveFormsModule,MatButtonModule,MatSelectModule,CommonModule,MatCheckboxModule, MatIconModule, MatAutocompleteModule
   ],
   templateUrl: './usuario-create.component.html',
   styleUrl: './usuario-create.component.scss'
@@ -47,6 +48,8 @@ export class UsuarioCreateComponent {
 
   departamentos: any[] = [];
   puestos: any[] = [];
+  filteredDepartamentos: any[] = [];
+  filteredPuestos: any[] = [];
 
   constructor(private gService:GenericService,
     private router:Router,
@@ -108,6 +111,7 @@ export class UsuarioCreateComponent {
     .subscribe({
       next: (data: any[]) => {
         this.departamentos = data;
+        this.filteredDepartamentos = data;
 
         this.getPuestos();
       },
@@ -129,6 +133,8 @@ export class UsuarioCreateComponent {
     .subscribe({
       next: (data: any[]) => {
         this.puestos = data;
+        this.filteredPuestos = data;
+
       },
       error: (error) => {
         if (!error.message.includes(`404 Not Found`)) {
@@ -150,35 +156,21 @@ export class UsuarioCreateComponent {
         password: this.myForm.value.password,
         user_type: this.myForm.value.tipoUsuario,
         nombre_completo: this.myForm.value.nombreCompleto,
-        departamento: this.myForm.value.departamento,
-        puesto: this.myForm.value.puesto
+        departamento: this.myForm.value.departamento.id,
+        puesto: this.myForm.value.puesto.id
       };
 
 
       this.gService.create('crear-usuario/', datas)
       .pipe(takeUntil(this.destroy$))
       .subscribe((data:any)=>{
-        if (data.username && data.username[0]) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: `${data.username[0]}`,
-          });
-        } else if (data.password && data.password[0]){
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: `${data.password[0]}`,
-          });
-        } else {
-          Swal.fire({
-            icon: 'success',
-            title: 'Éxito',
-            text: 'El usuario se ha creado correctamente',
-          });
+        Swal.fire({
+          icon: 'success',
+          title: 'Éxito',
+          text: 'El usuario se ha creado correctamente',
+        });
 
-          this.router.navigate([`/usuarios`]);
-        }
+        this.router.navigate([`/usuarios`]);
       });
     } else {
       Swal.fire({
@@ -187,5 +179,55 @@ export class UsuarioCreateComponent {
         text: `La contraseña debe tener menos de 128 carácteres.`,
       });
     }
+  }
+
+  filterDepartamento(value: string) {
+    this.filteredDepartamentos = this.departamentos.filter(u => u.descripcion.toLowerCase().includes(value.toLowerCase()));
+  }
+  onEnterPressedDepartamento() {
+    if (this.filteredDepartamentos.length > 0) {
+      this.myForm.get('departamento')?.setValue(this.filteredDepartamentos[0]);
+    }
+  }
+  displayDepartamento(departamento: any): string {
+    return departamento?.descripcion || '';
+  }
+  validateDepartamentoInput() {
+    const value = this.myForm.get('departamento')?.value;
+  
+    if (!value || typeof value !== 'object' || !value.id) {
+      this.myForm.get('departamento')?.setValue(null);
+      this.filterDepartamento("");
+    }
+  }
+  onDepartamentoBlur() {
+    setTimeout(() => {
+      this.validateDepartamentoInput();
+    }, 100);
+  }
+
+  filterPuesto(value: string) {
+    this.filteredPuestos = this.puestos.filter(u => u.descripcion.toLowerCase().includes(value.toLowerCase()));
+  }
+  onEnterPressedPuesto() {
+    if (this.filteredPuestos.length === 1) {
+      this.myForm.get('puesto')?.setValue(this.filteredPuestos[0]);
+    }
+  }
+  displayPuesto(puesto: any): string {
+    return puesto?.descripcion || '';
+  }
+  validatePuestoInput() {
+    const value = this.myForm.get('puesto')?.value;
+  
+    if (!value || typeof value !== 'object' || !value.id) {
+      this.myForm.get('puesto')?.setValue(null);
+      this.filterPuesto("");
+    }
+  }
+  onPuestoBlur() {
+    setTimeout(() => {
+      this.validatePuestoInput();
+    }, 100);
   }
 }

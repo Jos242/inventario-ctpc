@@ -1,10 +1,16 @@
-<div class="row">
-
+<div class="content-container">
+  <a routerLink="/index" class="go-back back-absolute" matTooltip="Ir atras">
+    <mat-icon>arrow_back</mat-icon>
+  </a>
+  <div class="row">
     <div class="col-sm-6">
         <mat-card class="example-card">
             <mat-card-header>
               <!-- <mat-card-subtitle>Activos</mat-card-subtitle> -->
-              <mat-card-title>Crear Acta de Baja </mat-card-title>
+              <mat-card-title>
+                <mat-icon>deselect</mat-icon>
+                Crear Acta de Baja 
+              </mat-card-title>
             </mat-card-header>
             
             <mat-card-content>
@@ -13,7 +19,9 @@
               <mat-divider></mat-divider>
             </mat-card-content>
             <mat-card-actions>
-              <button mat-flat-button color="primary" [routerLink]="['/actas/baja']" >Entrar</button>
+              <button mat-flat-button color="primary" [routerLink]="['/actas/baja']">
+                Entrar
+              </button>
               <!-- <button mat-flat-button color="primary">Como Usar</button> -->
             </mat-card-actions>
             <mat-card-footer>
@@ -25,7 +33,10 @@
       <mat-card class="example-card">
         <mat-card-header>
           <!-- <mat-card-subtitle>Activos</mat-card-subtitle> -->
-          <mat-card-title>Crear Acta de Traslado </mat-card-title>
+          <mat-card-title>
+            <mat-icon>flip_to_front</mat-icon>
+            Crear Acta de Traslado
+          </mat-card-title>
         </mat-card-header>
         
         <mat-card-content>
@@ -35,61 +46,71 @@
           <mat-divider></mat-divider>
         </mat-card-content>
         <mat-card-actions>
-          <button mat-flat-button color="primary" [routerLink]="['/actas/traslado']" >Entrar</button>
+          <button mat-flat-button color="primary" [routerLink]="['/actas/traslado']">
+            Entrar
+          </button>
           <!-- <button mat-flat-button color="primary">Como Usar</button> -->
         </mat-card-actions>
         <mat-card-footer>
           
         </mat-card-footer>
       </mat-card>
-
-        
     </div>
-       
-</div>
-<div class="row">
-  <div class="col-sm-6">
-    <mat-card class="example-card">
-      <mat-card-header>
-        <!-- <mat-card-subtitle>Actas</mat-card-subtitle> -->
-        <mat-card-title>Crear Excels</mat-card-title>
-      </mat-card-header>
-      
-      <mat-card-content>
-          <br>
-        <p>Mediante este modulo podra generar Excels de los activos y observaciones en diferentes formatos.</p>
-        <p></p>
-        <mat-divider></mat-divider>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-flat-button color="primary" [routerLink]="['/actas/excels']" >Entrar</button>
-        <!-- <button mat-flat-button color="primary">Como Usar</button> -->
-      </mat-card-actions>
-      <mat-card-footer>
-        
-      </mat-card-footer>
-    </mat-card>
   </div>
-  <div class="col-sm-6">
-    <mat-card class="example-card">
-      <mat-card-header>
-        <!-- <mat-card-subtitle>Actas</mat-card-subtitle> -->
-        <mat-card-title>Listado de Actas</mat-card-title>
-      </mat-card-header>
-      
-      <mat-card-content>
-          <br>
-        <p>Mediante este modulo podra ver el listado de todas las actas disponibles para impresion,asi cuales han sido impresas y cuales no.</p>
-        <p></p>
-        <mat-divider></mat-divider>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-flat-button color="primary" [routerLink]="['/actas/lista']" >Entrar</button>
-        <!-- <button mat-flat-button color="primary">Como Usar</button> -->
-      </mat-card-actions>
-      <mat-card-footer>
+  <div class="row">
+    <div class="col-sm-6">
+      <mat-card class="example-card">
+        <mat-card-header>
+          <!-- <mat-card-subtitle>Actas</mat-card-subtitle> -->
+          <mat-card-title>
+            <mat-icon>document_scanner</mat-icon>
+            Crear Excels
+          </mat-card-title>
+        </mat-card-header>
         
-      </mat-card-footer>
-    </mat-card>
+        <mat-card-content>
+            <br>
+          <p>Mediante este modulo podra generar Excels de los activos y observaciones en diferentes formatos.</p>
+          <p></p>
+          <mat-divider></mat-divider>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-flat-button color="primary" [routerLink]="['/actas/excels']">
+            Entrar
+          </button>
+          <!-- <button mat-flat-button color="primary">Como Usar</button> -->
+        </mat-card-actions>
+        <mat-card-footer>
+          
+        </mat-card-footer>
+      </mat-card>
+    </div>
+    <div class="col-sm-6">
+      <mat-card class="example-card">
+        <mat-card-header>
+          <!-- <mat-card-subtitle>Actas</mat-card-subtitle> -->
+          <mat-card-title>
+            <mat-icon>article</mat-icon>
+            Listado de Actas
+          </mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+            <br>
+          <p>Mediante este modulo podra ver el listado de todas las actas disponibles para impresion,asi cuales han sido impresas y cuales no.</p>
+          <p></p>
+          <mat-divider></mat-divider>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-flat-button color="primary" [routerLink]="['/actas/lista']">
+            Entrar
+          </button>
+          <!-- <button mat-flat-button color="primary">Como Usar</button> -->
+        </mat-card-actions>
+        <mat-card-footer>
+          
+        </mat-card-footer>
+      </mat-card>
+    </div>
   </div>
 </div>

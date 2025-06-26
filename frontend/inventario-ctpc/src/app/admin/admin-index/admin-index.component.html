@@ -1,95 +1,88 @@
-<div class="row">
+<div class="content-container">
+  <a routerLink="/index" class="go-back back-absolute" matTooltip="Ir atras">
+    <mat-icon>arrow_back</mat-icon>
+  </a>
 
-    <div class="col-sm-6">
-        <mat-card class="example-card">
-            <mat-card-header>
-              <!-- <mat-card-subtitle>Activos</mat-card-subtitle> -->
-              <mat-card-title>Usuarios</mat-card-title>
-            </mat-card-header>
-            
-            <mat-card-content>
-                <br>
-              <p>Mediante este modulo se puede ver un listado de todos los usuarios y funcionarios, asi como crear nuevos o editar los existentes</p>
-              <mat-divider></mat-divider>
-            </mat-card-content>
-            <mat-card-actions>
-              <button mat-flat-button color="primary" [routerLink]="['/usuarios']" >Entrar</button>
-              <!-- <button mat-flat-button color="primary">Como Usar</button> -->
-            </mat-card-actions>
-            <mat-card-footer>
-              
-            </mat-card-footer>
-          </mat-card>
-    </div>
+  <div class="row">
     <div class="col-sm-6">
       <mat-card class="example-card">
         <mat-card-header>
           <!-- <mat-card-subtitle>Activos</mat-card-subtitle> -->
-          <mat-card-title>Ubicaciones</mat-card-title>
+          <mat-card-title>
+            <mat-icon>person</mat-icon>
+            Usuarios
+          </mat-card-title>
         </mat-card-header>
-        
         <mat-card-content>
-            <br>
-          <p>Mediante este modulo se puede ver un listado de todos las ubicaciones, asi como crear nuevas o editar las existentes</p>
-          <p></p>
+          <br>
+          <p>Mediante este modulo se puede ver un listado de todos los usuarios y funcionarios, asi como crear nuevos o editar los existentes</p>
           <mat-divider></mat-divider>
         </mat-card-content>
         <mat-card-actions>
-          <button mat-flat-button color="primary" [routerLink]="['/ubicaciones']" >Entrar</button>
+          <button mat-flat-button color="primary" [routerLink]="['/usuarios']">
+            Entrar
+          </button>
           <!-- <button mat-flat-button color="primary">Como Usar</button> -->
         </mat-card-actions>
         <mat-card-footer>
           
         </mat-card-footer>
       </mat-card>
-
-        
     </div>
-       
-</div>
-<div class="row">
-  <div class="col-sm-6">
-    <mat-card class="example-card">
-      <mat-card-header>
-        <!-- <mat-card-subtitle>Actas</mat-card-subtitle> -->
-        <mat-card-title>Modos de Adquisición</mat-card-title>
-      </mat-card-header>
-      
-      <mat-card-content>
+    <div class="col-sm-6">
+      <mat-card class="example-card">
+        <mat-card-header>
+          <!-- <mat-card-subtitle>Activos</mat-card-subtitle> -->
+          <mat-card-title>
+            <mat-icon>location_on</mat-icon>
+            Ubicaciones
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
           <br>
-        <p>Mediante este modulo se puede ver un listado de todos los modos de adquisicion, asi como crear nuevas o editar los existentes</p>
-        <p></p>
-        <mat-divider></mat-divider>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-flat-button color="primary"  [routerLink]="['/adquisiciones']" >Entrar</button>
-        <!-- <button mat-flat-button color="primary">Como Usar</button> -->
-      </mat-card-actions>
-      <mat-card-footer>
-        
-      </mat-card-footer>
-    </mat-card>
+          <p>Mediante este modulo se puede ver un listado de todos las ubicaciones, asi como crear nuevas o editar las existentes</p>
+          <mat-divider></mat-divider>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-flat-button color="primary" [routerLink]="['/ubicaciones']">
+            Entrar
+          </button>
+          <!-- <button mat-flat-button color="primary">Como Usar</button> -->
+        </mat-card-actions>
+        <mat-card-footer>
+          
+        </mat-card-footer>
+      </mat-card>
+    </div>
   </div>
-  <div class="col-sm-6">
-    <mat-card class="example-card">
-      <mat-card-header>
-        <!-- <mat-card-subtitle>Actas</mat-card-subtitle> -->
-        <mat-card-title>Plantillas</mat-card-title>
-      </mat-card-header>
-      
-      <mat-card-content>
+  <div class="row">
+    <div class="col-sm-6">
+      <mat-card class="example-card">
+        <mat-card-header>
+          <!-- <mat-card-subtitle>Actas</mat-card-subtitle> -->
+          <mat-card-title>
+            <mat-icon>warehouse</mat-icon>
+            Modos de Adquisición
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
           <br>
-        <p>Mediante este modulo podra ver el listado de todas las plantillas existentes, ver a que modulo aplican, y crear nuevas o editar las existentes</p>
-        <p></p>
-        <mat-divider></mat-divider>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-flat-button color="primary" [routerLink]="['/actas/lista']" >Entrar</button>
-        <!-- <button mat-flat-button color="primary">Como Usar</button> -->
-      </mat-card-actions>
-      <mat-card-footer>
-        
-      </mat-card-footer>
-    </mat-card>
+          <p>Mediante este modulo se puede ver un listado de todos los modos de adquisicion, asi como crear nuevas o editar los existentes</p>
+          <mat-divider></mat-divider>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-flat-button color="primary"  [routerLink]="['/adquisiciones']">
+            Entrar
+          </button>
+          <!-- <button mat-flat-button color="primary">Como Usar</button> -->
+        </mat-card-actions>
+        <mat-card-footer>
+          
+        </mat-card-footer>
+      </mat-card>
+    </div>
+    <div class="col-sm-6">
+      
+    </div>
   </div>
 </div>

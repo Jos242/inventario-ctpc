@@ -1,14 +1,19 @@
-<div class="example-container mat-elevation-z8">
+<div class="content-container mat-elevation-z8">
   @if (isLoadingResults) {
-    <div class="example-loading-shade">
-      @if (isLoadingResults) {
+    <div class="loading-shade">
         <mat-spinner></mat-spinner>
-      }
     </div>
   }
 
-  <div class="example-table-container">
+  <div class="boton-container">
+    <a routerLink="/index" class="go-back" matTooltip="Ir atras">
+      <mat-icon>arrow_back</mat-icon>
+    </a>
+  </div>
+
+  <div class="boton-container">
     <mat-form-field>
+      <mat-icon matTextPrefix class="calendar-icon">calendar_today</mat-icon>
       <mat-label>Fecha</mat-label>
       <mat-select placeholder="Seleccione una ubicacion" (selectionChange)="applyFilter($event.value)" [(value)]="selected">
         <mat-option *ngFor="let fechaCierre of fechaCierres" [value]="fechaCierre">
@@ -16,34 +21,41 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
+  
+  <mat-form-field class="buscar ms-3">
+      <mat-icon matTextPrefix class="search-icon">search</mat-icon>
+      <mat-label>Buscar...</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Ej. Monitor, Aula 01, 6105-1234" #input>
+    </mat-form-field>
+  </div>
     
-    <div class="mat-elevation-z8">
+  <div class="">
+    <div class="table-container">
       <table mat-table [dataSource]="dataSource" matSort>
         <ng-container matColumnDef="ubicacion_nombre">
           <th mat-header-cell *matHeaderCellDef mat-sort-header> Ubicación </th>
-          <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.ubicacion_nombre}} </td>
+          <td mat-cell *matCellDef="let row"> {{row.ubicacion_nombre}} </td>
         </ng-container>
 
         <ng-container matColumnDef="funcionario_nombre">
           <th mat-header-cell *matHeaderCellDef mat-sort-header> Funcionario </th>
-          <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.funcionario_nombre}} </td>
+          <td mat-cell *matCellDef="let row"> {{row.funcionario_nombre}} </td>
         </ng-container>
 
         <ng-container matColumnDef="fecha">
           <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha </th>
-          <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.fecha}} </td>
+          <td mat-cell *matCellDef="let row"> {{row.fecha}} </td>
         </ng-container>
 
         <ng-container matColumnDef="finalizado">
           <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
-          <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.finalizado == 1 ? 'Completado' : 'En progreso'}} </td>
+          <td mat-cell *matCellDef="let row"> {{row.finalizado == 1 ? 'Completado' : 'En progreso'}} </td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="verDetalles(row.id)" [ngClass]="row.class" (mousedown)="onMiddleClick($event, row.id)" ></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="verDetalles(row.id)" [ngClass]="row.class" (mousedown)="onMiddleClick($event, row.id)"  matTooltip="Presione para ver más información sobre este item"></tr>
       </table>
-    
-      <mat-paginator [pageSizeOptions]="pageSizeOptions"  showFirstLastButtons [pageSize]="10" aria-label="Seleccione pagina de activos" ></mat-paginator>
     </div>
+    <mat-paginator [pageSizeOptions]="pageSizeOptions"  showFirstLastButtons [pageSize]="10" aria-label="Seleccione pagina de activos" ></mat-paginator>
   </div>
 </div>

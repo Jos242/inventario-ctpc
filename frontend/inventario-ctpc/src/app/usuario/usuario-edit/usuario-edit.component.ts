@@ -21,7 +21,7 @@ import { AuthService } from '../../share/auth.service';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
 import Swal from 'sweetalert2';
-import { MatIconModule } from '@angular/material/icon';
+import { MatIcon, MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-usuario-edit',
@@ -124,7 +124,7 @@ export class UsuarioEditComponent {
       .pipe(takeUntil(this.destroy$))
       .subscribe((data:any)=>{
         this.myForm.setValue({
-          usuario: data.user,
+          usuario: data.username,
           password: null,
           nombreCompleto: data.nombre_completo,
           departamento: data.departamento,
@@ -145,25 +145,25 @@ export class UsuarioEditComponent {
         };
   
   
-        this.gService.patch(`actualizar-usuario/${this.usuarioId}/`, datas)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Éxito',
-              text: 'Activo actualizado correctamente',
-            });
-            this.router.navigate([`/usuarios/${this.usuarioId}`]);
-          },
-          error: () => {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Hubo un error al actualizar el activo, por favor intente de nuevo.',
-            });
-          }
-        });
+          this.gService.patch(`actualizar-usuario/${this.usuarioId}/`, datas)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Éxito',
+                text: 'Activo actualizado correctamente',
+              });
+              this.router.navigate([`/usuarios/${this.usuarioId}`]);
+            },
+            error: () => {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Hubo un error al actualizar el activo, por favor intente de nuevo.',
+              });
+            }
+          });
       } else {
         Swal.fire({
           icon: 'error',

@@ -21,7 +21,7 @@ import { firstValueFrom, Subject, takeUntil } from 'rxjs';
 import { SelectionModel } from '@angular/cdk/collections';
 import { GenericService } from '../../share/generic.service';
 import { ConfirmationService } from '../../share/confirmation.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AuthService } from '../../share/auth.service';
@@ -40,7 +40,7 @@ import 'moment/locale/es';
   imports: [
     MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatRippleModule, MatTabsModule, MatGridListModule, MatCardModule,
     ReactiveFormsModule, MatButtonModule, MatSelectModule, CommonModule, MatFormFieldModule, MatInputModule, MatDatepickerModule, MatProgressSpinnerModule,
-    MatCheckbox, MatIconModule, MatRippleModule, MatTooltipModule
+    MatCheckbox, MatIconModule, MatRippleModule, MatTooltipModule, RouterLink
   ],
   templateUrl: './acta-mover-create.component.html',
   styleUrl: './acta-mover-create.component.scss'

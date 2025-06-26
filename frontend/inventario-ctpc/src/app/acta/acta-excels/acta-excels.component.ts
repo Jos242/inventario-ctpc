@@ -12,13 +12,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { environment } from '../../../environments/environment';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { HotToastService } from '@ngxpert/hot-toast';
+import { MatIconModule } from '@angular/material/icon';
 
 
 
 @Component({
   selector: 'app-acta-excels',
   standalone: true,
-  imports: [MatCardModule, MatDividerModule, RouterLink, MatButtonModule, MatProgressSpinner],
+  imports: [MatCardModule, MatDividerModule, RouterLink, MatButtonModule, MatProgressSpinner, MatIconModule, RouterLink],
   templateUrl: './acta-excels.component.html',
   styleUrl: './acta-excels.component.scss'
 })
