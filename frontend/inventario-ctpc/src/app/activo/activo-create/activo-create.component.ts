@@ -36,7 +36,7 @@ import { MatAutocompleteModule, MatAutocompleteTrigger } from '@angular/material
 })
 export class ActivoCreateComponent {
   myForm: FormGroup;
-  destroy$:Subject<boolean>=new Subject<boolean>();
+  destroy$:Subject<boolean> = new Subject<boolean>();
 
   ubicaciones: any[] = [];
   filteredUbicaciones: any[] = [];
@@ -248,7 +248,7 @@ export class ActivoCreateComponent {
     this.filteredUbicaciones = this.ubicaciones.filter(u => u.nombre_oficial.toLowerCase().includes(value.toLowerCase()));
   }
   onEnterPressedUbicacion() {
-    if (this.filteredUbicaciones.length === 1) {
+    if (this.filteredUbicaciones.length > 0) {
       this.myForm.get('ubicacion_original')?.setValue(this.filteredUbicaciones[0]);
     }
   }
@@ -262,6 +262,11 @@ export class ActivoCreateComponent {
       this.myForm.get('ubicacion_original')?.setValue(null);
       this.filterUbicacion("");
     }
+  }
+  onUbicacionBlur() {
+    setTimeout(() => {
+      this.validateUbicacionInput();
+    }, 100);
   }
 
   filterModo(value: string) {
@@ -282,5 +287,10 @@ export class ActivoCreateComponent {
       this.myForm.get('modo_adquisicion')?.setValue(null);
       this.filterModo("");
     }
+  }
+  onModoBlur() {
+    setTimeout(() => {
+      this.validateModoInput();
+    }, 100);
   }
 }

@@ -23,14 +23,13 @@ import { HotToastService } from '@ngxpert/hot-toast';
   styleUrl: './acta-excels.component.scss'
 })
 export class ActaExcelsComponent {
-  excels:any;
-  fileName:any;
+  excels: number = 0;
+  cantNot: number = 0;
+  fileName: any;
 
-  
-  filtros: FormGroup;
   datos: any;
   isLoadingResults: any;
-  destroy$:Subject<boolean>=new Subject<boolean>();
+  destroy$: Subject<boolean>=new Subject<boolean>();
 
 
   constructor(private gService:GenericService,
@@ -41,38 +40,21 @@ export class ActaExcelsComponent {
     private sanitizer: DomSanitizer,
     private toast: HotToastService
     ){
-      this.filtros = this.fb.group({
-        id_registro: false,
-        no_identificacion: true,
-        descripcion: true,
-        marca: false,
-        modelo: false,
-        serie: false,
-        estado: false,
-        impreso: true,
-        ubicacion_original_nombre_oficial: false,
-        ubicacion_actual_nombre_oficial: false,
-        modo_adquisicion_desc: false,
-        precio: false,
-        conectividad: false,
-        seguridad: false,
-        placa: true,
-        baja: false,
-        fecha: false,
-      });
-
-      this.loadActivos();
-
-
+      this.loadRegistros();
     }
 
     getFormattedDate(): string {
       const date = new Date();
+      
       const day = String(date.getDate()).padStart(2, '0');
       const month = String(date.getMonth() + 1).padStart(2, '0'); // January is 0
       const year = date.getFullYear();
-    
-      return `${day}-${month}-${year}`;
+
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+
+      return `${day}-${month}-${year} ${hours}-${minutes}-${seconds}`;
     }
 
     getFileName(date: string): string {
@@ -91,9 +73,7 @@ export class ActaExcelsComponent {
 
 
   excelImpresion(){
-
     const formData = this.createFormData();
-    console.log(formData)
     
     this.gService.create('crear-excel/impresiones/', formData)
       .pipe(takeUntil(this.destroy$))
@@ -122,6 +102,7 @@ export class ActaExcelsComponent {
             },
           });
 
+          this.loadRegistros()
         },
         error: (error) => {
           this.isLoadingResults = false; // Stop loading on error
@@ -135,7 +116,7 @@ export class ActaExcelsComponent {
       });
   }
 
-  loadActivos(){
+  loadRegistros(){
     this.isLoadingResults = true;  // Start loading
 
     const loadingTimeout = setTimeout(() => {
@@ -148,39 +129,29 @@ export class ActaExcelsComponent {
       }
     }, 15000); // 15 seconds
 
-    const selectedColumns = Object.keys(this.filtros.value)
-      .filter(key => this.filtros.value[key]);
-
-    const formData = { fields: selectedColumns };
-
 
     // Make the request
-    this.gService.create('activos/select-columns/', formData)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data: any) => {
-          console.log(data);
-          this.datos = data;
-          // Count the number of items where datos.placa is false
+    this.gService.list('registro/no-impreso/count/')
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data: any) => {
+        this.excels = data;
+        this.cantNot = data;
+        this.excels = Math.floor(this.excels / 40);
 
-          this.excels = this.datos.filter((item: any) => item.impreso==0).length;
-          console.log(this.excels)
-          this.excels = Math.floor(this.excels/40)
-          this.isLoadingResults = false; // Stop loading
-          clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
-          
-
-        },
-        error: (error) => {
-          this.isLoadingResults = false; // Stop loading on error
-          clearTimeout(loadingTimeout); // Clear the timeout if there's an error
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. Descripcion del error: ${error.message}`,
-          });
-        }
-      });
+        this.isLoadingResults = false; // Stop loading
+        clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
+      },
+      error: (error) => {
+        this.isLoadingResults = false; // Stop loading on error
+        clearTimeout(loadingTimeout); // Clear the timeout if there's an error
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. Descripcion del error: ${error.message}`,
+        });
+      }
+    });
   }
 
     downloadExcel(endpoint: string, fileName: string): void {

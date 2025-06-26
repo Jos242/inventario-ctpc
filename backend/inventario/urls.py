@@ -22,17 +22,24 @@ urlpatterns = [
     path("agregar-multiples-activos/", views.ActivosView.as_view()),
     path("activos/excel/by/nos-identificacion/", views.ActivosView.as_view()),
     path("activos/select-columns/", views.ActivosViewNoAuth.as_view()),
+    path("activos/no-baja/select-columns/", views.ActivosViewNoAuth.as_view()),
+    path("activos/historial/select-columns/", views.ActivosViewNoAuth.as_view()),
+    path("registro/no-impreso/count/", views.ActivosViewNoAuth.as_view()),
     path("update-activo/<int:pk>/", views.ActivosView.as_view()),
     path("delete/last/id-registro/", views.ActivosView.as_view()),
 
     #Endpoints relacionados a las observaciones------------------------------
     path("todas-las-observaciones/", views.ObservacionesViewNoAuth.as_view()),
-    path("observacion/<str:activo>/", views.ObservacionesViewNoAuth.as_view()),
+    path("observacion/activo/<str:activo>/", views.ObservacionesViewNoAuth.as_view()),
     path("nueva-observacion/", views.ObservacionesView.as_view()),
     path("observaciones-excel/", views.ObservacionesView.as_view()),
 
+    #Endpoints relacionados a las activoobservacion------------------------------
+    path("create-activo-observacion/", views.ActivoObservacionView.as_view()),
+
     #Endpoints relacionados a los documentos--------------------------------- 
     path("guardar-acta/", _views.DocsView.as_view()),
+    path("generar-acta/", _views.DocsView.as_view()),
     path("obtener-documentos/", _views.DocsView.as_view()),
     path("obtener-documento/<int:pk>/", _views.DocsView.as_view()),
     path("crear-excel/impresiones/", _views.DocsView.as_view()),
@@ -102,8 +109,14 @@ urlpatterns = [
     #Endpoints relaciondos a los puestos----------------------------
     path("all-puestos/", _views.PuestosView.as_view()),
 
-
     #Endpoints relaciondos a el historial de acceso----------------------------
     path("all/historial-acceso/", _views.HistorialDeAccesoView.as_view()),
-    path("historial-acceso/<int:user_id>/", _views.HistorialDeAccesoView.as_view())
+    path("historial-acceso/<int:user_id>/", _views.HistorialDeAccesoView.as_view()),
+
+    #Endpoints relaciondos a el historial de ubicaciones----------------------------
+    path("historial-ubicacion-activo/<int:pk>/", _views.HistorialUbicacionView.as_view()),
+    path("create-historial-ubicacion/", _views.HistorialUbicacionView.as_view()),
+
+    #Mover observaciones a la tabla intermedia----------------------------
+    path("mover-observaciones/", views.ObservacionesViewNoAuth.as_view()),
 ]

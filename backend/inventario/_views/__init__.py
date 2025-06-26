@@ -3,6 +3,7 @@
 
 from inventario._views.modo_adquisicion           import ModoAdquisicionView
 from inventario._views.historial_de_acceso        import HistorialDeAccesoView
+from inventario._views.historial_ubicacion        import HistorialUbicacionView
 from inventario._views.user_view                  import UserView
 from inventario._views.plantillas                 import PlantillasView 
 from inventario._views.funcionarios               import FuncionariosView, get_funcionario_by_id, get_funcionario_by_id_usuario, get_all_funcionarios

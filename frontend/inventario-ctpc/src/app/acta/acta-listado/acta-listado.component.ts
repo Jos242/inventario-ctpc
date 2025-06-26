@@ -1,6 +1,6 @@
 import { Component, LOCALE_ID } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { GenericService } from '../../share/generic.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -15,18 +15,24 @@ import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import localeCR from '@angular/common/locales/es-CR'
 import {MatCardModule} from '@angular/material/card';
+import { ConfirmationService } from '../../share/confirmation.service';
 
-interface DocumentNode {
-  name: string;
-  children?: DocumentNode[];
-  path?: string;
+interface doc {
+  id?: number;
+  titulo: string;
+  tipo?: string;
+  ruta?: string;
+  creado_el?: string;
+  impreso?: boolean;
 }
 
-interface ExampleFlatNode {
+interface DocumentNode extends doc {
+  children?: DocumentNode[];
+}
+
+interface ExampleFlatNode extends doc {
   expandable: boolean;
-  name: string;
   level: number;
-  path?: string;
 }
 
 @Component({
@@ -45,10 +51,9 @@ export class ActaListadoComponent {
   selectedDocument: any = null;
 
   private _transformer = (node: DocumentNode, level: number) => ({
+    ...node,
     expandable: !!node.children && node.children.length > 0,
-    name: node.name,
-    level: level,
-    path: node.path,
+    level: level
   });
 
   treeControl = new FlatTreeControl<ExampleFlatNode>(
@@ -70,12 +75,11 @@ export class ActaListadoComponent {
     private router: Router,
     private route: ActivatedRoute,
     private httpClient: HttpClient,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private confirmationService: ConfirmationService
   ) {
     this.loadDocs();
   }
-
-
 
   loadDocs() {
     this.isLoadingResults = true;
@@ -91,25 +95,25 @@ export class ActaListadoComponent {
     }, 15000);
 
     this.gService.list('obtener-documentos/')
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data: any) => {
-          this.datos = data;
-          console.log(this.datos)
-          this.isLoadingResults = false;
-          clearTimeout(loadingTimeout);
-          this.processData();
-        },
-        error: () => {
-          this.isLoadingResults = false;
-          clearTimeout(loadingTimeout);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador.',
-          });
-        }
-      });
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data: any) => {
+        this.datos = data;
+        console.log(this.datos)
+        this.isLoadingResults = false;
+        clearTimeout(loadingTimeout);
+        this.processData();
+      },
+      error: () => {
+        this.isLoadingResults = false;
+        clearTimeout(loadingTimeout);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador.',
+        });
+      }
+    });
   }
 
   processData() {
@@ -129,14 +133,14 @@ export class ActaListadoComponent {
       const month = date.toLocaleString('es-CR', { month: 'long', year: 'numeric' });
       const capitalizedMonth = capitalizeFirstLetter(month);
       if (!acc[capitalizedMonth]) acc[capitalizedMonth] = [];
-      acc[capitalizedMonth].push({ name: doc.titulo, path: doc.ruta });
+      acc[capitalizedMonth].push(doc);
       return acc;
     }, {});
   
     // Convert to tree structure
     for (const month in groupedByMonth) {
       treeData.push({
-        name: month,
+        titulo: month,
         children: groupedByMonth[month]
       });
     }
@@ -148,16 +152,20 @@ export class ActaListadoComponent {
 
 
   onDocumentClick(node: ExampleFlatNode) {
-    this.selectedDocument = this.datos.find((doc: any) => doc.titulo === node.name);
+    console.log(node)
+    this.selectedDocument = this.datos.find((doc: any) => doc.titulo === node.titulo);
   }
   
   downloadDocument(path: string) {
-    const url = `${environment.apiURL}media/${path}`;
+    const url = `${environment.apiURL}${path}`;
     window.open(url, '_blank');
   }
 
-  marcarImpreso(){
-    if (!this.selectedDocument) return;
+  async marcarImpreso(){
+    const confirmation = this.confirmationService.confirm(9);
+    const result = await firstValueFrom(confirmation);
+
+    if (!this.selectedDocument || !result) return;
 
     const updateData = {
       titulo: this.selectedDocument.titulo,
@@ -185,10 +193,10 @@ export class ActaListadoComponent {
           console.log(data)
           clearTimeout(loadingTimeout);
           Swal.fire({
-          icon: 'success',
-          title: 'Éxito',
-          text: `Documento ${this.selectedDocument.titulo} marcado como impreso.`,
-        });
+            icon: 'success',
+            title: 'Éxito',
+            text: `Documento ${this.selectedDocument.titulo} marcado como impreso.`,
+          });
         },
         error: () => {
           this.isLoadingResults = false;

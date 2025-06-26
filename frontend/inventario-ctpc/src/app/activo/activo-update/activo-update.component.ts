@@ -11,11 +11,12 @@ import { Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GenericService } from '../../share/generic.service';
 import Swal from 'sweetalert2';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 @Component({
   selector: 'app-activo-update',
   standalone: true,
-  imports: [MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatCheckboxModule, ReactiveFormsModule, CommonModule],
+  imports: [MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatCheckboxModule, ReactiveFormsModule, CommonModule, MatAutocompleteModule],
   templateUrl: './activo-update.component.html',
   styleUrl: './activo-update.component.scss'
 })
@@ -24,10 +25,14 @@ export class ActivoUpdateComponent {
   myForm: FormGroup;
   destroy$: Subject<boolean> = new Subject<boolean>();
 
+  ubicaciones: any[] = [];
+  filteredUbicaciones: any[] = [];
+  modosAdquisiciones: any[] = [];
+  filteredModos: any[] = [];
   isLoadingResults: any;
 
-  ubicaciones: any;
-  modosAdquisicion: any;
+  ubicacion_anterior_id: any;
+
   estados: { id: string, descripcion: string }[] = [
     { id: 'BUENO', descripcion: 'BUENO' },
     { id: 'MALO', descripcion: 'MALO' },
@@ -45,6 +50,7 @@ export class ActivoUpdateComponent {
   ];
   datos: any;
   activoId: any;
+  activoNo: any;
 
   selectedUbicacion: any; 
   selectedModoAdquisicion: any; 
@@ -60,7 +66,7 @@ export class ActivoUpdateComponent {
    }
 
   ngOnInit(): void {
-    this.activoId = this.route.snapshot.paramMap.get('id');
+    this.activoNo = this.route.snapshot.paramMap.get('id');
     
     this.loadModosAdquisicion();
     this.loadUbicaciones();
@@ -69,7 +75,7 @@ export class ActivoUpdateComponent {
     this.myForm = this.formBuilder.group({
       descripcion: ['', Validators.required],
       ubicacion_actual: [Validators.required],
-      modo_adquisicion: [ Validators.required],
+      modo_adquisicion: [Validators.required],
       marca: ["N/A"],
       modelo: ["N/A"],
       serie: ["N/A"],
@@ -100,7 +106,8 @@ export class ActivoUpdateComponent {
       .subscribe({
         next: (data: any[]) => {
           this.ubicaciones = data;
-          console.log(this.ubicaciones)
+          this.filteredUbicaciones = data;
+          
           this.isLoadingResults = false;
           clearTimeout(loadingTimeout);
         },
@@ -133,11 +140,12 @@ export class ActivoUpdateComponent {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data: any[]) => {
-          this.modosAdquisicion = data;
-          console.log(this.modosAdquisicion)
+          this.modosAdquisiciones = data;
+          this.filteredModos = data;
+
           this.isLoadingResults = false;
           clearTimeout(loadingTimeout);
-          this.loadActivosDetails(this.activoId);
+          this.loadActivosDetails();
         },
         error: (error) => {
           this.isLoadingResults = false;
@@ -151,46 +159,26 @@ export class ActivoUpdateComponent {
       });
   }
 
-  loadActivosDetails(activoId: string): void {
-    this.gService.list(`activo/${activoId}/`)
+  loadActivosDetails(): void {
+    this.gService.list(`activo/${this.activoNo}/`)
       .pipe(takeUntil(this.destroy$))
       .subscribe(data => {
-        this.datos = data;console.log(this.datos)
-        this.setDefaultValues();
+        this.datos = data;
+        this.ubicacion_anterior_id = data.ubicacion_actual.id;
+        this.activoId = data.id;
         
-        this.activoId=this.datos.id;
-        // this.selectedUbicacion = this.datos.ubicacion_original; // Set the default value for ubicacion
-        // this.selectedModoAdquisicion = this.datos.modo_adquisicion; 
         this.myForm.patchValue(this.datos);
         console.log("final load activo details")
       });
   }
 
-  setDefaultValues() {
-    if (this.datos && this.modosAdquisicion.length && this.ubicaciones.length) {
-      
-      const modoAdquisicion = this.modosAdquisicion.find(modo => modo.descripcion === this.datos.modo_adquisicion);
-      this.selectedModoAdquisicion = modoAdquisicion.id;
-      // console.log(this.selectedModoAdquisicion)
-      // console.log(modoAdquisicion)
-      // console.log(modoAdquisicion.id)
-      // this.myForm.get('modo_adquisicion').setValue(modoAdquisicion ? modoAdquisicion.id : null);
-
-      
-      const ubicacion = this.ubicaciones.find(ubic => ubic.nombre_oficial === this.datos.ubicacion_original);
-      console.log(this.ubicaciones)
-      console.log(ubicacion)
-      this.selectedUbicacion = ubicacion.id;
-      console.log("final set default values")
-      // console.log(ubicacion)
-      // this.myForm.get('ubicacion_original').setValue(ubicacion ? ubicacion.id : null);
-    }
-  }
-
   onSubmit() {
     if (this.myForm.valid) {
       const datas = this.myForm.value;
-      console.log(datas)
+      datas.ubicacion_actual = this.myForm.value.ubicacion_actual.id;
+      datas.modo_adquisicion = this.myForm.value.modo_adquisicion.id;
+      datas.ubicacion_anterior_id = this.ubicacion_anterior_id;
+
       this.gService.patch(`update-activo/${this.activoId}/`, datas)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
@@ -200,7 +188,7 @@ export class ActivoUpdateComponent {
               title: 'Éxito',
               text: 'Activo actualizado correctamente',
             });
-            // this.router.navigate(['/activos']);
+            this.router.navigate([`/activos/${this.activoNo}`]);
           },
           error: () => {
             Swal.fire({
@@ -213,4 +201,53 @@ export class ActivoUpdateComponent {
     }
   }
 
+  filterUbicacion(value: string) {
+    this.filteredUbicaciones = this.ubicaciones.filter(u => u.nombre_oficial.toLowerCase().includes(value.toLowerCase()));
+  }
+  onEnterPressedUbicacion() {
+    if (this.filteredUbicaciones.length > 0) {
+      this.myForm.get('ubicacion_actual')?.setValue(this.filteredUbicaciones[0]);
+    }
+  }
+  displayUbicacion(ubicacion: any): string {
+    return ubicacion?.nombre_oficial || '';
+  }
+  validateUbicacionInput() {
+    const value = this.myForm.get('ubicacion_actual')?.value;
+  
+    if (!value || typeof value !== 'object' || !value.id) {
+      this.myForm.get('ubicacion_actual')?.setValue(null);
+      this.filterUbicacion("");
+    }
+  }
+  onUbicacionBlur() {
+    setTimeout(() => {
+      this.validateUbicacionInput();
+    }, 100);
+  }
+
+  filterModo(value: string) {
+    this.filteredModos = this.modosAdquisiciones.filter(u => u.descripcion.toLowerCase().includes(value.toLowerCase()));
+  }
+  onEnterPressedModo() {
+    if (this.filteredModos.length === 1) {
+      this.myForm.get('modo_adquisicion')?.setValue(this.filteredModos[0]);
+    }
+  }
+  displayModo(modo: any): string {
+    return modo?.descripcion || '';
+  }
+  validateModoInput() {
+    const value = this.myForm.get('modo_adquisicion')?.value;
+  
+    if (!value || typeof value !== 'object' || !value.id) {
+      this.myForm.get('modo_adquisicion')?.setValue(null);
+      this.filterModo("");
+    }
+  }
+  onModoBlur() {
+    setTimeout(() => {
+      this.validateModoInput();
+    }, 100);
+  }
 }

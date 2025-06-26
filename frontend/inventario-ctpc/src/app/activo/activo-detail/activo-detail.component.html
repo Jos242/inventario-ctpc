@@ -13,9 +13,9 @@
                             <p><strong>Modelo:</strong> {{ datos.modelo }}</p>
                             <p><strong>Serie:</strong> {{ datos.serie }}</p>
                             <p><strong>Estado:</strong> {{ datos.estado }}</p>
-                            <p><strong>Ubicación Original:</strong> {{ datos.ubicacion_original }}</p>
-                            <p><strong>Ubicación Actual:</strong> {{ datos.ubicacion_actual }}</p>
-                            <p><strong>Modo Adquisición:</strong> {{ datos.modo_adquisicion }}</p>
+                            <p><strong>Ubicación Original:</strong> {{ datos.ubicacion_original.nombre_oficial }}</p>
+                            <p><strong>Ubicación Actual:</strong> {{ datos.ubicacion_actual.nombre_oficial }}</p>
+                            <p><strong>Modo Adquisición:</strong> {{ datos.modo_adquisicion.descripcion }}</p>
                             <p><strong>Precio:</strong> {{ datos.precio }}</p>
                             <p><strong>Creado El:</strong> {{ datos.fecha | date: "long" }}</p>
                         </div>

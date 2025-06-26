@@ -16,12 +16,12 @@
                 <mat-card-content>
                     <br>
                   <p>Presione el boton "Generar" para generar el excel con formato de impresion, utlizando los ultimos 41 registros todavia no impresos. Actualmente se pueden crear <b>{{this.excels}}</b> nuevos documentos basado en la cantidad de registros nuevos. 
-                     Al presionar el boton de "Generar" se genera 1 excel con los primeros 41 registros en requerir impresion</p>
+                    Al presionar el boton de "Generar" se genera 1 excel con los primeros 41 registros en requerir impresion ({{ cantNot }})</p>
                   <p></p>
                   <mat-divider></mat-divider>
                 </mat-card-content>
                 <mat-card-actions>
-                  <button mat-flat-button color="primary" (click)="excelImpresion()" >Generar</button>
+                  <button mat-flat-button color="primary" (click)="excelImpresion()" [disabled]="excels < 1">Generar</button>
                 </mat-card-actions>
               </mat-card>
 

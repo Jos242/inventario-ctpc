@@ -14,12 +14,12 @@ def handle_file_directories(doc_type:str | None = None,
         it returns the path for the specified product
     """
     if doc_type is None:
-        absolute_path:str = f"{MEDIA_ROOT}/uploads/actas/"
-        relative_path:str = f"uploads/actas/"
+        absolute_path:str = f"{MEDIA_ROOT}\\uploads\\actas\\"
+        relative_path:str = f"uploads\\actas\\"
 
     if doc_type == "ubicacion_img":
-        absolute_path:str = f"{MEDIA_ROOT}/uploads/ubicaciones/{folder_name}/"
-        relative_path:str = f"uploads/ubicaciones/{folder_name}/"
+        absolute_path:str = f"{MEDIA_ROOT}\\uploads\\ubicaciones\\{folder_name}\\"
+        relative_path:str = f"uploads\\ubicaciones\\{folder_name}\\"
  
     if os.path.exists(absolute_path):
         return [relative_path, absolute_path]
@@ -33,7 +33,7 @@ def handle_uploaded_file(files: list,
                          **kwargs) -> str:
     """
         saves the file following this structure:
-        uploads/{model pk}/{file_name.ext}
+        uploads\\{model pk}\\{file_name.ext}
     """
 
     nombre_oficial:str = kwargs.get("nombre_oficial", "")
@@ -69,9 +69,14 @@ def handle_uploaded_file(files: list,
 
     return relative_path
 
+def store_acta(file, file_name: str):
+    relative_path = os.path.join(f"media\\uploads\\actas\\", file_name)
+    path_to_write = os.path.join(f"{MEDIA_ROOT}\\uploads\\actas\\", file_name) 
 
+    with open(path_to_write, 'wb') as destination: 
+        destination.write(file.read())
 
-
+    return relative_path
 
 
 

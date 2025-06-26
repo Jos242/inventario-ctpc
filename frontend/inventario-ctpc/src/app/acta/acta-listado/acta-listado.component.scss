@@ -1,33 +1,65 @@
 
 .mainCont{
-    width: 70%;
-    margin: 0 auto;
+  width: 70%;
+  margin: 0 auto;
 }
 
 mat-card{
-    min-height: 220px;
-    margin-bottom: 10px;
+  min-height: 220px;
+  margin-bottom: 10px;
 }
 
 .impreso{
-    color: white;
-    background-color: rgb(224, 150, 12);
+  color: white;
+  background-color: rgb(224, 150, 12);
 }
 
 .descargar{
-    margin-right: 5px;
-    margin-bottom: 5px;
+  margin-right: 5px;
+  margin-bottom: 5px;
 }
 
 .impreso:hover{
-    background-color: rgb(255, 183, 50);
+  background-color: rgb(255, 183, 50);
 }
 
 .disabled-button {
-    background-color: #b0b0b0; /* Gray out the button */
-    color: #ffffff;           /* Keep the text color consistent */
-    cursor: not-allowed;      /* Show the not-allowed cursor */
-  }
+  background-color: #b0b0b0; /* Gray out the button */
+  color: #ffffff;           /* Keep the text color consistent */
+  cursor: not-allowed;      /* Show the not-allowed cursor */
+}
 
+.rotate-icon {
+  transition: transform 0.3s ease;
+}
 
+.rotate-icon.expanded {
+  transform: rotate(90deg);
+}
 
+.button-fab-extended,
+.button-fab-extended:hover,
+.button-fab-extended:focus,
+.button-fab-extended:active {
+  box-shadow: none;
+  background-color: transparent;
+  border-radius: 5px;
+}
+
+.node-item {
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.node-item.impreso {
+  background-color: rgb(255, 183, 50);
+  color: black;
+}
+
+.node-item:hover {
+  background-color: rgb(0, 0, 0, 0.05);
+}
+
+.node-item:active {
+  background-color: rgb(0, 0, 0, 0.2);
+}

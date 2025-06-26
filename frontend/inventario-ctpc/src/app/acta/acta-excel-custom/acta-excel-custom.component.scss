@@ -32,7 +32,7 @@ table {
 }
 
 .example-container2{
-  max-height: 719px; /* Adjust the height as needed */
+  max-height: 69vh; /* Adjust the height as needed */
   overflow-y: auto;
   display: block;
 }
@@ -68,19 +68,6 @@ table {
   color: red;
 }
 
-.example-loading-shade {
-  position: absolute;
-  top: 73px; /* Adjust this to match your header height */
-  left: 0;
-  bottom: 0; /* Changed to 0 to cover the entire content area below the header */
-  right: 0;
-  background: rgba(0, 0, 0, 0.15);
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .titulo{
     margin-top: 10px;
     margin-top: 10px;
@@ -103,3 +90,16 @@ table {
 //       width: 93%;
 //   }
 // }
+
+.row-red {
+  background-color: red;
+  color: white;
+}
+
+.row-orange {
+  background-color: orange;
+}
+
+.row-yellow {
+  background-color: rgb(255, 251, 0);
+}

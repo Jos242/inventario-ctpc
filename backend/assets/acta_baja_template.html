@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+      body { font-family: Arial, sans-serif; font-size: 12px; }
+      .parent-component {
+        transform: scale(1); 
+        transform-origin: top left; 
+        margin-left: 10px;
+        
+      }
+
+      .specific-div {
+        width: 8.5in;
+        height: 11in;
+        border: 1px solid #000; /* Just to visualize the parent div */
+      }
+
+      .cont {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .header {
+        width: 66%;
+        margin: 0 auto;
+      }
+
+      .titulos {
+        margin: 0 auto;
+        font-family: Calibri;
+        font-size: 14pt;
+        font-weight: bolder;
+      }
+
+      .tabla {
+        border: 1px solid #000;
+        margin-bottom: 20px;
+        width: 82.425%;
+        margin-top: 25px;
+        font-family: Calibri;
+        font-size: 11pt;
+          color: #000;
+      }
+
+      .tabla th {
+        font-weight: normal;
+      }
+
+      .tabla th.full-width,
+      .tabla td.full-width {
+        width: 100%;
+      }
+
+      .tabla td.half-width {
+        width: 50%;
+      }
+
+
+      .tabla-container {
+        width: 82.425%;
+      }
+
+      .tabla2 tr th {
+        font-family: Arial;
+        font-size: 10pt;
+        text-align: center;
+        background-color: #bdd7ee;
+        font-weight: bolder;
+      }
+
+      .tabla2 tr td {
+        font-family: Calibri;
+        font-size: 11pt;
+      }
+
+      .tabla2 tr td, thead tr th,.tabla tr td, .tabla tr th, #text-measure {
+        border: 1px solid #000000;
+        text-align: left;
+        padding: 5px;
+        line-height: normal; 
+        box-sizing: border-box;
+      }
+
+
+      .firmas {
+        width: 78.5889%;
+        margin-top: 10%;
+      }
+
+      .footer {
+        width: 80.981%;
+      }
+    </style>
+</head>
+<body>
+    <div class="parent-component">
+      <div #specific class="specific-div">
+        <div #contentToConvert class="cont">
+          <div #header class="cont">
+            <img src="images/header.png" alt="" class="header">
+            <!-- <h1 class="centered">Ministerio de Educacion Publica</h1>
+            <h1 class="centered">Direccion Regional Educacion de Alajuela</h1>
+            <h3 class="centered">Colegio Tecnico Profesional de Carrizal</h3>
+            <br>
+            <br>
+            <h4 class="centered">Info Contacto</h4>
+            <h4 class="centered">Info Contacto</h4> -->
+            <p>&nbsp;</p>
+            
+            <div class="cont">
+              <p class="titulos">ACTA DE BAJA DE BIENES N {{ numActa }} - {{ anio }}</p>
+              <p class="titulos">Fecha del Acta: {{ fechaActa }}</p>
+              <!-- <img src="assets/images/logocole.png" alt="" class="absolute-img"> -->
+              <br>
+              <table #firstTable class="tabla">
+                  <tr>
+                    <th colspan="2"><b>Colegio Tecnico Profesional: </b>{{ nombreColegio }}</th>
+                  </tr>
+                  <tr>
+                    <td class="half-width"><b>Fecha de baja del bien:</b> {{ fechaActa }}</td>
+                    <td class="half-width"><b>Curso Lectivo:</b> {{ anio }}</td>
+                  </tr>
+                  <tr>
+                    <td colspan="2"><b>Empresa a la cual se va a entregar para su reciclaje o destruccion. O bien, el metodo que se va a utilizar para desecharlo: </b> {{ descActa }}</td>
+                  </tr>
+              </table> 
+            </div>
+          </div>
+          
+          <div class="tabla-container">
+            <table class="tabla2">
+              <thead>
+                <tr>
+                  <th rowspan="2">Número de identificacion del bien</th>
+                  <th rowspan="2">Descripción del bien</th>
+                  <th rowspan="2">Marca</th>
+                  <th rowspan="2">Modelo</th>
+                  <th rowspan="2">Serie</th>
+                  <th colspan="2">Marque con X según corresponda</th>
+                </tr>
+                <tr>
+                  <th>Obsolencia</th>
+                  <th>Inservibilidad</th>
+                </tr>
+              </thead>
+              {% for item in items %}
+              <tr>
+                <td>{{ item.no_identificacion }}</td>
+                <td>{{ item.descripcion }}</td>
+                <td>{{ item.marca }}</td>
+                <td>{{ item.modelo }}</td>
+                <td>{{ item.serie }}</td>
+                <td>{% if item.obsolencia %}X{% endif %}</td>
+                <td>{% if item.inservibilidad %}X{% endif %}</td>
+              </tr>
+            </table>
+
+            <div class="tabla2 cont">
+              <div id="text-measure" style="position: absolute;visibility: hidden; height:auto; width:22.277%;"></div>
+            </div>
+          </div>
+          <div>
+            <img src="images/firmas.png" alt="" class="firmas">
+            <img src="images/footer.png" alt="" class="footer">
+          </div>
+        </div>
+      </div>
+    </div>
+</body>
+</html>

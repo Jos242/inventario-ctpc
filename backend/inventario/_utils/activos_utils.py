@@ -84,15 +84,12 @@ def next_entries_minus_one() -> str:
     resultados = query_activos.union(query_observaciones).order_by('id_registro')
     
     resultados_list = list(resultados)
-    print(f"Resultados list length -> {len(resultados_list)}")
 
     if not resultados: 
         return "Not possible to substract one, no extra entries"
     
  
     for resultado in resultados_list:
-        print(f"""(next_entries_minus_one) -> id_registro:
-              {resultado['id_registro']} asiento: {resultado['asiento']} """)
 
         if resultado['origen'] == 'activos':                         
             activo:Activos = Activos.objects.get(id_registro = resultado['id_registro'])
@@ -209,6 +206,8 @@ def handle_solo_activos(resultados, path_to_save, file_name) -> Response:
     worksheet.set_header('&L', {'margin': 0.314})
     worksheet.set_footer('&R', {'margin': 0.314})
     worksheet.fit_to_pages(1, 1)
+    worksheet.center_horizontally()
+    worksheet.center_vertically()
     workbook.close()
 
     for activo in activos_list:
@@ -248,7 +247,7 @@ def handle_solo_observaciones(resultados, path_to_save, file_name):
     #Para aumentar el ancho de la columna-------------------------------------
     worksheet.set_column('A:A', 2.29) 
     worksheet.set_column('B:B', 86.29) 
-    counter:int = 1
+    counter: int = 1
     # no_identificacion IS descripcion, because the query needs to be
     # fixed 
     outer_borders_black ={'top': 1,
@@ -257,9 +256,9 @@ def handle_solo_observaciones(resultados, path_to_save, file_name):
                           'right': 1}
     
     for observacion in observaciones_list:
-        obs:Observaciones = Observaciones.objects.get(id_registro = observacion['id_registro']) 
+        obs: Observaciones = Observaciones.objects.get(id_registro = observacion['id_registro']) 
         new_id_registro = restar_uno(observacion['id_registro'])
-        new_asiento = int(observacion['asiento'] -1) 
+        new_asiento = int(observacion['asiento'] - 1) 
         
         if int(observacion['asiento']) == 2 and counter > 30:
             nums = observacion['id_registro'].split(',') 
@@ -267,8 +266,6 @@ def handle_solo_observaciones(resultados, path_to_save, file_name):
             nums[1] = f"{int(nums[1]) - 1}"
             result =  ",".join(nums) # ID_REGISTRO MINUS ONE
 
-            print(observacion['id_registro'])
-            print(nums[1]) 
             worksheet.write(f'A{counter}', "41",
                             workbook.add_format(bold_param |
                                                 center_text_param |
@@ -300,6 +297,8 @@ def handle_solo_observaciones(resultados, path_to_save, file_name):
     worksheet.set_header('&L', {'margin': 0.314})
     worksheet.set_footer('&R', {'margin': 0.314})
     worksheet.fit_to_pages(1, 1)
+    worksheet.center_horizontally()
+    worksheet.center_vertically()
 
     workbook.close()
     next_entries_minus_one()
@@ -348,9 +347,25 @@ def handle_observaciones_y_activos(resultados, path_to_save, file_name):
             element["serie"]
         ]
 
-        worksheet.write_row(row = i,
-                            col = 0,
-                            data = row)
+        origen = element.get("origen")
+        
+        if origen == "observaciones":
+            # Merge from column A to F for this row
+            merge_format = workbook.add_format({
+                'valign': 'vcenter',
+                **outer_borders_black
+            })
+
+            # Write the index in column A
+            worksheet.write(i, 0, i + 1, workbook.add_format(bold_param |
+                                                center_text_param |
+                                                outer_borders_black))
+
+            # Merge columns B to F
+            merged_text = f"{element['no_identificacion']}"
+            worksheet.merge_range(i, 1, i, 5, merged_text, merge_format)
+        else:
+            worksheet.write_row(i, 0, row)
 
                 
     b_column_format = workbook.add_format({'bold': True, 
@@ -372,8 +387,10 @@ def handle_observaciones_y_activos(resultados, path_to_save, file_name):
     worksheet.set_margins(left = 0.669, right = 0.354,
                           top = 0.984, bottom = 0.196)
 
-    worksheet.set_header('&L', {'margin': 0.314})
-    worksheet.set_footer('&R', {'margin': 0.314})
+    worksheet.set_header('', {'margin': 0.314})
+    worksheet.set_footer('', {'margin': 0.314})
+    worksheet.center_horizontally()
+    worksheet.center_vertically()
     worksheet.fit_to_pages(1, 1)
     workbook.close()
 

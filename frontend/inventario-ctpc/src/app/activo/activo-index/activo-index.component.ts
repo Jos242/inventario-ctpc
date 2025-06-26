@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy, ElementRef, HostListener } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy, ElementRef, HostListener, ChangeDetectorRef } from '@angular/core';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardActions, MatCardModule} from '@angular/material/card';
@@ -37,9 +37,9 @@ export interface ActivoData {
   modelo: string;
   serie: string;
   estado: string;
-  ubicacion_original_nombre_oficial: string;
-  ubicacion_actual_nombre_oficial: string;
-  modo_adquisicion_desc: string;
+  ubicacion_original: any;
+  ubicacion_actual: any;
+  modo_adquisicionany: any;
   precio: string;
   conectividad: string;
   seguridad: string;
@@ -96,241 +96,249 @@ export class ActivoIndexComponent implements AfterViewInit  {
     private router:Router,
     private route:ActivatedRoute,
     private httpClient:HttpClient,
-    private sanitizer: DomSanitizer
-    ){
-      this.filtros = this.fb.group({
-        id_registro: false,
-        no_identificacion: true,
-        descripcion: true,
-        marca: true,
-        modelo: true,
-        serie: true,
-        estado: false,
-        ubicacion_original_nombre_oficial: true,
-        ubicacion_actual_nombre_oficial: true,
-        modo_adquisicion_desc: false,
-        precio: false,
-        conectividad: false,
-        seguridad: false,
-        placa: false,
-        baja: false,
-        fecha: false,
-      });
+    private sanitizer: DomSanitizer,
+    private cdr: ChangeDetectorRef
+  ){
+    this.filtros = this.fb.group({
+      id_registro: false,
+      no_identificacion: true,
+      descripcion: true,
+      marca: true,
+      modelo: true,
+      serie: true,
+      estado: false,
+      ubicacion_original: true,
+      ubicacion_actual: true,
+      modo_adquisicion: false,
+      precio: false,
+      conectividad: false,
+      seguridad: false,
+      placa: false,
+      baja: false,
+      fecha: false
+    });
+
+    // Load cached filters if available
+    const cachedFilters = JSON.parse(localStorage.getItem('selectedColumns') || '{}');
+    if (Object.keys(cachedFilters).length) {
+      this.filtros.patchValue(cachedFilters);
+    }
+
+    this.checks(); 
+    this.updateDisplayedColumns();
+  }
+
+  ngOnInit(): void {
+    this.checkScreenSize();
+    
+    this.filtros.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.displayMessage = true;
+    });
+
+    //this.moverObservaciones();
+  }
+
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+
+    if (localStorage.getItem('lastSearch')) {
+      this.input.nativeElement.value = localStorage.getItem('lastSearch');
+      this.applyFilter(null,localStorage.getItem('lastSearch'));
+    } else{
+      this.input.nativeElement.value = null;
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.filterValue) { 
+      localStorage.setItem('lastSearch', this.filterValue);
+    } else {
+      localStorage.setItem('lastSearch', '');
+    }
+    this.destroy$.complete();
+  }
+
+  @HostListener('window:resize', [])
+  onResize() {
+    this.checkScreenSize();
+  }
+
+  private checkScreenSize(): void {
+    this.isSmallScreen = window.innerWidth < 1024;
+  }
+
+  updateDisplayedColumns(): void {
+    this.displayedColumns = Object.keys(this.filtros.value).filter(key => this.filtros.value[key]);
+  }
+
+  loadUbicaciones(): void {
+    this.isLoadingResults = true;
   
-      // Load cached filters if available
-      const cachedFilters = JSON.parse(localStorage.getItem('selectedColumns') || '{}');
-      if (Object.keys(cachedFilters).length) {
-        this.filtros.patchValue(cachedFilters);
+    const loadingTimeout = setTimeout(() => {
+      if (this.isLoadingResults) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Hay problemas...',
+          text: 'La carga de datos esta durando mas de lo esperado... Por favor intente nuevamente',
+        });
       }
+    }, 15000);
+  
+    this.gService.list('all-ubicaciones/')
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data: any[]) => {
+        this.updateDisplayedColumns();
+        this.ubicaciones = data;
 
-      this.checks(); 
-      this.updateDisplayedColumns();
-    }
+        // Match ubicacion fields and attach aliases for both original and actual ubicaciones
+        this.datos.forEach((element: any) => {
+          const ubicacionOriginal = this.ubicaciones.find(
+            (ubi: any) => ubi.nombre_oficial === element.ubicacion_original.nombre_oficial
+          );
+          const ubicacionActual = this.ubicaciones.find(
+            (ubi: any) => ubi.nombre_oficial === element.ubicacion_actual.nombre_oficial
+          );
 
-    ngOnInit(): void {
-      this.checkScreenSize();
-      
-      this.filtros.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
-        this.displayMessage = true;
-      });
-    }
+          // Assign aliasOriginal and aliasActual if found
+          element.aliasOriginal = ubicacionOriginal?.alias || null;
+          element.aliasActual = ubicacionActual?.alias || null;
+        });
 
-    ngAfterViewInit() {
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-
-      if (localStorage.getItem('lastSearch')) {
-        this.input.nativeElement.value = localStorage.getItem('lastSearch');
-        this.applyFilter(null,localStorage.getItem('lastSearch'));
-      } else{
-        this.input.nativeElement.value = null;
+        this.isLoadingResults = false;
+        clearTimeout(loadingTimeout);
+      },
+      error: (error) => {
+        this.isLoadingResults = false;
+        clearTimeout(loadingTimeout);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador.',
+        });
       }
-    }
+    });
+  }
+  
+  checks(){
+    this.isLoadingResults = true;  // Start loading
 
-    ngOnDestroy(): void {
-      if (this.filterValue) { 
-        localStorage.setItem('lastSearch', this.filterValue);
-      } else {
-        localStorage.setItem('lastSearch', '');
+    const loadingTimeout = setTimeout(() => {
+      if (this.isLoadingResults) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Hay problemas...',
+          text: 'La carga de datos esta durando mas de lo esperado... Por favor intente nuevamente',
+        });
       }
-      this.destroy$.complete();
-    }
+    }, 15000); // 15 seconds
 
-    @HostListener('window:resize', [])
-    onResize() {
-      this.checkScreenSize();
-    }
+    const selectedColumns = Object.keys(this.filtros.value)
+      .filter(key => this.filtros.value[key]);
 
-    private checkScreenSize(): void {
-      this.isSmallScreen = window.innerWidth < 1024;
+    if (!selectedColumns.includes('has_observaciones')) {
+      selectedColumns.push('has_observaciones');
     }
+    const formData = { fields: selectedColumns, observaciones: true };
 
-    updateDisplayedColumns(): void {
-      this.displayedColumns = Object.keys(this.filtros.value).filter(key => this.filtros.value[key]);
-    }
+    // Save selected columns to cache
+    localStorage.setItem('selectedColumns', JSON.stringify(this.filtros.value));
 
-    fetchObservaciones(): void {
-      this.isLoadingResults = true;
-      this.gService.list('todas-las-observaciones/')
-        .pipe(takeUntil(this.destroy$))
-        .subscribe((data: any) => {
-          this.observaciones = data;
-          
+    // Make the request
+    this.gService.create('activos/select-columns/', formData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data: any) => {
+          this.datos = data;
+
           for (let element of this.datos) {
             element.class = this.getRowClass(element);
           }
+        
+          this.displayMessage = true;
           this.dataSource.data = this.datos;
-          this.totalItems = this.datos.length;
-          
+          this.totalItems = data.length;
           this.updatePageSizeOptions();
 
-          this.isLoadingResults = false;
-        });
-    }
+          this.loadUbicaciones();
 
-    hasObservaciones(activoId: string): boolean {
-      return this.observaciones.some(obs => obs.activo == activoId);
-    }
-
-    getRowClass(row: any): string {
-      this.isLoadingResults = true;
-      if (row.baja == 'DADO DE BAJA CON PLACA' || row.baja == 'DADO DE BAJA SIN PLACA') {
-        return 'row-red';
-      } else if (row.baja == 'A DAR DE BAJA') {
-        return 'row-orange';
-      } else if (this.hasObservaciones(row.id_registro)) {
-        return 'row-yellow';
-      }
-      return '';
-    }
-
-    loadUbicaciones(): void {
-      this.isLoadingResults = true;
-    
-      const loadingTimeout = setTimeout(() => {
-        if (this.isLoadingResults) {
+          this.isLoadingResults = false; // Stop loading
+          clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
+          this.displayMessage = false;
+        },
+        error: (error) => {
+          this.isLoadingResults = false; // Stop loading on error
+          clearTimeout(loadingTimeout); // Clear the timeout if there's an error
           Swal.fire({
             icon: 'error',
-            title: 'Hay problemas...',
-            text: 'La carga de datos esta durando mas de lo esperado... Por favor intente nuevamente',
+            title: 'Error',
+            text: 'Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador.',
           });
         }
-      }, 15000);
+      });
+  }
+
+  getRowClass(row: any): string {
+    this.isLoadingResults = true;
+    if (row.baja == 'DADO DE BAJA CON PLACA' || row.baja == 'DADO DE BAJA SIN PLACA') {
+      return 'row-red';
+    } else if (row.baja == 'A DAR DE BAJA') {
+      return 'row-orange';
+    } else if (row.has_observaciones) {
+      return 'row-yellow';
+    }
+    return '';
+  }
+
+  updatePageSizeOptions() {
+    this.pageSizeOptions = [10, 25, 40, 100, this.totalItems];
+  }
+
+  applyFilter(event: Event, flag: string) {
+    if (flag) {
+      this.filterValue = flag;
+    } else { 
+      this.filterValue = (event.target as HTMLInputElement).value;
+    }
     
-      this.gService.list('all-ubicaciones/')
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (data: any[]) => {
-            this.updateDisplayedColumns();
-            this.ubicaciones = data;
+    this.dataSource.filter = this.filterValue.trim().toLowerCase();
     
-            // Match ubicacion fields and attach aliases for both original and actual ubicaciones
-            this.datos.forEach((element: any) => {
-              const ubicacionOriginal = this.ubicaciones.find(
-                (ubi: any) => ubi.nombre_oficial === element.ubicacion_original_nombre_oficial
-              );
-              const ubicacionActual = this.ubicaciones.find(
-                (ubi: any) => ubi.nombre_oficial === element.ubicacion_actual_nombre_oficial
-              );
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
+  }
+
+  onMiddleClick(event: MouseEvent, id: Number): void {
+    if (event.button === 1) {  // Middle-click detection
+      event.preventDefault();  // Prevent default behavior (scrolling)
+      window.open(`/activos/${id}`, '_blank');
+    }
+  }
+
+  verDetalles(id: Number): void {
+    console.log(id)
+    this.router.navigate(['activos/', id]);
+  }
     
-              // Assign aliasOriginal and aliasActual if found
-              element.aliasOriginal = ubicacionOriginal?.alias || null;
-              element.aliasActual = ubicacionActual?.alias || null;
-            });
-    
-            this.isLoadingResults = false;
-            clearTimeout(loadingTimeout);
-          },
-          error: (error) => {
-            this.isLoadingResults = false;
-            clearTimeout(loadingTimeout);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador.',
-            });
-          }
+  moverObservaciones(): void {
+    this.gService.list('mover-observaciones/')
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data: any[]) => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Éxito',
+          text: `${data}`,
         });
-    }
-    
-    checks(){
-      this.isLoadingResults = true;  // Start loading
-
-      const loadingTimeout = setTimeout(() => {
-        if (this.isLoadingResults) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Hay problemas...',
-            text: 'La carga de datos esta durando mas de lo esperado... Por favor intente nuevamente',
-          });
-        }
-      }, 15000); // 15 seconds
-
-      const selectedColumns = Object.keys(this.filtros.value)
-        .filter(key => this.filtros.value[key]);
-  
-      const formData = { fields: selectedColumns };
-  
-      // Save selected columns to cache
-      localStorage.setItem('selectedColumns', JSON.stringify(this.filtros.value));
-  
-      // Make the request
-      this.gService.create('activos/select-columns/', formData)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (data: any) => {
-            this.datos = data;
-
-            this.fetchObservaciones();
-            this.displayMessage = true;
-            this.dataSource.data = this.datos;
-            this.totalItems = data.length;
-            this.updatePageSizeOptions();
-
-            this.isLoadingResults = false; // Stop loading
-            clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
-            this.displayMessage = false;
-
-            this.loadUbicaciones();
-          },
-          error: (error) => {
-            this.isLoadingResults = false; // Stop loading on error
-            clearTimeout(loadingTimeout); // Clear the timeout if there's an error
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador.',
-            });
-          }
+      },
+      error: (error) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: `${error}`,
         });
-    }
-
-    updatePageSizeOptions() {
-      this.pageSizeOptions = [10, 25, 40, 100, this.totalItems];
-    }
-
-    applyFilter(event: Event, flag: string) {
-      if (flag) {
-        this.filterValue = flag;
-      } else { 
-        this.filterValue = (event.target as HTMLInputElement).value;
       }
-      
-      this.dataSource.filter = this.filterValue.trim().toLowerCase();
-      
-      if (this.dataSource.paginator) {
-        this.dataSource.paginator.firstPage();
-      }
-    }
-
-    onMiddleClick(event: MouseEvent, no_identificacion: string): void {
-      if (event.button === 1) {  // Middle-click detection
-        event.preventDefault();  // Prevent default behavior (scrolling)
-        window.open(`/activos/${no_identificacion}`, '_blank');
-      }
-    }
-
-    verDetalles(id: string): void {
-      this.router.navigate(['activos/', id]);
-    }
+    });
+  }
 }

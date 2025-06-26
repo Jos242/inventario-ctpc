@@ -1,8 +1,31 @@
 <h2 mat-dialog-title>Confirmación</h2>
 <mat-dialog-content>
-  Está seguro que quiere realizar esta acción?
+  <div [innerHTML]="data.texto"></div>
+
+  <div *ngIf="data.ubicaciones">
+    <form [formGroup]="myForm" class="divForm">
+      <mat-form-field appearance="outline" class="inputsForm custom-dropdown">
+          <mat-label>Ubicacion</mat-label>
+          <input #ubicacionInput matInput type="text" placeholder="Ubicación" formControlName="ubicacion"
+          [matAutocomplete]="autoUbicacion" #autoTriggerUbicacion="matAutocompleteTrigger"
+          (keyup)="filterUbicacion(ubicacionInput.value)" (blur)="onUbicacionBlur()" (keydown.enter)="onEnterPressedUbicacion(); ubicacionInput.blur(); autoTriggerUbicacion.closePanel()">
+          <span class="arrow"></span>
+          <mat-autocomplete #autoUbicacion="matAutocomplete" [displayWith]="displayUbicacion">
+              <mat-option *ngFor="let ubicacion of filteredUbicaciones" [value]="ubicacion">
+              {{ ubicacion.nombre_oficial }}
+              </mat-option>
+          </mat-autocomplete>
+          <mat-hint>Ubicacion fisica del activo en el colegio</mat-hint>
+          <mat-error *ngIf="myForm.get('ubicacion')?.hasError('invalidUbicacion')">
+            Un activo ya posee esta <strong>ubicación</strong>
+        </mat-error>
+      </mat-form-field>
+    </form>
+  </div>
+
 </mat-dialog-content>
 <mat-dialog-actions>
-  <button mat-button [mat-dialog-close]="false">No</button>
-  <button mat-button [mat-dialog-close]="true">Sí</button>
+  <button mat-button [mat-dialog-close]="false">{{ data.false }}</button>
+  <button mat-button [mat-dialog-close]="true" *ngIf="!data.ubicaciones">{{ data.true }}</button>
+  <button mat-button (click)="closeDialog()" *ngIf="data.ubicaciones" [disabled]="myForm.invalid">{{ data.true }}</button>
 </mat-dialog-actions>

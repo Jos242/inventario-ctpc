@@ -1,12 +1,12 @@
-import { Component, Inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { FormGroup, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { MatSelectModule } from '@angular/material/select';
+import { FormGroup, ReactiveFormsModule, FormBuilder, Validators, FormControl } from '@angular/forms';
+import { MatSelect, MatSelectModule } from '@angular/material/select';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {FormsModule} from '@angular/forms';
 import { GenericService } from '../share/generic.service';
-import { Subject, filter, takeUntil, forkJoin, from, concatMap } from 'rxjs';
+import { Subject, filter, takeUntil, forkJoin, from, concatMap, Observable, startWith, map } from 'rxjs';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 
@@ -32,7 +32,8 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { MatTooltip } from '@angular/material/tooltip';
 import { DialogRef } from '@angular/cdk/dialog';
 import { HotToastService } from '@ngxpert/hot-toast';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatAutocompleteModule, MatAutocompleteSelectedEvent, MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import {MatChipInputEvent, MatChipsModule} from '@angular/material/chips';
 
 @Component({
   selector: 'app-add-annotation-dialog',
@@ -43,9 +44,9 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MatCheckboxModule,
     MatSliderModule,
     MatMenuModule,MatDialogModule,
-    RouterLink, MatSelectModule,
+    MatSelectModule,
     CommonModule,ReactiveFormsModule,
-    MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, MatTooltip, MatAutocompleteModule
+    MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, MatAutocompleteModule, MatChipsModule
   ],
   templateUrl: './add-annotation-dialog.component.html',
   styleUrl: './add-annotation-dialog.component.scss'
@@ -55,19 +56,20 @@ export class AddAnnotationDialogComponent {
   myForm: FormGroup;
   filtros: FormGroup;
 
-  activos: any;
-  filteredActivos: any;
+  select_no_identificacion = new FormControl();
+  search_no_identificacion = new FormControl();
+  @ViewChild('search') searchTextBox: ElementRef;
+
+  activos: any[] = [];
+  filteredActivos: any[] = [];
+  selectedActivos: any[] = [];
 
   activoIdRegistro: any;
-  currentActivo: any;
   activoId: any;
-  datosActivos: any; // This should be populated with the actual data
-  activosACrear: any[] = [];
 
   public isLoadingResults = false;
 
-  activosEnLista: any;
-  listaActi: any[] = [];;
+  @ViewChild(MatAutocompleteTrigger) autoTrigger!: MatAutocompleteTrigger;
 
   constructor(
     private router:Router,
@@ -78,16 +80,15 @@ export class AddAnnotationDialogComponent {
     private gService:GenericService,
     public dialogRef: MatDialogRef<AddAnnotationDialogComponent>,
     private toast: HotToastService,
+    private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.myForm = this.fb.group({
-      descripcion: [null, Validators.required],
-      no_identificacion: [null ,Validators.required]
+      descripcion: [null, Validators.required]
     });
-
     this.activoIdRegistro = data.activoIdRegistro;
     this.activoId = data.activoId;
-    console.log(this.activoIdRegistro)
+    
     this.filtros = this.fb.group({
       id_registro: true,
       no_identificacion: true,
@@ -98,7 +99,7 @@ export class AddAnnotationDialogComponent {
       estado: false,
       ubicacion_original_nombre_oficial: true,
       ubicacion_actual_nombre_oficial: false,
-      modo_adquisicion_desc: false,
+      modo_adquisicion: false,
       precio: false,
       conectividad: false,
       seguridad: false,
@@ -106,21 +107,47 @@ export class AddAnnotationDialogComponent {
       baja: false,
       fecha: false,
     });
-    this.loadActivos();
-    
   }
 
   ngOnInit() {
-    this.activosACrear.push(this.activoIdRegistro); // Add the default activo to the array
-    this.listaActi.push(this.activoId);
-    this.activosList();
+    this.loadActivos();
   }
 
-  activosList(): void {
-    this.activosEnLista = this.listaActi.map(activo => activo).join(', '); 
+  filterActivos(value: string) {
+    const filterValue = value.toLowerCase();
+    this.filteredActivos = this.activos.filter(a => a.no_identificacion.toLowerCase().includes(filterValue));
+  }
+  selectionChange(event) {
+    if (event.isUserInput) {
+      if (event.source.selected == true) {
+        this.selectedActivos.push(event.source.value);
+      } else if (event.source.selected == false) {
+        let index = this.selectedActivos.indexOf(event.source.value);
+        this.selectedActivos.splice(index, 1)
+      }
+    }
+  }
+  openedChange(e) {
+    // Set search textbox value as empty while opening selectbox 
+    this.search_no_identificacion.patchValue('');
+    // Focus to search textbox while clicking on selectbox
+    if (e == true) {
+      this.searchTextBox?.nativeElement?.focus();
+    }
+  }
+  onSearchFocus(selectRef: MatSelect) {
+    selectRef.open();
   }
 
-  loadActivos(){
+  removeActivo(activo) {
+    const index = this.selectedActivos.indexOf(activo);
+    if (index >= 0) {
+      this.selectedActivos.splice(index, 1);
+      this.select_no_identificacion.setValue(this.selectedActivos);
+    }
+  }
+
+  loadActivos() {
     this.isLoadingResults = true;  // Start loading
 
     const loadingTimeout = setTimeout(() => {
@@ -138,80 +165,36 @@ export class AddAnnotationDialogComponent {
 
     const formData = { fields: selectedColumns };
 
-
     // Make the request
     this.gService.create('activos/select-columns/', formData)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data: any) => {
-          console.log(data);
-          
-          // Count the number of items where datos.placa is false
-          this.datosActivos = data;
-     
-          console.log(this.datosActivos);
-          this.isLoadingResults = false; // Stop loading
-          clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
-
-        },
-        error: (error) => {
-          this.isLoadingResults = false; // Stop loading on error
-          clearTimeout(loadingTimeout); // Clear the timeout if there's an error
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador.',
-          });
-        }
-      });
-  }
-
-  agregarActivo(){
-    const selectedActivo = this.myForm.value.no_identificacion.id_registro;
-
-    // Prevent duplicates and the initially passed activoIdRegistro
-    if (selectedActivo && selectedActivo !== this.activoIdRegistro && !this.activosACrear.includes(selectedActivo)) {
-      this.activosACrear.push(selectedActivo);
-      this.listaActi.push(this.myForm.value.no_identificacion.no_identificacion);
-      this.toast.success(`Activo ${this.myForm.value.no_identificacion.no_identificacion} seleccionado correctamente`, {
-        dismissible: true,
-        duration: 4000,  // 3 seconds
-        position: 'top-right',  // position of the toast
-        style: {
-          border: '1px solid #28a745', // Add a green border
-          // padding: '16px',
-          color: '#28a745',
-          background: '#f0fdf4' // Light green background
-        },
-        iconTheme: {
-          primary: '#28a745',
-          secondary: '#FFFAEE',
-        },
-      });
-      console.log(this.activosACrear);
-    } else {
-
-      this.toast.warning(`El activo ${this.myForm.value.no_identificacion.no_identificacion} ya ha sido seleccionado`, {
-        duration: 4000,
-        position: 'top-right',
-        style: {
-          border: '1px solid #ffc107',
-          color: '#856404',
-          background: '#fff3cd'
-        },
-        dismissible: true,
-      });
-    }
-   
-    this.activosList()
-
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data: any) => {
+        this.activos = data;
+        this.filteredActivos = data;
+        
+        this.selectedActivos.push(data.find(d => d.no_identificacion == this.activoId));
+        this.select_no_identificacion.setValue(this.selectedActivos);
+        
+        this.isLoadingResults = false; // Stop loading
+        clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
+      },
+      error: (error) => {
+        this.isLoadingResults = false; // Stop loading on error
+        clearTimeout(loadingTimeout); // Clear the timeout if there's an error
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador.',
+        });
+      }
+    });
   }
 
   async onSubmit() {
-    if (this.myForm.valid) {
-      let descripcion = this.myForm.value.descripcion;
+    if (this.myForm.valid && this.selectedActivos.length > 0) {
+      let descripcion = this.myForm.value.descripcion.trim();
 
-      // Ensure the description ends with a period
       if (descripcion.charAt(descripcion.length - 1) !== '.') {
           descripcion += '.';
       }
@@ -220,7 +203,7 @@ export class AddAnnotationDialogComponent {
         const chunks = [];
         let start = 0;
 
-        while (start < text.length) {
+        while (start < text.length) { 
             let end = start + chunkSize;
             if (end >= text.length) {
                 chunks.push(text.slice(start));
@@ -239,67 +222,33 @@ export class AddAnnotationDialogComponent {
       };
 
       const chunks = splitDescripcion(descripcion, 98);
-      let exitosos = 0;
 
-      for (const activoId of this.activosACrear) {
-          try {
-              for (const chunk of chunks) {
-                  const formData = new FormData();
-                  formData.append('descripcion', chunk);
-                  formData.append('activo', activoId);
-
-                  console.log("Data to send:", formData);
-
-                  const data = await firstValueFrom(this.gService.create('nueva-observacion/', formData));
-                  console.log(`Observation for activo ${activoId} created:`, data);
-              }
-              exitosos++;
-          } catch (error) {
-              Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: `Hubo un error de servidor al crear la observación para el activo ${activoId}, por favor intente otra vez o contacte a su administrador si el problema persiste.`,
-              });
-              return;
-          }
+      const datos = {
+        descripciones: chunks,
+        activos: this.selectedActivos
       }
-
-      if (exitosos === this.activosACrear.length) {
-          this.myForm.reset();
+      
+      this.gService.create('create-activo-observacion/', datos)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data: any) => {
           Swal.fire({
               icon: 'success',
               title: 'Éxito',
               text: 'Se han agregado las anotaciones correctamente.',
           });
-      } else {
+
+          this.dialogRef.close();
+        },
+        error: (error) => {
           Swal.fire({
-              icon: 'warning',
-              title: 'Parcialmente exitoso',
-              text: `Se han creado anotaciones para ${exitosos} del total de ${this.activosACrear.length} activos correctamente. Por favor revise y agregue las faltantes nuevamente.`,
+            icon: 'error',
+            title: 'Error',
+            text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. ${error}`,
           });
-      }
-  }
-  }
-
-  
-
-  filterActivo(value: string) {
-    this.filteredActivos = this.activos.filter(u => u.nombre_oficial.toLowerCase().includes(value.toLowerCase()));
-  }
-  onEnterPressedActivo() {
-    if (this.filteredActivos.length === 1) {
-      this.myForm.get('ubicacion_original')?.setValue(this.filteredActivos[0]);
+        }
+      });
     }
   }
-  displayActivo(ubicacion: any): string {
-    return ubicacion?.nombre_oficial || '';
-  }
-  validateActivoInput() {
-    const value = this.myForm.get('ubicacion_original')?.value;
   
-    if (!value || typeof value !== 'object' || !value.id) {
-      this.myForm.get('ubicacion_original')?.setValue(null);
-      this.filteredActivos("");
-    }
-  }
 }

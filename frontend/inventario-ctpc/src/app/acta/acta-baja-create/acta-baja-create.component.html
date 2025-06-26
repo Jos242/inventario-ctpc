@@ -1,187 +1,221 @@
 <div>
   @if (isLoadingResults) {
     <div class="example-loading-shade">
-      @if (isLoadingResults) {
         <mat-spinner></mat-spinner>
-      }
     </div>
   }   
-    <div class="titulo d-flex justify-content-center">
-        <h1>Crear Nueva Acta de Baja</h1>
-    </div>
-    <div class="formAgregar">
-        <mat-card>
-            <mat-card-content>
-                <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">
-                    <div class="container">
-                      <div class="row">
-                        <mat-form-field appearance="outline" class="inputsForm">
-                          <mat-label>Descripcion</mat-label>
-                          <textarea matInput formControlName="descripcion"></textarea>
-                          <mat-hint>Descripcion de lo que se hara con el activo</mat-hint>
-                        </mat-form-field>
-                        <br>
-                        <mat-form-field appearance="outline" class="inputsForm">
-                          <mat-label>Razon de Baja</mat-label>
-                          <mat-select formControlName="razon" placeholder="Seleccione una razon">
-                            <mat-option value="Obsolencia">Obsolencia</mat-option>
-                            <mat-option value="Inservibilidad">Inservibilidad</mat-option>
-                          </mat-select>
-                          <mat-hint>Razon por la cual se estara dando de baja el activo</mat-hint>
-                        </mat-form-field>
-                        <mat-form-field appearance="outline" class="inputsForm">
-                          <mat-label>Seleccione la fecha</mat-label>
-                          <input formControlName="fecha" matInput [matDatepicker]="picker" readonly="true" (focus)="picker.open()">
-                          <mat-hint>DD/MM/AAAA</mat-hint>
-                          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-                          <mat-datepicker #picker></mat-datepicker>
-                        </mat-form-field>
-                        
-                      </div>
+  <div class="titulo d-flex justify-content-center">
+      <h1>Crear Nueva Acta de Baja</h1>
+  </div>
+  <div class="formAgregar">
+    <mat-card>
+      <mat-card-content>
+        <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">
+          <div class="">
+            <div class="row">
+              <mat-form-field appearance="outline" class="inputsForm">
+                <mat-label>Descripcion</mat-label>
+                <textarea matInput formControlName="descripcion"></textarea>
+                <mat-hint>Descripcion de lo que se hara con el activo</mat-hint>
+              </mat-form-field>
+              <br>
+              <!--
+              <mat-form-field appearance="outline" class="inputsForm">
+                <mat-label>Razon de Baja</mat-label>
+                <mat-select formControlName="razon" placeholder="Seleccione una razon">
+                  <mat-option value="Obsolencia">Obsolencia</mat-option>
+                  <mat-option value="Inservibilidad">Inservibilidad</mat-option>
+                </mat-select>
+                <mat-hint>Razon por la cual se estara dando de baja el activo</mat-hint>
+              </mat-form-field>
+              -->
+              <mat-form-field appearance="outline" class="inputsForm">
+                <mat-label>Seleccione la fecha</mat-label>
+                <input formControlName="fecha" matInput [matDatepicker]="picker" readonly="true" (focus)="picker.open()">
+                <mat-hint>DD/MM/AAAA</mat-hint>
+                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+              </mat-form-field>
+            </div>
 
-                      <div class="row">
-                        <h1 *ngIf="!myForm.get('razon').value">Por favor seleccione la razon por la que se daran de baja los activos para poder visualizar los activos</h1>
+            <div>
+              <mat-form-field appearance="outline" class="inputsForm">
+                <mat-label>Buscar...</mat-label>
+                <input matInput (keyup)="applyFilter($event)" placeholder="Ej. Monitor, Aula 01, 6105-1234" #input>
+              </mat-form-field>
+              <div class="row">
+                <div class="col-6">
+                  <h2>Todos los Activos</h2>
+                  <div class="mat-elevation-z8">
+                    <div class="table-container">
+                      <table mat-table [dataSource]="dataSource" matSort>        
+                        <ng-container matColumnDef="select">
+                          <th class="p-0" mat-header-cell *matHeaderCellDef>
+                            <mat-checkbox (change)="$event ? toggleAllRowsAll() : null"
+                                          [checked]="selectionAll.hasValue() && isAllSelectedAll()"
+                                          [indeterminate]="selectionAll.hasValue() && !isAllSelectedAll()">
+                            </mat-checkbox>
+                          </th>
+                          <td class="p-0" mat-cell *matCellDef="let row">
+                            <mat-checkbox (click)="$event.stopPropagation()"
+                                          (change)="$event ? selectionAll.toggle(row) : null"
+                                          [checked]="selectionAll.isSelected(row)">
+                            </mat-checkbox>
+                          </td>
+                        </ng-container>     
 
-                        <mat-form-field appearance="outline" class="inputsForm">
-                          <mat-label>Buscar...</mat-label>
-                          <input matInput (keyup)="applyFilter($event)" placeholder="Ej. Monitor, Aula 01, 6105-1234" #input>
-                        </mat-form-field>
-                        
-                        <div class="row">
-                          <div class="col-6">
-                            <h2>Todos los Activos</h2>
-                            <div class="mat-elevation-z8">
-                              <table mat-table [dataSource]="dataSource" matSort *ngIf="myForm.get('razon').value">                            
-                                <!-- No. Identificacion Column -->
-                                <ng-container *ngIf="displayedColumns.includes('no_identificacion')" matColumnDef="no_identificacion">
-                                  <th mat-header-cell *matHeaderCellDef mat-sort-header> No. Placa </th>
-                                  <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.no_identificacion}} </td>
-                                </ng-container>
-                            
-                                <!-- Descripcion Column -->
-                                <ng-container *ngIf="displayedColumns.includes('descripcion')" matColumnDef="descripcion">
-                                  <th mat-header-cell *matHeaderCellDef mat-sort-header> Descripcion </th>
-                                  <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.descripcion}} </td>
-                                </ng-container>
-              
-                                <ng-container *ngIf="displayedColumns.includes('marca')" matColumnDef="marca">
-                                  <th mat-header-cell *matHeaderCellDef mat-sort-header> Marca </th>
-                                  <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.marca}} </td>
-                                </ng-container>
-              
-                                <ng-container *ngIf="displayedColumns.includes('modelo')" matColumnDef="modelo">
-                                  <th mat-header-cell *matHeaderCellDef mat-sort-header> Modelo </th>
-                                  <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.modelo}} </td>
-                                </ng-container>
-                            
-                                <ng-container *ngIf="displayedColumns.includes('serie')" matColumnDef="serie">
-                                  <th mat-header-cell *matHeaderCellDef mat-sort-header> Serie </th>
-                                  <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.serie}} </td>
-                                </ng-container>
-                 
-                                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                                <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectActivo(row)"></tr>
-                              
-                                <!-- Row shown when there is no matching data. -->
-                                <tr class="mat-row" *matNoDataRow>
-                                  <td class="mat-cell" colspan="4">No se han encontrado datos para "{{input.value}}"</td>
-                                </tr>
-                              </table>
-                            
-                              <mat-paginator [pageSizeOptions]="pageSizeOptions" #allPaginator showFirstLastButtons [pageSize]="5" aria-label="Seleccione pagina de activos" ></mat-paginator>
-                            </div>
-                          </div>
-                          <div class="col-6">
-                            <h2>Activos Marcados Para Dar de Baja</h2>
-                            <div class="mat-elevation-z8">
-                              <table mat-table [dataSource]="dataSourceDeBaja" matSort *ngIf="myForm.get('razon').value">                            
-                                <!-- No. Identificacion Column -->
-                                <ng-container *ngIf="displayedColumns.includes('no_identificacion')" matColumnDef="no_identificacion">
-                                  <th mat-header-cell *matHeaderCellDef mat-sort-header> No. Placa </th>
-                                  <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.no_identificacion}} </td>
-                                </ng-container>
-                            
-                                <!-- Descripcion Column -->
-                                <ng-container *ngIf="displayedColumns.includes('descripcion')" matColumnDef="descripcion">
-                                  <th mat-header-cell *matHeaderCellDef mat-sort-header> Descripcion </th>
-                                  <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.descripcion}} </td>
-                                </ng-container>
-              
-                                <ng-container *ngIf="displayedColumns.includes('marca')" matColumnDef="marca">
-                                  <th mat-header-cell *matHeaderCellDef mat-sort-header> Marca </th>
-                                  <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.marca}} </td>
-                                </ng-container>
-              
-                                <ng-container *ngIf="displayedColumns.includes('modelo')" matColumnDef="modelo">
-                                  <th mat-header-cell *matHeaderCellDef mat-sort-header> Modelo </th>
-                                  <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.modelo}} </td>
-                                </ng-container>
-                            
-                                <ng-container *ngIf="displayedColumns.includes('serie')" matColumnDef="serie">
-                                  <th mat-header-cell *matHeaderCellDef mat-sort-header> Serie </th>
-                                  <td mat-cell *matCellDef="let row" matTooltip="Presione para ver más información sobre este activo"> {{row.serie}} </td>
-                                </ng-container>
-                 
-                                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                                <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectActivo(row)"></tr>
-                              
-                                <!-- Row shown when there is no matching data. -->
-                                <tr class="mat-row" *matNoDataRow>
-                                  <td class="mat-cell" colspan="4">No se han encontrado datos para "{{input.value}}"</td>
-                                </tr>
-                              </table>
-                            
-                              <mat-paginator [pageSizeOptions]="pageSizeOptions" #paginatorDeBaja  showFirstLastButtons [pageSize]="5" aria-label="Seleccione pagina de activos" ></mat-paginator>
-                            </div>
-                          </div>
-                        </div>
-
-                        
-
-                      </div>
-                  
-                  
+                        <!-- No. Identificacion Column -->
+                        <ng-container *ngIf="displayedColumns.includes('no_identificacion')" matColumnDef="no_identificacion">
+                          <th mat-header-cell *matHeaderCellDef mat-sort-header> No. Placa </th>
+                          <td mat-cell *matCellDef="let row"> {{row.no_identificacion}} </td>
+                        </ng-container>
+                    
+                        <!-- Descripcion Column -->
+                        <ng-container *ngIf="displayedColumns.includes('descripcion')" matColumnDef="descripcion">
+                          <th mat-header-cell *matHeaderCellDef mat-sort-header> Descripcion </th>
+                          <td mat-cell *matCellDef="let row"> {{row.descripcion}} </td>
+                        </ng-container>
+      
+                        <ng-container *ngIf="displayedColumns.includes('marca')" matColumnDef="marca">
+                          <th mat-header-cell *matHeaderCellDef mat-sort-header> Marca </th>
+                          <td mat-cell *matCellDef="let row"> {{row.marca || 'N/A'}} </td>
+                        </ng-container>
+      
+                        <ng-container *ngIf="displayedColumns.includes('modelo')" matColumnDef="modelo">
+                          <th mat-header-cell *matHeaderCellDef mat-sort-header> Modelo </th>
+                          <td mat-cell *matCellDef="let row"> {{row.modelo || 'N/A'}} </td>
+                        </ng-container>
+                    
+                        <ng-container *ngIf="displayedColumns.includes('serie')" matColumnDef="serie">
+                          <th mat-header-cell *matHeaderCellDef mat-sort-header> Serie </th>
+                          <td mat-cell *matCellDef="let row"> {{row.serie || 'N/A'}} </td>
+                        </ng-container>
+                    
+                        <ng-container *ngIf="displayedColumns.includes('ubicacion_actual')" matColumnDef="ubicacion_actual">
+                          <th mat-header-cell *matHeaderCellDef mat-sort-header> Ubicación </th>
+                          <td mat-cell *matCellDef="let row"> {{row.ubicacion_actual.nombre_oficial}} </td>
+                        </ng-container>
+          
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="$event ? selectionAll.toggle(row) : null"></tr>
                       
-                  
-                      <div class="row" style="margin-top:10px ;">
-                        <div class="col-sm-6">
-                          <button mat-flat-button color="primary" type="submit" class="btnAgregar" [disabled]="!myForm.valid">Agregar Informacion Al Acta</button>
-                        </div>
-                        <div class="col-sm-6">
-                          <button mat-flat-button color="warn" (click)="resetActa()" class="btnWarning" >Reiniciar Informacion del Acta</button>
-                        </div>
-                        
-                      </div>
-                      <div class="row">
-                        <div class="col-lg" style="margin-top: 10px;">
-                          <button mat-flat-button color="primary" (click)="generatePdf(contentToConvert)" [disabled]="!listoGuardar">Dar de Baja a los Activos, Guardar y Descargar PDF</button>
-                        </div>  
-                        
-                      </div>
+                        <!-- Row shown when there is no matching data. -->
+                        <tr class="mat-row" *matNoDataRow>
+                          <td class="mat-cell" colspan="4">
+                            <div>
+                            No se han encontrado datos para "{{input.value}}"
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
                     </div>
-                  </form>
+                    <mat-paginator #allPaginator [pageSizeOptions]="pageSizeOptions" showFirstLastButtons [pageSize]="5" aria-label="Seleccione pagina de activos" ></mat-paginator>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <h2>Activos Marcados Para Dar de Baja</h2>
+                  <div class="mat-elevation-z8">
+                    <div class="table-container">
+                      <table mat-table [dataSource]="dataSourceDeBaja" matSort>       
+                        <ng-container matColumnDef="select">
+                          <th class="p-0" mat-header-cell *matHeaderCellDef>
+                            <mat-checkbox (change)="$event ? toggleAllRowsBaja() : null"
+                                          [checked]="selectionBaja.hasValue() && isAllSelectedBaja()"
+                                          [indeterminate]="selectionBaja.hasValue() && !isAllSelectedBaja()">
+                            </mat-checkbox>
+                          </th>
+                          <td class="p-0" mat-cell *matCellDef="let row">
+                            <mat-checkbox (click)="$event.stopPropagation()"
+                                          (change)="$event ? selectionBaja.toggle(row) : null"
+                                          [checked]="selectionBaja.isSelected(row)">
+                            </mat-checkbox>
+                          </td>
+                        </ng-container> 
+
+                        <!-- No. Identificacion Column -->
+                        <ng-container *ngIf="displayedColumns.includes('no_identificacion')" matColumnDef="no_identificacion">
+                          <th mat-header-cell *matHeaderCellDef mat-sort-header> No. Placa </th>
+                          <td mat-cell *matCellDef="let row"> {{row.no_identificacion}} </td>
+                        </ng-container>
+                    
+                        <!-- Descripcion Column -->
+                        <ng-container *ngIf="displayedColumns.includes('descripcion')" matColumnDef="descripcion">
+                          <th mat-header-cell *matHeaderCellDef mat-sort-header> Descripcion </th>
+                          <td mat-cell *matCellDef="let row"> {{row.descripcion}} </td>
+                        </ng-container>
+      
+                        <ng-container *ngIf="displayedColumns.includes('marca')" matColumnDef="marca">
+                          <th mat-header-cell *matHeaderCellDef mat-sort-header> Marca </th>
+                          <td mat-cell *matCellDef="let row"> {{row.marca}} </td>
+                        </ng-container>
+      
+                        <ng-container *ngIf="displayedColumns.includes('modelo')" matColumnDef="modelo">
+                          <th mat-header-cell *matHeaderCellDef mat-sort-header> Modelo </th>
+                          <td mat-cell *matCellDef="let row"> {{row.modelo}} </td>
+                        </ng-container>
+                    
+                        <ng-container *ngIf="displayedColumns.includes('serie')" matColumnDef="serie">
+                          <th mat-header-cell *matHeaderCellDef mat-sort-header> Serie </th>
+                          <td mat-cell *matCellDef="let row"> {{row.serie}} </td>
+                        </ng-container>
+                    
+                        <ng-container *ngIf="displayedColumns.includes('ubicacion_actual')" matColumnDef="ubicacion_actual">
+                          <th mat-header-cell *matHeaderCellDef mat-sort-header> Ubicación </th>
+                          <td mat-cell *matCellDef="let row"> {{row.ubicacion_actual.nombre_oficial}} </td>
+                        </ng-container>
+          
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="$event ? selectionBaja.toggle(row) : null"></tr>
+                      
+                        <!-- Row shown when there is no matching data. -->
+                        <tr class="mat-row" *matNoDataRow>
+                          <td class="mat-cell" colspan="4">
+                            <div>
+                            No se han encontrado datos para "{{input.value}}"
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                    <mat-paginator [pageSizeOptions]="pageSizeOptions" #paginatorDeBaja  showFirstLastButtons [pageSize]="5" aria-label="Seleccione pagina de activos" ></mat-paginator>
+                  </div>
+                </div>
+              </div>
+            </div>
         
-            </mat-card-content>
-        </mat-card>
-    </div>
-</div>
+            <div class="row" style="margin-top: 10px;">
+              <div class="col-sm-6">
+                <button mat-flat-button color="primary" type="submit" class="btnAgregar" [disabled]="(selectionAll.selected.length + selectionBaja.selected.length) < 1">Agregar Informacion Al Acta</button>
+              </div>
+              <div class="col-sm-6">
+                <button mat-flat-button color="warn" type="button" (click)="resetActa()" class="btnWarning" >Reiniciar Informacion del Acta</button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg" style="margin-top: 10px;">
+                <button mat-flat-button color="primary" type="button" (click)="generatePdf()" [disabled]="myForm.invalid || selectedActivos.length < 1">Dar de Baja a los Activos, Guardar y Descargar documento</button>
+              </div>  
+            </div>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
 
+  <br>
+  <br>
 
-<br>
-
-<br>
-<div class="titulo d-flex justify-content-center">
-    <h1>Previsualizacion del Acta</h1>
-</div>
-<div class="titulo d-flex justify-content-center">
-  <h3>No se preocupe si se ve mal formateada, a la hora de crear el pdf se vera con el formato correcto</h3>
-</div>
-<br>
-<div class="d-flex justify-content-center">
+  <div class="titulo d-flex justify-content-center">
+      <h1>Previsualizacion del Acta</h1>
+  </div>
+  <div class="titulo d-flex justify-content-center">
+    <h3>No se preocupe si se ve mal formateada, a la hora de crear el pdf se vera con el formato correcto</h3>
+  </div>
+  <br>
   <div class="parent-component">
     <div #specific class="specific-div">
       <div #contentToConvert class="cont">
-        <div class="cont" *ngFor="let tabla of activoTablas; let i = index">
+        <div class="cont">
           <div #header class="cont">
             <img src="assets/images/header.png" alt="" class="header">
             <!-- <h1 class="centered">Ministerio de Educacion Publica</h1>
@@ -192,9 +226,9 @@
             <h4 class="centered">Info Contacto</h4>
             <h4 class="centered">Info Contacto</h4> -->
             <p>&nbsp;</p>
-           
-            <div class="cont" [ngClass]="{'noHeight': i != 0}">
-              <p class="titulos">ACTA DE BAJA DE BIENES N {{numActa}}</p>
+          
+            <div class="cont">
+              <p class="titulos">ACTA DE BAJA DE BIENES N {{numActa}}-{{actaAnio}}</p>
               <p class="titulos">Fecha del Acta: {{fechaActa}}</p>
               <!-- <img src="assets/images/logocole.png" alt="" class="absolute-img"> -->
               <br>
@@ -204,7 +238,7 @@
                   </tr>
                   <tr>
                     <td class="half-width"><b>Fecha de baja del bien:</b> {{fechaActa}}</td>
-                    <td class="half-width"><b>Curso Lectivo:</b> {{ahno}}</td>
+                    <td class="half-width"><b>Curso Lectivo:</b> {{actaAnio}}</td>
                   </tr>
                   <tr>
                     <td colspan="2"><b>Empresa a la cual se va a entregar para su reciclaje o destruccion. O bien, el metodo que se va a utilizar para desecharlo: </b> {{descActa}}</td>
@@ -212,12 +246,11 @@
               </table> 
             </div>
           </div>
-          
           <div class="tabla-container">
-            <table class="tabla2">
+            <table class="tabla2 header-table">
               <thead>
                 <tr>
-                  <th rowspan="2" style="width: 15.218%;">Número de identificacion del bien</th>
+                  <th rowspan="2" style="width: 15.218%;">Número de identificación del bien</th>
                   <th rowspan="2" style="width: 22.277%; padding: 0%;">Descripción del bien</th>
                   <th rowspan="2" style="width: 9.725%;">Marca</th>
                   <th rowspan="2" style="width: 9.725%;">Modelo</th>
@@ -225,42 +258,45 @@
                   <th colspan="2" style="width: 32%;">Marque con X según corresponda</th>
                 </tr>
                 <tr>
-                  <th>Obsolencia</th>
-                  <th>Inservibilidad</th>
+                  <th rowspan="2" style="width: 16%;">Obsolencia</th>
+                  <th rowspan="2" style="width: 16%;">Inservibilidad</th>
                 </tr>
               </thead>
-              <tr *ngFor="let activo of tabla">
-                <td>{{activo.no_identificacion || ''}}</td>
-                <td>{{activo.descripcion || ''}}</td>
-                <td>{{activo.marca || ''}}</td>
-                <td>{{activo.modelo || ''}}</td>
-                <td>{{activo.serie || ''}}</td>
-                <td>{{activo.razon === 'Obsolencia' ? 'X' : ''}}</td>
-                <td>{{activo.razon === 'Inservibilidad' ? 'X' : ''}}</td>
-              </tr>
             </table>
-    
-            <div class="tabla2 cont">
+            <div class="body-scroll">
+              <table class="tabla2 body-table">
+                <tbody>
+                  <tr *ngFor="let activo of selectedActivos.slice().reverse()">
+                    <td style="width: 15.218%;">{{activo.no_identificacion || ''}}</td>
+                    <td style="width: 22.277%;">{{activo.descripcion || ''}}</td>
+                    <td style="width: 9.725%;">{{activo.marca || ''}}</td>
+                    <td style="width: 9.725%;">{{activo.modelo || ''}}</td>
+                    <td style="width: 11.055%;">{{activo.serie || ''}}</td>
+                    <td style="width: 16%; text-align: center;">{{activo.obsolencia ? 'X' : ''}}</td>
+                    <td style="width: 16%; text-align: center; position: relative;">
+                      {{activo.inservibilidad ? 'X' : ''}}
+                      <div class="remove-div" matRipple (click)="removeActivo(activo)" matTooltip="Remover activo">
+                        <mat-icon class="remove-icon">delete</mat-icon>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="activos-container">
+              <table class="tabla2">
+              </table>
+            </div>
+            <!--<div class="tabla2 cont">
               <div id="text-measure" style="position: absolute;visibility: hidden; height:auto; width:22.277%;"></div>
             </div>
+          </div>-->
           </div>
-  
-          <div #blanco [attr.data-index]="i"></div>
-  
-         
-           
-          <ng-container *ngIf="activoTablas.indexOf(tabla) == activoTablas.length - 1">
+          <div>
             <img src="assets/images/firmas.png" alt="" class="firmas">
-    
             <img src="assets/images/footer.png" alt="" class="footer">
-          </ng-container>
-        </div>
+          </div>
       </div>
     </div>
   </div>
 </div>
-
-<br>
-
-
-

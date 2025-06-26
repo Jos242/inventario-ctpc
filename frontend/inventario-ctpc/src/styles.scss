@@ -24,3 +24,24 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   border-right: 5px solid transparent;
   border-top: 5.5px solid #757575;
 }
+
+.example-loading-shade {
+  position: fixed;
+  top: 0; /* Adjust this to match your header height */
+  left: 0;
+  bottom: 0; /* Changed to 0 to cover the entire content area below the header */
+  right: 0;
+  background: rgba(0, 0, 0, 0.15);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mat-cell div {
+  margin: 7px;
+}
+
+mat-icon {
+  flex-shrink: 0;
+}

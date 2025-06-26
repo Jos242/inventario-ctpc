@@ -26,16 +26,42 @@ class UpdateActivoSerializer(serializers.ModelSerializer):
                   'ubicacion_actual', 'precio', 'baja', 'placa'] 
     
 class ReadActivoSerializerComplete(serializers.ModelSerializer):
-    ubicacion_original = serializers.CharField(required = False)
-    ubicacion_actual = serializers.CharField(required = False)
-    modo_adquisicion = serializers.CharField(required = False)
+    ubicacion_original = serializers.SerializerMethodField()
+    ubicacion_actual = serializers.SerializerMethodField()
+    modo_adquisicion = serializers.SerializerMethodField()
 
     class Meta:
         model = Activos
-        fields = ['id', 'id_registro', 'asiento', 'no_identificacion',
-                  'descripcion', 'marca', 'modelo', 'serie', 'estado',
-                  'ubicacion_original', 'ubicacion_actual', 'modo_adquisicion',
-                  'precio', 'conectividad', 'seguridad', 'placa','baja', 'fecha']
+        fields = [
+            'id', 'id_registro', 'asiento', 'no_identificacion',
+            'descripcion', 'marca', 'modelo', 'serie', 'estado',
+            'ubicacion_original', 'ubicacion_actual', 'modo_adquisicion',
+            'precio', 'conectividad', 'seguridad', 'placa','baja', 'fecha'
+        ]
+
+    def get_ubicacion_original(self, obj):
+        if obj.ubicacion_original:
+            return {
+                "id": obj.ubicacion_original.id,
+                "nombre_oficial": str(obj.ubicacion_original)
+            }
+        return None
+
+    def get_ubicacion_actual(self, obj):
+        if obj.ubicacion_actual:
+            return {
+                "id": obj.ubicacion_actual.id,
+                "nombre_oficial": str(obj.ubicacion_actual)
+            }
+        return None
+
+    def get_modo_adquisicion(self, obj):
+        if obj.modo_adquisicion:
+            return {
+                "id": obj.modo_adquisicion.id,
+                "descripcion": str(obj.modo_adquisicion)
+            }
+        return None
 
 class ReadActivoSerializerIncomplete(serializers.ModelSerializer):
     ubicacion_original = serializers.CharField(required = False) 
@@ -50,7 +76,6 @@ class ObservacionesSerializer(serializers.Serializer):
     id_registro = serializers.CharField(max_length=150, read_only=True, required=False)
     asiento = serializers.IntegerField(read_only=True, required = False)
     descripcion = serializers.CharField(style={'base_template': 'textarea.html'})
-    activo = serializers.SlugRelatedField(queryset=Activos.objects.all(), slug_field='id_registro')
     impreso = serializers.BooleanField(required = False)
 
     class Meta:
@@ -164,6 +189,16 @@ class ReadUserSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=128, required = False)
     class Meta:
         model = User
+
+class ActaBajaSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only = True)
+    no_identificacion = serializers.CharField(read_only = True)
+    descripcion = serializers.CharField(read_only = True)
+    marca = serializers.CharField(read_only = True)
+    modelo = serializers.CharField(read_only = True)
+    serie = serializers.CharField(read_only = True)
+    obsolencia = serializers.BooleanField(read_only = True)
+    inservibilidad = serializers.BooleanField(read_only = True)
  
 class DocSerializer(serializers.ModelSerializer):
 
@@ -173,20 +208,20 @@ class DocSerializer(serializers.ModelSerializer):
 
     class Meta:
         model  = Docs
-        fields = ['titulo', 'tipo', 'archivo','creado_el']
+        fields = ['titulo', 'tipo', 'ruta', 'archivo','creado_el']
     
-    def is_valid(self, *, raise_exception=False, impreso) -> bool:
-        valid:bool = super().is_valid(raise_exception=raise_exception)
+    def is_valid(self, *, raise_exception=False) -> bool:#, impreso
+        valid: bool = super().is_valid(raise_exception=raise_exception)
 
         if not valid:
             return valid
 
-        is_file_type_pdf:bool    = self.validated_data.get("TIPO") == 'PDF' 
-        is_impreso_not_none:bool = impreso is None
+        #is_file_type_pdf:bool    = self.validated_data.get("TIPO") == 'PDF' 
+        #is_impreso_not_none:bool = impreso is None
  
-        if  is_file_type_pdf and is_impreso_not_none:
-            self._errors["field_required"] = ["field 'impreso' is required"]
-            return False
+        #if  is_file_type_pdf and is_impreso_not_none:
+        #    self._errors["field_required"] = ["field 'impreso' is required"]
+        #    return False
 
         return valid
 
@@ -267,7 +302,7 @@ class WhatTheExcelNameIs(serializers.Serializer):
     
     def is_valid(self, *args, **kwargs):
         valid = super().is_valid(*args, **kwargs)        
-        file_name:str = self.validated_data.get("file_name") 
+        file_name: str = self.validated_data.get("file_name") 
 
         if not valid:
             return valid
@@ -276,6 +311,7 @@ class WhatTheExcelNameIs(serializers.Serializer):
             self._errors['file_name'] = ['not .xlsx extension']
             return False
 
+        return valid
 
 class UbicacionesSerializer(serializers.ModelSerializer):
     img_path = serializers.FileField(required = False)
@@ -353,21 +389,23 @@ class ModoAdquisicionSerializer(serializers.ModelSerializer):
 
 
 class DynamicReadActivosSerializer(serializers.ModelSerializer):  
-    ubicacion_original_nombre_oficial= serializers.CharField()
-    ubicacion_actual_nombre_oficial = serializers.CharField()
-    modo_adquisicion_desc = serializers.CharField()
+    ubicacion_original = serializers.SerializerMethodField()
+    ubicacion_actual = serializers.SerializerMethodField()
+    modo_adquisicion = serializers.SerializerMethodField()
+    count_historial = serializers.IntegerField(read_only = True)
+    ubicacion_primera = serializers.SerializerMethodField()
+    has_observaciones = serializers.BooleanField(read_only = True)
 
-  
     class Meta:
        model = Activos
        fields = [
-            'id', 'id_registro', 'asiento',
-            'no_identificacion', 'descripcion', 'marca',
-            'modelo', 'serie', 'estado',
-            'ubicacion_original_nombre_oficial', 'modo_adquisicion_desc', 'precio',
+            'id', 'id_registro', 'asiento', 'no_identificacion', 'descripcion',
+            'marca', 'modelo', 'serie', 'estado',
+            'ubicacion_original', 'modo_adquisicion', 'precio',
             'fecha', 'observacion', 'impreso',
-            'ubicacion_actual_nombre_oficial', 'conectividad', 'seguridad',
-            'placa', 'baja'
+            'ubicacion_actual', 'conectividad', 'seguridad',
+            'placa', 'baja',
+            'count_historial', 'ubicacion_primera', 'has_observaciones'
         ]
 
     def __init__(self, *args, **kwargs):
@@ -382,6 +420,30 @@ class DynamicReadActivosSerializer(serializers.ModelSerializer):
             for field_name in existing - allowed: 
                 self.fields.pop(field_name)
 
+    def get_ubicacion_original(self, obj):
+        return {
+            'id': getattr(obj, 'ubicacion_original_id_val', None),
+            'nombre_oficial': getattr(obj, 'ubicacion_original_nombre_oficial', '')
+        }
+
+    def get_ubicacion_actual(self, obj):
+        return {
+            'id': getattr(obj, 'ubicacion_actual_id_val', None),
+            'nombre_oficial': getattr(obj, 'ubicacion_actual_nombre_oficial', '')
+        }
+
+    def get_modo_adquisicion(self, obj):
+        return {
+            'id': getattr(obj, 'modo_adquisicion_id_val', None),
+            'descripcion': getattr(obj, 'modo_adquisicion_desc', '')
+        }
+
+    def get_ubicacion_primera(self, obj):
+        return {
+            'id': getattr(obj, 'ubicacion_primera_id_val', None),
+            'nombre_oficial': getattr(obj, 'ubicacion_primera_nombre_oficial', '')
+        }
+
 class PlantillasSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -392,6 +454,12 @@ class HistorialDeAccesoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HistorialDeAcceso
+        fields = '__all__'
+
+class HistorialUbicacionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HistorialUbicacion
         fields = '__all__'
 
 class NoIdentificacionSerializer(serializers.Serializer):

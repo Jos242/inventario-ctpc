@@ -1,16 +1,28 @@
 #inventario modules--------------------------------------
-from inventario.models                       import Docs, Activos, Observaciones 
+from inventario.models                       import Docs, Activos, Observaciones, HistorialUbicacion, Ubicaciones, ActivoObservacion
 from inventario.permissions                  import IsAdminUser
-from inventario.serializers                  import ReadDocSerializer, DocUpdateSerializer, WhatTheExcelNameIs, DocSerializer
+from inventario.serializers                  import ActaBajaSerializer, ReadDocSerializer, DocUpdateSerializer, WhatTheExcelNameIs, DocSerializer
 from inventario._utils.activos_utils         import get_combined_results, determine_print_type, handle_observaciones_y_activos, handle_solo_activos, handle_solo_observaciones
-from inventario._utils.file_utils            import handle_uploaded_file
+from inventario._utils.file_utils            import handle_uploaded_file, store_acta
 #--------------------------------------------------------
 
 #Django modules------------------------------------------
 from django.db.models                        import F, QuerySet, Value
-from django.http                             import HttpResponse
+from django.http                             import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 from django.db.models.functions              import Coalesce
 from django.db.models                        import CharField, OuterRef, Subquery, Func
+from django.db import transaction
+
+from datetime import datetime
+from docxtpl import DocxTemplate
+from io import BytesIO
+
+from ..utils import ObservacionesActions
+
+import tempfile
+import os
+import subprocess
+
 #--------------------------------------------------------
 
 #Django rest frameworks modules--------------------------
@@ -150,7 +162,7 @@ class DocsView(APIView):
         path = request.path
 
         if path == "/guardar-acta/":
-            serializer:DocSerializer = DocSerializer(data = request.data)  
+            serializer: DocSerializer = DocSerializer(data = request.data)  
             impreso = request.data.get('impreso', None)
 
             if not serializer.is_valid(impreso = impreso):
@@ -167,17 +179,162 @@ class DocsView(APIView):
             return Response(serializer.data, 
                         status = status.HTTP_200_OK)
 
+        if path == "/generar-acta/":
+            formato = request.data.get('formato', 'pdf').lower()
+            items = request.data.get('items', [])
+            acta = request.data.get('acta', '')
+
+            data_acta = {
+                'numActa': request.data.get('numActa', 1),
+                'anio': request.data.get('anio', ''),
+                'fechaActa': request.data.get('fechaActa', ''),
+                'nombreColegio': request.data.get('nombreColegio', 'CARRIZAL'),
+                'descActa': request.data.get('descActa', ''),
+                'acta': request.data.get('acta', ''),
+                'items': items
+            }
+
+            try:
+                with transaction.atomic():
+                    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+                    if acta == 'baja':
+                        acta_template = os.path.join(BASE_DIR, 'assets', 'acta_baja_template.docx')
+                        file_name_base = f"ACTA DE BAJA DE BIENES N {data_acta['numActa']}-{data_acta['anio']}"
+                        
+                        activo_ids = [item.get('id') for item in items if item.get('id')]
+
+                        if len(activo_ids) != len(items):
+                            raise ValueError("Missing ID in one or more items.")
+
+                        activos_to_update = list(Activos.objects.filter(id__in = activo_ids))
+
+                        if len(activos_to_update) != len(activo_ids):
+                            raise ValueError("One or more activos not found.")
+                        
+                        for activo in activos_to_update:
+                            activo.baja = 'DADO DE BAJA CON PLACA'
+
+                        obs_actions = ObservacionesActions()
+                        success = obs_actions.create_by_activo_observacion(data_acta)
+
+                        if success > 0:
+                            Activos.objects.bulk_update(activos_to_update, ['baja'])
+                        else:
+                            raise Exception("Failed to create observations. Rolling back.")
+
+                    elif acta == 'traslado' :
+                        acta_template = os.path.join(BASE_DIR, 'assets', 'acta_traslado_template.docx')
+                        file_name_base = f"ACTA DE TRASLADO DE BIENES N {data_acta['numActa']}-{data_acta['anio']}"
+
+                        # Step 1: Extract destino_ids from items
+                        destino_ids = [item['destino_id'] for item in items if item.get('destino_id')]
+
+                        # Step 2: Fetch all necessary Ubicacion instances
+                        ubicaciones = Ubicaciones.objects.filter(id__in = destino_ids)
+                        ubicacion_map = {u.id: u for u in ubicaciones}
+
+                        # Step 3: Fetch Activos
+                        activo_ids = [item['id'] for item in items if item.get('id')]
+
+                        if len(activo_ids) != len(items):
+                            raise ValueError("One or more items are missing 'id'.")
+
+                        activos_to_update = Activos.objects.filter(id__in = activo_ids)
+                        activo_map = {a.id: a for a in activos_to_update}
+
+                        # Step 4: Assign matched ubicacion to each activo
+                        for item in items:
+                            activo = activo_map.get(item.get('id'))
+                            destino = ubicacion_map.get(item.get('destino_id'))
+                            if activo and destino:
+                                activo.ubicacion_actual = destino
+
+                        obs_actions = ObservacionesActions()
+                        success = obs_actions.create_by_activo_observacion(data_acta)
+
+                        if success > 0:
+                            Activos.objects.bulk_update(activos_to_update, ['ubicacion_actual'])
+                            HistorialUbicacion.objects.filter(activo__in = activos_to_update).update(acta = True)
+                        else:
+                            raise Exception("Failed to create observations. Rolling back.")
+                            
+                    try:
+                        doc = DocxTemplate(acta_template)
+                        doc.render(data_acta)
+                    except Exception as e:
+                        return HttpResponseServerError(f"Error loading template: {str(e)}")
+
+                    with tempfile.TemporaryDirectory() as tmpdirname:
+                        pdf_path = os.path.join(tmpdirname, 'acta.pdf')
+                        docx_path = os.path.join(tmpdirname, 'acta.docx')
+                        doc.save(docx_path)
+
+                        def save_and_respond(file_path, extension, content_type):
+                            full_filename = f"{file_name_base}.{extension}"
+
+                            with open(file_path, 'rb') as file:
+                                ruta = store_acta(file, full_filename)
+
+                                doc_data = {
+                                    "titulo": full_filename,
+                                    "tipo": "PDF" if extension == "pdf" else "WORD",
+                                    "ruta": ruta
+                                }
+
+                                serializer = DocSerializer(data = doc_data)
+                                if not serializer.is_valid():
+                                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                                
+                                serializer.save()
+
+                                file.seek(0)
+                                response = HttpResponse(file.read(), content_type = content_type)
+                                response['Content-Disposition'] = f'attachment; filename="{full_filename}"'
+                                return response
+
+
+                        if formato == 'pdf':
+                            #CAMBIAR EN PRODUCCION, /usr/bin/libreoffice
+                            libreoffice_cmd = r'C:\\Program Files\\LibreOffice\\program\\soffice.exe'
+                            if not os.path.exists(libreoffice_cmd):
+                                return HttpResponseServerError(f"LibreOffice not found at {libreoffice_cmd}")
+                            
+                            try:
+                                subprocess.run([
+                                    libreoffice_cmd,
+                                    '--headless',
+                                    '--convert-to', 'pdf',
+                                    docx_path,
+                                    '--outdir', tmpdirname
+                                ], check=True)
+                            except FileNotFoundError:
+                                return HttpResponseServerError("LibreOffice is not installed or not found in PATH.")
+                            except subprocess.CalledProcessError as e:
+                                return HttpResponseServerError(f"LibreOffice conversion failed: {str(e)}")
+
+                            if not os.path.exists(pdf_path):
+                                return HttpResponseServerError("PDF file was not generated.")
+
+                            return save_and_respond(pdf_path, 'pdf', 'application/pdf')
+                        
+                        elif formato == 'docx':
+                            return save_and_respond(docx_path, 'docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                        
+                        else:
+                            return Response({'error': f"Formato '{formato}' no soportado."}, status = 400)
+            except Exception as e:
+                # Nothing was saved
+                return Response({'error': str(e)}, status = 400)
                 
         if path == f"/crear-excel/impresiones/":
-            serializer:WhatTheExcelNameIs = WhatTheExcelNameIs(data = request.data)
-
+            serializer: WhatTheExcelNameIs = WhatTheExcelNameIs(data = request.data)
+            
             if not serializer.is_valid():
-
                 return Response(serializer.errors,
                                 status = status.HTTP_400_BAD_REQUEST)
 
-            file_name:str = serializer.validated_data.get("file_name", "")
-            resultados:QuerySet = get_combined_results()
+            file_name: str = serializer.validated_data.get("file_name", "")
+            resultados: QuerySet = get_combined_results()
             
             if len(resultados[:40]) < 40:
                 return Response(data = {"error": ("there is not enough information "

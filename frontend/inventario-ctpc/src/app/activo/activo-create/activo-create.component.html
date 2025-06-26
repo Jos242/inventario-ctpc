@@ -32,7 +32,7 @@
                                 <mat-label>Ubicacion</mat-label>
                                 <input #ubicacionInput matInput type="text" placeholder="Ubicación" formControlName="ubicacion_original" 
                                 [matAutocomplete]="autoUbicacion" #autoTriggerUbicacion="matAutocompleteTrigger"
-                                (keyup)="filterUbicacion(ubicacionInput.value)" (blur)="validateUbicacionInput()" (keydown.enter)="onEnterPressedUbicacion(); ubicacionInput.blur(); autoTriggerUbicacion.closePanel()">
+                                (keyup)="filterUbicacion(ubicacionInput.value)" (blur)="onUbicacionBlur()" (keydown.enter)="onEnterPressedUbicacion(); ubicacionInput.blur(); autoTriggerUbicacion.closePanel()">
                                 <span class="arrow"></span>
                                 <mat-autocomplete #autoUbicacion="matAutocomplete" [displayWith]="displayUbicacion">
                                     <mat-option *ngFor="let ubicacion of filteredUbicaciones" [value]="ubicacion">
@@ -47,7 +47,7 @@
                                 <mat-label>Modo de Adquisicion</mat-label>
                                 <input #modoInput matInput type="text" placeholder="Donacion" formControlName="modo_adquisicion" 
                                 [matAutocomplete]="autoModo" #autoTriggerModo="matAutocompleteTrigger"
-                                (keyup)="filterModo(modoInput.value)" (blur)="validateModoInput()" (keydown.enter)="onEnterPressedModo(); modoInput.blur(); autoTriggerModo.closePanel()">
+                                (keyup)="filterModo(modoInput.value)" (blur)="onModoBlur()" (keydown.enter)="onEnterPressedModo(); modoInput.blur(); autoTriggerModo.closePanel()">
                                 <span class="arrow"></span>
                                 <mat-autocomplete #autoModo="matAutocomplete" [displayWith]="displayModo">
                                     <mat-option *ngFor="let modo of filteredModos" [value]="modo">

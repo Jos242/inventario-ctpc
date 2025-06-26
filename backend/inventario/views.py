@@ -121,6 +121,10 @@ class ActivosViewNoAuth(APIView):
             rp:Response = self.activos_do.activos_filter_column()    
             return rp
         
+        if path == "/registro/no-impreso/count/":
+            rp: Response = self.activos_do.get_registro_noimpreso_count()  
+            return rp
+        
         return Response({"data": "did not match an endpoint for a HTTP GET Method"},
                         status= status.HTTP_404_NOT_FOUND)
 
@@ -128,6 +132,12 @@ class ActivosViewNoAuth(APIView):
         path:str = request.path
         if path == "/activos/select-columns/":
             rp:Response = self.activos_do.select_columns_to_filter(request)
+            return rp
+        if path == "/activos/no-baja/select-columns/":
+            rp:Response = self.activos_do.select_columns_to_filter(request, exclude_de_baja = True)
+            return rp
+        if path == "/activos/historial/select-columns/":
+            rp:Response = self.activos_do.select_columns_to_filter(request, exclude_de_baja = True, include_historial = True)
             return rp
  
 
@@ -170,11 +180,39 @@ class ObservacionesViewNoAuth(APIView):
 
     def get(self, request:Request, activo = None):
         path = request.path
-        if path == f"/observacion/{activo}/":
-            rp:Response = self.observaciones_do.get_observacion_by_activo(activo = activo) 
+        if path == f"/observacion/activo/{activo}/":
+            rp: Response = self.observaciones_do.get_observacion_by_activo(activo = activo) 
             return rp
 
         if path == "/todas-las-observaciones/":
             return self.observaciones_do.all_observaciones() 
+
+        if path == "/mover-observaciones/":
+            count = self.observaciones_do.mover_observaciones() 
+
+            if count > 0:
+                return Response(f"Se moveieron {count} observaciones", status = status.HTTP_200_OK)
+            else:
+                return Response(f"No se moveieron observaciones", status = status.HTTP_200_OK)
+
+class ActivoObservacionView(APIView):
+    parser_classes = (FormParser, MultiPartParser, JSONParser)
+    authentication_classes = []
+    permission_classes = []  
+    observaciones_do: ObservacionesActions = None
+    
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.observaciones_do = ObservacionesActions()   
+
+    def post(self, request:Request):
+        path = request.path
+        if path == "/create-activo-observacion/":
+            success = self.observaciones_do.create_all_activo_observacion(request)
+            if success > 0:
+                return Response({"success": f'{success} rows created'}, status = status.HTTP_201_CREATED)
+            else:
+                return Response({"error": f'Error occurred: {success}'}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
 
 

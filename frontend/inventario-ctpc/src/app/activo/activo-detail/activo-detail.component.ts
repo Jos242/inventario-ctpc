@@ -102,9 +102,9 @@ export class ActivoDetailComponent implements OnInit{
         .pipe(takeUntil(this.destroy$))
         .subscribe((data:any)=>{
           this.datos = data;
-          console.log(this.datos);
+          
           this.activoIdRegistro=this.datos.id_registro;
-          this.loadDetails();
+          this.loadObservacionDetails();
         });
 
         
@@ -117,24 +117,24 @@ export class ActivoDetailComponent implements OnInit{
       });
     
       dialogRef.afterClosed().subscribe(result => {
-        this.loadDetails();
+        this.loadObservacionDetails();
         this.myForm.reset();
       });
     }
 
-    loadDetails(){
-      this.gService.list(`observacion/${this.datos.id_registro}/`)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe((data:any)=>{
-          this.datos2 = data;
-          console.log(this.datos2);
-          if(this.datos2.length!=0){
-            this.datos.combinedDescripcion = this.datos2.map(d => d.descripcion).join(' ').replace(/\./g, '.<br> <br>');
-          }else{
-            this.datos.combinedDescripcion = "Este activo no tiene observaciones"
-          }
-          
-        });
+    loadObservacionDetails(){
+      this.gService.list(`observacion/activo/${this.datos.id}/`)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data:any)=>{
+        this.datos2 = data;
+        
+        if (this.datos2.length != 0) {
+          this.datos.combinedDescripcion = this.datos2.map(d => d.descripcion).join(' ').replace(/\./g, '.<br> <br>');
+        } else {
+          this.datos.combinedDescripcion = "Este activo no tiene observaciones"
+        }
+        
+      });
     }
 
     darBaja() {

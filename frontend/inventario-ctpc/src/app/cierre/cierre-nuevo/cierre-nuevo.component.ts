@@ -211,17 +211,16 @@ export class CierreNuevoComponent {
       }
     }, 15000); // 15 seconds
 
-    const selectedColumns = ['id', 'id_registro', 'no_identificacion', 'descripcion', 'marca', 'modelo', 'ubicacion_actual_nombre_oficial']
+    const selectedColumns = ['id', 'id_registro', 'no_identificacion', 'descripcion', 'marca', 'modelo', 'ubicacion_actual']
 
     const formData = { fields: selectedColumns };
-
 
     // Make the request
     this.gService.create('activos/select-columns/', formData)
     .pipe(takeUntil(this.destroy$))
     .subscribe({
       next: (data: any) => {
-        this.datos = data.filter(a => a.ubicacion_actual_nombre_oficial == this.datosUbi.nombre_oficial);
+        this.datos = data.filter(a => a.ubicacion_actual.nombre_oficial == this.datosUbi.nombre_oficial);
 
         if (this.currentCierre.revisiones) {
           this.currentCierre.revisiones.forEach(revision => {
@@ -233,8 +232,8 @@ export class CierreNuevoComponent {
             }
           });
         }
-
         this.activos = this.datos;
+
         this.isLoadingResults = false; // Stop loading
         clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
 
@@ -262,7 +261,6 @@ export class CierreNuevoComponent {
   }
 
   scrollToFinalizar() {
-    console.log(this.cierresIndex)
     this.finalizarButton.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 

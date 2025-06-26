@@ -1,0 +1,154 @@
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            header_img_path = os.path.join(BASE_DIR, 'assets', 'images', 'header.png')
+            firmas_img_path = os.path.join(BASE_DIR, 'assets', 'images', 'firmas.png')
+            footer_img_path = os.path.join(BASE_DIR, 'assets', 'images', 'footer.png')
+
+
+
+            buffer = BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=letter,
+                            rightMargin=36,leftMargin=36,
+                            topMargin=36,bottomMargin=36)
+
+            styles = getSampleStyleSheet()
+            # Custom styles
+            title_style = ParagraphStyle(
+                name='Title',
+                fontName='Helvetica-Bold',
+                fontSize=16,
+                alignment=1,  # center
+                spaceAfter=12,
+            )
+            subtitle_style = ParagraphStyle(
+                name='Subtitle',
+                fontName='Helvetica-Bold',
+                fontSize=14,
+                alignment=1,
+                spaceAfter=10,
+            )
+            normal_center = ParagraphStyle(
+                name='NormalCenter',
+                fontName='Helvetica',
+                fontSize=12,
+                alignment=1,
+                spaceAfter=12,
+            )
+            normal = styles['Normal']
+            normal.spaceAfter = 6
+
+            elements = []
+
+            # HEADER IMAGE placeholder (replace with your path)
+            try:
+                header_img = Image(header_img_path, width=4.5*inch, height=1*inch)
+                header_img.hAlign = 'CENTER'
+                elements.append(header_img)
+            except Exception:
+                # Image missing, just ignore
+                pass
+
+            elements.append(Spacer(1, 12))
+
+            # Title lines
+            elements.append(Paragraph(f"ACTA DE BAJA DE BIENES N {context['numActa']} - {context['anio']}", subtitle_style))
+            elements.append(Paragraph(f"Fecha del Acta: {context['fechaActa']}", subtitle_style))
+            elements.append(Spacer(1, 24))
+
+            # Info table (like .tabla)
+            info_data = [
+                [f"<b>Colegio Tecnico Profesional:</b> {context['nombreColegio']}", ''],
+                [f"<b>Fecha de baja del bien:</b> {context['fechaActa']}", f"<b>Curso Lectivo:</b> {context['anio']}"],
+                [f"<b>Empresa a la cual se va a entregar para su reciclaje o destruccion. O bien, el metodo que se va a utilizar para desecharlo:</b> {context['descActa']}", '']
+            ]
+            info_table = Table(info_data, colWidths=[4.5*inch, 2.5*inch])
+            info_table.setStyle(TableStyle([
+                ('SPAN', (0,0), (1,0)),  # first row span both columns
+                ('SPAN', (0,2), (1,2)),  # third row span both columns
+                ('BOX', (0,0), (-1,-1), 1, colors.black),
+                ('INNERGRID', (0,0), (-1,-1), 0.5, colors.black),
+                ('VALIGN', (0,0), (-1,-1), 'TOP'),
+                ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+                ('FONTSIZE', (0,0), (-1,-1), 11),
+                ('LEFTPADDING', (0,0), (-1,-1), 6),
+                ('RIGHTPADDING', (0,0), (-1,-1), 6),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+                ('TOPPADDING', (0,0), (-1,-1), 6),
+            ]))
+            elements.append(info_table)
+            elements.append(Spacer(1, 24))
+
+            # Detailed table header data
+            detail_header = [
+                ['Número de identificacion del bien', 'Descripción del bien', 'Marca', 'Modelo', 'Serie', 'Marque con X según corresponda', ''],
+                ['', '', '', '', '', 'Obsolencia', 'Inservibilidad']
+            ]
+
+            # Prepare detail table data rows
+            detail_data = []
+            for item in context['items']:
+                print(context['items'])
+                obsol = 'X' if item.get('obsolencia') else ''
+                inserv = 'X' if item.get('inservibilidad') else ''
+                row = [
+                    item.get('no_identificacion', ''),
+                    item.get('descripcion', ''),
+                    item.get('marca', ''),
+                    item.get('modelo', ''),
+                    item.get('serie', ''),
+                    obsol,
+                    inserv
+                ]
+                detail_data.append(row)
+
+            # Combine headers and data
+            table_data = detail_header + detail_data
+
+            col_widths = [1.0*inch, 2.0*inch, 0.9*inch, 0.9*inch, 0.9*inch, 1.1*inch, 1.1*inch]
+
+            detail_table = Table(table_data, colWidths=col_widths, repeatRows=2)
+
+            detail_table_style = TableStyle([
+                ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#bdd7ee")),
+                ('BACKGROUND', (0,1), (-1,1), colors.HexColor("#bdd7ee")),
+                ('TEXTCOLOR', (0,0), (-1,1), colors.black),
+                ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+                ('ALIGN', (1,2), (4,-1), 'LEFT'),
+                ('FONTNAME', (0,0), (-1,1), 'Helvetica-Bold'),
+                ('FONTNAME', (0,2), (-1,-1), 'Helvetica'),
+                ('FONTSIZE', (0,0), (-1,-1), 10),
+                ('GRID', (0,0), (-1,-1), 1, colors.black),
+                ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+                ('TOPPADDING', (0,0), (-1,-1), 6),
+            ])
+            detail_table.setStyle(detail_table_style)
+            elements.append(detail_table)
+            elements.append(Spacer(1, 48))
+
+            # Footer images placeholders
+            try:
+                firmas_img = Image(firmas_img_path, width=5.5*inch, height=1*inch)
+                firmas_img.hAlign = 'CENTER'
+                elements.append(firmas_img)
+            except Exception:
+                pass
+
+            try:
+                footer_img = Image(footer_img_path, width=5.8*inch, height=0.8*inch)
+                footer_img.hAlign = 'CENTER'
+                elements.append(footer_img)
+            except Exception:
+                pass
+
+            # Build PDF into buffer
+            doc.build(elements)
+
+            # Get PDF data from buffer
+            pdf = buffer.getvalue()
+            buffer.close()
+
+            # Create response
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="acta_baja_{context["numActa"]}.pdf"'
+            response.write(pdf)
+            return response

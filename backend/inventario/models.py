@@ -3,6 +3,7 @@ from django.db.models.functions import Now
 from django.db.models import UniqueConstraint
 from django.contrib.auth.models import User
 from django.db.models.manager import Manager
+from django.utils.timezone import now
 
 # Create your models here.
 class Puestos(models.Model):
@@ -153,7 +154,6 @@ class Observaciones(models.Model):
     id_registro = models.CharField(unique=True, max_length=150)
     asiento = models.IntegerField()
     descripcion = models.TextField()
-    activo = models.ForeignKey(Activos, to_field='id_registro', on_delete = models.CASCADE)
     impreso = models.BooleanField(default = False)
     forced = models.BooleanField(default = False)
     objects = models.Manager()
@@ -163,7 +163,8 @@ class Observaciones(models.Model):
 class Docs(models.Model):
     DOCS_TYPE = {
         "PDF": "PDF",
-        "EXCEL": "EXCEL"
+        "EXCEL": "EXCEL",
+        "WORD": "WORD"
     }
     id = models.AutoField(primary_key = True)
     titulo = models.CharField(max_length = 200)
@@ -221,8 +222,9 @@ class HistorialUbicacion(models.Model):
     ubicacion = models.ForeignKey(Ubicaciones, models.DO_NOTHING,
                                   db_column = 'ubicacion')
     activo = models.ForeignKey(Activos, models.DO_NOTHING,
-                               to_field = 'id_registro', db_column= 'activo')
-    fecha =  models.DateField(null = True)
+                               to_field = 'id_registro', db_column= 'activo', related_name='historialubicacion_activo')
+    fecha =  models.DateTimeField(default = now)
+    acta = models.BooleanField(default = False)
 
     class Meta:
         db_table = 'historialubicaciones'
@@ -246,5 +248,13 @@ class HistorialDeAcceso(models.Model):
 
     def __str__(self):
         return f"{self.usuario.username} - {self.tipo_usuario} - {self.fecha_hora_acceso}" 
+
+class ActivoObservacion(models.Model):
+    id = models.AutoField(primary_key=True)
+    activo = models.ForeignKey(Activos, models.DO_NOTHING, to_field = 'id', db_column= 'idActivo')
+    observacion = models.ForeignKey(Observaciones, models.DO_NOTHING, to_field = 'id', db_column= 'idObservacion')
+
+    class Meta:
+        db_table = 'activoobservacion'
 
 

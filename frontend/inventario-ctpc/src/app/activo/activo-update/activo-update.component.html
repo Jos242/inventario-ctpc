@@ -1,5 +1,5 @@
 <div class="titulo d-flex justify-content-center">
-    <h1>Editar Activo {{ activoId }}</h1>
+    <h1>Editar Activo {{ activoNo }}</h1>
 </div>
 <div class="formEditar">
     <mat-card>
@@ -24,23 +24,33 @@
                     </div>
                     <div class="row">
                         <div class="col-lg">
-
-                            <mat-form-field appearance="outline" class="inputsForm">
+                            <mat-form-field appearance="outline" class="inputsForm custom-dropdown">
                                 <mat-label>Ubicacion</mat-label>
-                                <mat-select formControlName="ubicacion_actual" placeholder="Seleccione una ubicacion" [(value)]="selectedUbicacion">
-                                    <mat-option *ngFor="let ubicacion of ubicaciones" [value]="ubicacion.id">{{ ubicacion.nombre_oficial }}</mat-option>
-                                </mat-select> 
+                                <input #ubicacionInput matInput type="text" placeholder="Ubicación" formControlName="ubicacion_actual" 
+                                [matAutocomplete]="autoUbicacion" #autoTriggerUbicacion="matAutocompleteTrigger"
+                                (keyup)="filterUbicacion(ubicacionInput.value)" (blur)="onUbicacionBlur()" (keydown.enter)="onEnterPressedUbicacion(); ubicacionInput.blur(); autoTriggerUbicacion.closePanel()">
+                                <span class="arrow"></span>
+                                <mat-autocomplete #autoUbicacion="matAutocomplete" [displayWith]="displayUbicacion">
+                                    <mat-option *ngFor="let ubicacion of filteredUbicaciones" [value]="ubicacion">
+                                    {{ ubicacion.nombre_oficial }}
+                                    </mat-option>
+                                </mat-autocomplete>
                                 <mat-hint>Ubicacion fisica del activo en el colegio</mat-hint>
                             </mat-form-field>
                         </div>
 
                         <div class="col-lg">
-                            
-                            <mat-form-field appearance="outline" class="inputsForm">
+                            <mat-form-field appearance="outline" class="inputsForm custom-dropdown">
                                 <mat-label>Modo de Adquisicion</mat-label>
-                                <mat-select formControlName="modo_adquisicion" placeholder="Donacion" [(value)]="selectedModoAdquisicion">
-                                    <mat-option *ngFor="let modo of modosAdquisicion" [value]="modo.id">{{ modo.descripcion }}</mat-option>
-                                </mat-select>
+                                <input #modoInput matInput type="text" placeholder="Donacion" formControlName="modo_adquisicion" 
+                                [matAutocomplete]="autoModo" #autoTriggerModo="matAutocompleteTrigger"
+                                (keyup)="filterModo(modoInput.value)" (blur)="onModoBlur()" (keydown.enter)="onEnterPressedModo(); modoInput.blur(); autoTriggerModo.closePanel()">
+                                <span class="arrow"></span>
+                                <mat-autocomplete #autoModo="matAutocomplete" [displayWith]="displayModo">
+                                    <mat-option *ngFor="let modo of filteredModos" [value]="modo">
+                                    {{ modo.descripcion }}
+                                    </mat-option>
+                                </mat-autocomplete>
                                 <mat-hint>Manera mediante la cual se obtuvo el activo</mat-hint>
                             </mat-form-field>
                         </div>

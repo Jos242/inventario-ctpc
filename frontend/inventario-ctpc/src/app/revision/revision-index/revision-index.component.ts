@@ -12,7 +12,6 @@ import Swal from 'sweetalert2';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
-import { RevisionCierreDialogComponent } from '../revision-cierre-dialog/revision-cierre-dialog.component';
 import { ConfirmationService } from '../../share/confirmation.service';
 import { MatSelectModule } from '@angular/material/select';
 
@@ -75,11 +74,9 @@ export class RevisionIndexComponent {
         .subscribe({
           next: (data: any[]) => {
             this.datos = data;
-            console.log(this.datos);
 
             // Save the matched user to a variable
             this.currentUserData = data;
-            console.log(this.currentUserData);
 
             this.loadUbiByFunc();
 
@@ -119,7 +116,6 @@ export class RevisionIndexComponent {
           next: (data: any[]) => {
             this.ubicaciones = data;
             this.datosUbi = data[0];
-            console.log(this.ubicaciones);
 
             this.isLoadingResults = false;
             clearTimeout(loadingTimeout);
@@ -142,7 +138,6 @@ export class RevisionIndexComponent {
     }
 
     iniciarRevision(){
-      console.log(this.datosUbi.id)
       const storedData = JSON.parse(localStorage.getItem('cierres') || '[]');
 
       const index = storedData.findIndex((item: any) =>
@@ -152,12 +147,8 @@ export class RevisionIndexComponent {
       );
       const foundCierre = index !== -1 ? storedData[index] : null;
       
-      const dialogRef = this.dialog.open(RevisionCierreDialogComponent, {
-        width: '600px',
-        data: foundCierre ? 1 : 0
-      });
-
-      dialogRef.afterClosed().subscribe(result => {
+      this.confirmationService.confirm(foundCierre ? 2 : 1)
+      .subscribe(result => {
         if (result === true) {
           if (foundCierre) {
             this.router.navigate(['/cierre'], { 

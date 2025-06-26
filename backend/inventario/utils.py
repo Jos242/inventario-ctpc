@@ -4,13 +4,16 @@ import io
 import os
 from typing import Any
 import xlsxwriter
+import textwrap
 #----------------------------------------------
 
 #Django herramientas---------------------------
+from django.core.exceptions import FieldDoesNotExist
 from django.contrib.auth.models import User
 from sgica.settings import BASE_DIR, MEDIA_ROOT
-from django.db.models import F, Value, CharField, OuterRef, Subquery, Func
+from django.db.models import F, Value, CharField, Func, Count, Q, Subquery, OuterRef, IntegerField, CharField, Exists
 from django.db.models.functions import Coalesce
+
 from django.http import HttpResponse
 from django.db.models.query import QuerySet
 from django.db import transaction
@@ -166,7 +169,7 @@ class ActivosActions():
         except Activos.DoesNotExist:
             return Response({"error": "activo does not exist"}, 
                             status = status.HTTP_404_NOT_FOUND)
-
+        
         serializer = ReadActivoSerializerComplete(instance = activo)
 
         return Response(serializer.data,
@@ -248,6 +251,15 @@ class ActivosActions():
         output.close()
 
         return response
+    
+    def get_registro_noimpreso_count(self):
+        activos_no_impreso_count = Activos.objects.filter(impreso = False).count()
+        observaciones_no_impreso_count = Observaciones.objects.filter(impreso = False).count()
+
+        total_no_impreso = activos_no_impreso_count + observaciones_no_impreso_count
+
+        return Response(total_no_impreso, status = status.HTTP_200_OK)
+
   #--------------------------------------------------------
     
     #Metodos para el HTTP POST-------------------------------
@@ -296,31 +308,68 @@ class ActivosActions():
 
         return Response(results, status=status.HTTP_201_CREATED)
     
-    def select_columns_to_filter(self, request) -> Response:
+    def select_columns_to_filter(self, request, exclude_de_baja = False, include_historial = False) -> Response:
         FIELDS = request.data.get('fields', [])
-        ALWAYS_INCLUDED_FIELDS = ['id_registro', 'baja']
+        ALWAYS_INCLUDED_FIELDS = ['id', 'id_registro', 'baja']
         missing_fields = [f for f in ALWAYS_INCLUDED_FIELDS if f not in FIELDS]
         QUERY_FIELDS = FIELDS + missing_fields
 
-        RELATED_FIELDS = ["ubicacion_original_nombre_oficial", "ubicacion_actual_nombre_oficial", "modo_adquisicion_desc"]
-        SELECT_RELATED = ['ubicacion_original', 'ubicacion_actual', 'modo_adquisicion']
-        related_map = dict(zip(RELATED_FIELDS, SELECT_RELATED))
-        related_fields = [related_map[column] for column in RELATED_FIELDS if column in QUERY_FIELDS]
-        annotations = {
-                'ubicacion_original_nombre_oficial': F('ubicacion_original__nombre_oficial'),
-                'ubicacion_actual_nombre_oficial': F('ubicacion_actual__nombre_oficial'),
-                'modo_adquisicion_desc': F('modo_adquisicion__descripcion'),
-        }
-
-        for column in RELATED_FIELDS:
-            if column not in annotations:
-                del annotations[column]
-
-        activos = Activos.objects.select_related(*related_fields) \
-                                 .annotate(**annotations) \
-                                 .values(*QUERY_FIELDS) \
-                                 .order_by('-id')
+        RELATED_FIELDS = ["ubicacion_original", "ubicacion_actual", "modo_adquisicion"]
         
+        activos = Activos.objects.select_related(*RELATED_FIELDS).annotate(
+            ubicacion_original_nombre_oficial = F('ubicacion_original__nombre_oficial'),
+            ubicacion_actual_nombre_oficial = F('ubicacion_actual__nombre_oficial'),
+            modo_adquisicion_desc = F('modo_adquisicion__descripcion'),
+            
+            # Include the IDs explicitly so serializer can get them
+            ubicacion_original_id_val = F('ubicacion_original__id'),
+            ubicacion_actual_id_val = F('ubicacion_actual__id'),
+            modo_adquisicion_id_val = F('modo_adquisicion__id'),
+        )
+
+        if exclude_de_baja:
+            activos = activos.exclude(baja__in=[
+                'DADO DE BAJA CON PLACA',
+                'DADO DE BAJA SIN PLACA'
+            ])
+
+        if include_historial:
+            # Subquery for last historial.fecha
+            first_historial = HistorialUbicacion.objects.filter(
+                activo = OuterRef('id_registro'), acta = False
+            ).order_by('fecha')
+
+            activos = activos.annotate(
+                count_historial = Count(
+                    'historialubicacion_activo',
+                    filter = Q(historialubicacion_activo__acta = False)
+                ),
+                ubicacion_primera_id_val=Subquery(
+                    first_historial.values('ubicacion__id')[:1],
+                    output_field = IntegerField()
+                ),
+                ubicacion_primera_nombre_oficial=Subquery(
+                    first_historial.values('ubicacion__nombre_oficial')[:1],
+                    output_field = CharField()
+                )
+            )
+            for field in ['count_historial', 'ubicacion_primera_id_val', 'ubicacion_primera_nombre_oficial']:
+                if field not in QUERY_FIELDS:
+                    QUERY_FIELDS.append(field)
+        
+        if (request.data.get('observaciones', False)):
+            #Add has_observaciones annotation ===
+            observaciones_exist = ActivoObservacion.objects.filter(activo = OuterRef('id'))
+        
+            activos = activos.annotate(
+                has_observaciones = Exists(observaciones_exist)
+            )
+        
+            if 'has_observaciones' not in QUERY_FIELDS:
+                QUERY_FIELDS.append('has_observaciones')
+                
+        activos = activos.order_by('-id')
+
         serializer = DynamicReadActivosSerializer(instance = activos,
                                                   many = True, fields = QUERY_FIELDS)
 
@@ -351,7 +400,7 @@ class ActivosActions():
         workbook = xlsxwriter.Workbook(output, {"in_memory": True})
         worksheet = workbook.add_worksheet()
         
-        EXCEL_FIELDS = ["", "No.Identificacion", "Descripción",
+        EXCEL_FIELDS = ["No.Registro", "No.Identificacion", "Descripción",
                         "Marca", "Modelo", "Serie", "Estado",
                         "Ubicación", "Modo de adquisición", "Precio",
                         ]
@@ -391,8 +440,9 @@ class ActivosActions():
     #Metodos para el HTTP PATCH------------------------------
     def update_activo(self, request, pk:int) -> Response:
         data = request.data
+
         serializer = UpdateActivoSerializer(data = data)
-        print(serializer)
+
         try:
             activo = Activos.objects.get(id = pk)
    
@@ -401,12 +451,29 @@ class ActivosActions():
                             status = status.HTTP_404_NOT_FOUND)
             
         if serializer.is_valid():
-            activo:Activos = serializer.update(instance = activo,
-                                                        validated_data= serializer.validated_data)
-            activo.save()
-            serializer = ReadActivoSerializerComplete(instance = activo)  
-            return Response(serializer.data,
-                            status = status.HTTP_200_OK) 
+            try:
+                with transaction.atomic():
+                    # Update the activo
+                    activo = serializer.update(instance = activo, validated_data= serializer.validated_data)
+
+                    # Create historial if needed
+                    if data.get('ubicacion_anterior_id') != data.get('ubicacion_actual'):
+                        ubicacion_anterior_id = data.get('ubicacion_anterior_id')
+                        try:
+                            ubicacion_anterior = Ubicaciones.objects.get(id = ubicacion_anterior_id)
+                        except Ubicaciones.DoesNotExist:
+                            return Response({"error": "Ubicación anterior no encontrada"}, status=status.HTTP_400_BAD_REQUEST)
+                        
+                        HistorialUbicacion.objects.create(
+                            activo = activo,
+                            ubicacion = ubicacion_anterior
+                        )
+
+                    response_serializer = ReadActivoSerializerComplete(instance=activo)
+                    return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.errors, 
                         status = status.HTTP_400_BAD_REQUEST )
@@ -446,16 +513,17 @@ class ObservacionesActions():
 
     def get_observacion_by_activo(self, activo:str) -> Response: 
         try:
-            observacion = Observaciones.objects.filter(activo = activo) 
+            observacion_ids = ActivoObservacion.objects.filter(activo = activo).values_list('observacion', flat = True)
+            observaciones = Observaciones.objects.filter(id__in = observacion_ids)
         except Observaciones.DoesNotExist:
             return Response({"error": "observacion does not exist"}, status = status.HTTP_404_NOT_FOUND)
         
-        serializer = ObservacionesSerializer(instance = observacion,
-                                             many=True)
+        serializer = ObservacionesSerializer(instance = observaciones,
+                                             many = True)
         return Response(serializer.data, status= status.HTTP_200_OK)
 
     def observaciones_excel(self):
-        resultado = Observaciones.objects.filter(                            ).values(
+        resultado = Observaciones.objects.filter().values(
                                 'id_registro',
                                 'descripcion',
                                 'activo_id'
@@ -508,5 +576,138 @@ class ObservacionesActions():
             return Response(serializer.data, status = status.HTTP_200_OK)
  
         return Response(serializer.errors, status = status.HTTP_200_OK)
+    
+    def create_all_activo_observacion(self, request):
+        activos = request.data.get('activos', [])
+        descripciones = request.data.get('descripciones', [])
 
+        activo_observacion = []
+
+        if not activos or not descripciones:
+            return 0
+
+        try:
+            with transaction.atomic():
+                observaciones = []
+                for descripcion in descripciones:
+                    remaining_fields = get_remaining_fields()
+                    remaining_fields.pop('no_identificacion', None)
+
+                    serializer = ObservacionesSerializer(data = {'descripcion': descripcion})
+                    
+                    if serializer.is_valid():
+                        serializer.validated_data.update(remaining_fields)
+                        serializer.is_valid(raise_exception = True)
+
+                        observacion = serializer.save(**remaining_fields)
+                        observaciones.append(observacion)
+                    else:
+                        return 0
+
+                for activo in activos:
+                    for observacion in observaciones:
+                        activo_observacion.append(
+                            ActivoObservacion.objects.create(
+                                activo_id = activo.get('id'),
+                                observacion_id = observacion.id
+                            )
+                        )
+
+            return len(activo_observacion)
+
+        except Exception as e:
+            print(f'Error: {e}')
+            return 0
+    
+    def create_by_activo_observacion(self, data_acta):
+        activos_data  = data_acta.get('items', [])
+        activo_observacion = []
+
+        if not activos_data:
+            return 0
+
+        try:
+            with transaction.atomic():
+                observaciones = []
+                for activo_data in activos_data:
+                    activo_id = activo_data.get('id')
+                    descripciones = self.split_desctipcion(activo_data, data_acta)
+
+                    if not activo_id or not descripciones:
+                        return 0
+
+                    observaciones = []
+                    for descripcion in descripciones:
+                        remaining_fields = get_remaining_fields()
+                        remaining_fields.pop('no_identificacion', None)
+
+                        serializer = ObservacionesSerializer(data = {'descripcion': descripcion})
+                        
+                        if serializer.is_valid():
+                            serializer.validated_data.update(remaining_fields)
+                            serializer.is_valid(raise_exception = True)
+
+                            observacion = serializer.save(**remaining_fields)
+                            observaciones.append(observacion)
+                        else:
+                            return 0
+
+                    for observacion in observaciones:
+                        activo_observacion.append(
+                            ActivoObservacion.objects.create(
+                                activo_id = activo_id,
+                                observacion_id = observacion.id
+                            )
+                        )
+
+            return len(activo_observacion)
+        except Exception as e:
+            print(f'Error: {e}')
+            return 0
+        
+    def split_desctipcion(self, activo, data_acta):
+        print(activo)
+        acta = data_acta.get('acta', '')
+        if ( acta == 'baja'):
+            descripcion = f"El activo con placa N°{activo.get('no_identificacion')}, el cual corresponde a un {activo.get('descripcion')}  y que consta en el Folio {self.get_folio(activo.get('id_registro'))} y asiento {self.get_asiento(activo.get('id_registro'))}, del tomo 1 del Libro de Inventario, fue dado de baja del inventario institucional a partir del {data_acta.get('fechaActa')}, por motivo de obsolescencia, según consta en el acta extraordinaria N°{data_acta.get('numActa')}-{data_acta.get('anio')}, la cual se encuentra en los archivos de esta institución."
+        elif ( acta == 'traslado'):
+            descripcion = f"El activo con placa N°{activo.get('no_identificacion')}, el cual corresponde a un {activo.get('descripcion')}, y que consta en el Folio {self.get_folio(activo.get('id_registro'))} y asiento {self.get_asiento(activo.get('id_registro'))}, del tomo 1 del Libro de Inventario, fue trasladado del {activo.get('origen')} a el  {activo.get('destino')}, a partir del {data_acta.get('fechaActa')}."
+
+        return textwrap.wrap(descripcion, width = 98)
+        
+    def get_folio(self, id_registro):
+        partes = id_registro.split(',')
+        return partes[1]
+    
+    def get_asiento(self, id_registro):
+        partes = id_registro.split(',')
+        return partes[2]
+    
+    def mover_observaciones(self):
+        activo_observaciones = []
+
+        if (not ActivoObservacion.objects.exists() and has_field(Observaciones, 'activo_id')):
+            try:
+                with transaction.atomic():
+                    for observacion in Observaciones.objects.only('id', 'activo_id'):
+                        activo = getattr(observacion, 'activo_id', None)
+                        if activo is not None:
+                            activo_observaciones.append(ActivoObservacion(
+                                observacion_id = observacion.id,
+                                activo_id = activo.id
+                            ))
+
+                    ActivoObservacion.objects.bulk_create(activo_observaciones)
+            except Exception as e:
+                print(f"Failed moving Observaciones to ActivoObservacion: {e}")
+                return 0
+
+        return len(activo_observaciones)
 #-------------------------------------------------------------
+
+def has_field(model, field_name):
+    try:
+        model._meta.get_field(field_name)
+        return True
+    except FieldDoesNotExist:
+        return False
