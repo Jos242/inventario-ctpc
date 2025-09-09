@@ -8,6 +8,7 @@
         <mat-spinner></mat-spinner>
     </div>
   }  
+
     <div class="row">
         <div class="col-lg">
             <mat-card class="example-card">
@@ -23,7 +24,7 @@
                   <mat-divider></mat-divider>
                 </mat-card-content>
                 <mat-card-actions>
-                  <button mat-flat-button color="primary" (click)="excelImpresion()" [disabled]="excels < 1">Generar</button>
+                  <button mat-flat-button color="primary" [disabled]="this.excels < 1" (click)="excelImpresion()">Generar</button>
                 </mat-card-actions>
               </mat-card>
 
@@ -43,9 +44,9 @@
                   <mat-divider></mat-divider>
                 </mat-card-content>
                 <mat-card-actions>
+                  <button mat-flat-button color="primary" (click)="printObsYAct()" style="margin-right:5px;" >Todos los Activos y Anotaciones</button>
                   <button mat-flat-button color="primary" (click)="printActivos()" style="margin-right:5px;" >Todos los Activos</button>
                   <button mat-flat-button color="primary" (click)="printObs()" style="margin-right:5px;"  >Todos las Anotaciones</button>
-                  <button mat-flat-button color="primary" (click)="printObsYAct()" >Todos los Activos y Anotaciones</button>
                 </mat-card-actions>
               </mat-card>
 
@@ -53,46 +54,65 @@
 
     </div>
     <div class="row" style="margin-top: 10px;">
-        <div class="col-lg">
-            <mat-card class="example-card">
-                <mat-card-header>
-                  <mat-card-title>Excel De Informacion</mat-card-title>
-                </mat-card-header>
-                
-                <mat-card-content>
-                    <br>
-                  <p>Presione el boton con respecto al excel que desea generar. Estos Excels tendran la informacion de todos los Funcionarios registrados en el sistema, todas las anotaciones, o de todas las ubicaciones registradas en el sistema.
-                    Estos contienen todos la informacion existente acerca de los mismos que este registrada en el sistema.
-                  </p>
-                  <p></p>
-                  <mat-divider></mat-divider>
-                </mat-card-content>
-                <mat-card-actions>
-                  <button mat-flat-button color="primary" (click)="printFuncs()" style="margin-right:5px;" >Todos los Funcionarios</button>
-                  <button mat-flat-button color="primary" (click)="printUbis()" style="margin-right:5px;"  >Todas las Ubicaciones</button>
-                </mat-card-actions>
-              </mat-card>
-        </div>
-        <div class="col-lg">
-          <mat-card class="example-card">
-            <mat-card-header>
-              <mat-card-title>Excel Con Informacion Personalizada</mat-card-title>
-            </mat-card-header>
-            
-            <mat-card-content>
-                <br>
-              <p>Mediante este modulo se tiene la capacidad de crear un excel con toda la informacion de los activos que se requieran. Los activos pueden ser agregados al excel manualmente,
-                mediante filtros como aula o numero de placa, completamente personalizable.
-              </p>
-              <p></p>
-              <mat-divider></mat-divider>
-            </mat-card-content>
-            <mat-card-actions>
-              <button mat-flat-button color="primary" [routerLink]="['/actas/excel-custom']" style="margin-right:5px;" >Entrar</button>
-            </mat-card-actions>
-          </mat-card>
-
-        </div>
-
+      <div class="col-lg">
+        <mat-card class="example-card">
+          <mat-card-header>
+            <mat-card-title>Excel De Informacion</mat-card-title>
+          </mat-card-header>
+          
+          <mat-card-content>
+              <br>
+            <p>Presione el boton con respecto al excel que desea generar. Estos Excels tendran la informacion de todos los Funcionarios registrados en el sistema, todas las anotaciones, o de todas las ubicaciones registradas en el sistema.
+              Estos contienen todos la informacion existente acerca de los mismos que este registrada en el sistema.
+            </p>
+            <p></p>
+            <mat-divider></mat-divider>
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-flat-button color="primary" (click)="printFuncs()" style="margin-right:5px;" >Todos los Funcionarios</button>
+            <button mat-flat-button color="primary" (click)="printUbis()" style="margin-right:5px;"  >Todas las Ubicaciones</button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+      <div class="col-lg">
+        <mat-card class="example-card">
+          <mat-card-header>
+            <mat-card-title>Excel Con Informacion Personalizada</mat-card-title>
+          </mat-card-header>
+          
+          <mat-card-content>
+              <br>
+            <p>Mediante este modulo se tiene la capacidad de crear un excel con toda la informacion de los activos que se requieran. Los activos pueden ser agregados al excel manualmente,
+              mediante filtros como aula o numero de placa, completamente personalizable.
+            </p>
+            <p></p>
+            <mat-divider></mat-divider>
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-flat-button color="primary" [routerLink]="['/actas/excel-custom']" style="margin-right:5px;" >Entrar</button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    </div>
+    <div class="row" style="margin-top: 10px;">
+      <div class="col-lg">
+        <mat-card class="example-card">
+          <mat-card-header>
+            <mat-card-title>Excel De Comparación</mat-card-title>
+          </mat-card-header>
+          
+          <mat-card-content>
+              <br>
+            <p>Mediante este modulo se tiene la capacidad de subir un excel con los registros y su información que se quieran comparar con los registros del sistema. 
+              Se mostraran los diferencias entre activos y observaciones encontrados con el mismo Id de Registro.
+            </p>
+            <p></p>
+            <mat-divider></mat-divider>
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-flat-button color="primary" [routerLink]="'/activos/excel'" style="margin-right:5px;" >Comparación de registros</button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
     </div>
 </div>

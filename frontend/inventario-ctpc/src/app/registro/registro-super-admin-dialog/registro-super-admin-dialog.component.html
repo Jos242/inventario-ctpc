@@ -1,0 +1,14 @@
+<h2 mat-dialog-title>Cambios realizados</h2>
+<div class="dialog-container">
+  <div class="changes-container" *ngFor="let row of data.changes">
+    <strong>{{row.id_registro}}</strong>
+    <div *ngFor="let change of row.changes">
+      <strong>{{change.column + ": "}}</strong>{{showText(change)}}
+    </div>
+    <mat-divider></mat-divider>
+  </div>
+</div>
+<mat-dialog-actions>
+  <button mat-button [mat-dialog-close]="false">Cancelar</button>
+  <button mat-button [mat-dialog-close]="true">Confirmar</button>
+</mat-dialog-actions>

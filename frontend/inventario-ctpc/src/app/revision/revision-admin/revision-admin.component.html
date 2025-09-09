@@ -1,1 +1,114 @@
-<p>revision-admin works!</p>
+<div class="example-container">
+  @if (isLoadingResults) {
+    <div class="loading-shade">
+        <mat-spinner></mat-spinner>
+    </div>
+  }
+
+  <div class="button-container" #finalizar>
+    <button mat-flat-button color="primary" routerLink="/cierre/reporte">
+      <mat-icon>reply</mat-icon>
+      Retornar
+    </button>
+    <div>
+      <button mat-stroked-button color="primary" class="manual-button" type="button" (click)="elegirActivos()">
+        <mat-icon>search</mat-icon>
+        Elegir Manualmente
+      </button>
+      <button mat-flat-button color="primary" type="button" (click)="generarActivos()">
+        <mat-icon>assignment_add</mat-icon>
+        Auto-generar Activos
+      </button>
+    </div>
+  </div>
+
+  <div class="mat-elevation-z8">
+    <div class="row activos-container">
+      <div class="col-md-6 card-activo-container" *ngFor="let activo of activos">
+        <div class="card-x" #card>
+          <mat-card class="card-activo" appearance="outlined" [ngClass]="{'card-found': activo.encontrado == true, 'card-not-found': activo.encontrado == false}">
+            <mat-card-header class="card-header">
+              <div class="card-title">
+                <mat-card-title>
+                  {{activo.no_identificacion}}
+                </mat-card-title>
+                <div>
+                  <button mat-stroked-button color="primary" type="button" (click)="updateEncontrado(activo, true)"  [ngClass]="{'button-found': activo.encontrado == true}">
+                    <mat-icon>check</mat-icon>
+                    Encontrado
+                  </button>
+                  <button mat-stroked-button color="primary" type="button" (click)="updateEncontrado(activo, false)"  [ngClass]="{'button-not-found': activo.encontrado == false}">
+                    <mat-icon>close</mat-icon>
+                    No Encontrado
+                  </button>
+                </div>
+              </div>
+            </mat-card-header>
+            <div class="card-container">  
+              <mat-card-content class="card-content">
+                <div class="content-info">
+                  <h3 class="m-0">
+                    <span class="content-titles">
+                      <mat-icon>description</mat-icon>Descripción: 
+                    </span>
+                    {{activo.descripcion}}
+                  </h3>
+                </div>
+                <div class="content-check">
+                  <h3 class="m-0">
+                    <span class="content-titles">
+                      <mat-icon>location_on</mat-icon>Ubicación actual: 
+                    </span>
+                    {{activo.ubicacion_actual.nombre_oficial}}
+                  </h3>
+                </div>
+              </mat-card-content>
+            </div>
+          </mat-card>
+        </div>
+      </div>
+      
+          
+      <div class="card-x" #card *ngIf="activos.length > 0">
+        <mat-card class="card-activo" appearance="outlined">
+          <mat-card-header class="card-header">
+            <div class="card-title">
+              <mat-card-title>
+                Detalles
+              </mat-card-title>
+            </div>
+          </mat-card-header>
+          <div class="card-container">  
+            <mat-card-content class="footer-content py-0">
+              <div class="row">
+                <h4 class="m-0 col">
+                  <span class="footer-titles green">
+                    <mat-icon>check</mat-icon>Encontrados: 
+                  </span>
+                  {{ trueCount }}
+                </h4>
+                <h4 class="m-0 col">
+                  <span class="footer-titles red">
+                    <mat-icon>close</mat-icon>No Encontrados: 
+                  </span>
+                  {{ falseCount }}
+                </h4>
+                <h4 class="m-0 col">
+                  <span class="footer-titles">
+                    <mat-icon>hourglass_bottom</mat-icon>Pendientes: 
+                  </span>
+                  {{ pendingCount }}
+                </h4>
+              </div>
+              <div>
+                <button mat-flat-button color="primary" type="button" [disabled]="pendingCount > 0" (click)="confirmarRevision()">
+                  Confirmar Revisión
+                </button>
+              </div>
+            </mat-card-content>
+          </div>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>

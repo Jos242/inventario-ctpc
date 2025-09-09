@@ -79,7 +79,7 @@ export class LoginIndexComponent implements OnInit{
           });
         }
       }, 15000);
-      this.authService.login({ username: this.myForm.get('usuario').value, password: this.myForm.get('password').value }).subscribe(response => {
+      this.authService.login({ username: this.myForm.get('usuario').value.trim(), password: this.myForm.get('password').value.trim() }).subscribe(response => {
         if (response) {
           this.isLoadingResults = false;
           clearTimeout(loadingTimeout); 

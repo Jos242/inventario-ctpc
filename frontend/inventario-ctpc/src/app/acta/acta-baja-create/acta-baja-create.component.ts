@@ -66,7 +66,7 @@ export class ActaBajaCreateComponent {
   activosDeBaja: any;
   myForm: FormGroup;
 
-  isLoadingResults:any;
+  isLoadingResults: any;
 
   displayedColumns: string[] = ['select', 'no_identificacion', 'descripcion', 'marca', 'modelo', 'serie', 'ubicacion_actual'];
   pageSizeOptions: number[] = [10, 25, 40, 100];

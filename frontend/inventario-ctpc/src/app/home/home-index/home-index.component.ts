@@ -152,9 +152,4 @@ export class HomeIndexComponent {
         return 'red';
       }
     }
-
-  
-    
-
-   
 }

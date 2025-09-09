@@ -394,29 +394,16 @@ export class ActaExcelCustomComponent implements AfterViewInit {
     const formData = { nos_identificacion: this.activosExcel.map(activo => activo.no_identificacion) };
 
     // Make the request
-    this.gService.excel('activos/excel/by/nos-identificacion/', formData)
+    this.gService.create('activos/excel/by/nos-identificacion/', formData)
     .pipe(takeUntil(this.destroy$))
     .subscribe({
-      next: (blob: Blob) => {
+      next: (data: any) => {
+        const url = `${environment.apiURL}${data}`;
+        window.open(url, '_blank');
+
         this.isLoadingResults = false; // Stop loading
         clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
 
-        // Create a link element
-        const link = document.createElement('a');
-        const url = window.URL.createObjectURL(blob);
-        
-        // Set the file name and attributes
-        link.href = url;
-        link.download = 'activos.xlsx';  // Set the file name for download
-
-        // Append to the DOM and click
-        document.body.appendChild(link);
-        link.click();
-        
-        // Clean up
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(link);
-        this.isLoadingResults = false; // Stop loading
         this.toast.success(`Excel generado correctamente`, {
           dismissible: true,
           duration: 4000,  // 3 seconds

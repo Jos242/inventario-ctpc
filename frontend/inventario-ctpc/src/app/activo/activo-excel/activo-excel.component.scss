@@ -1,0 +1,104 @@
+.btnWarning{
+    width: 100%; 
+}
+
+.btnAgregar{
+    width: 100%;
+}
+
+.formAgregar{
+    width: 90%;
+    margin-top: 10px;
+    margin: 0 auto;
+}
+
+.inputsForm{
+    margin-top: 10px;
+}
+
+table {
+  width: 100%;
+}
+
+.mat-mdc-form-field {
+  font-size: 14px;
+  width: 100%;
+}
+
+td {
+  word-break: break-all;
+  padding: 10px;
+  max-width: 300px;
+}
+
+/* Structure */
+.example-container {
+  margin: 0 auto;
+  width: 90%;
+  margin-top: 50px;
+}
+
+.example-table-container {
+  position: relative;
+  // min-height: 200px;
+  // max-height: 400px;
+  overflow: auto;
+}
+
+
+
+.mat-mdc-row:hover .mat-mdc-cell {
+  background-color: rgb(207, 207, 207);
+}
+
+.table-container {
+  overflow: auto;
+}
+
+
+.badge {
+  display: block;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  margin-right: 4px;
+  margin: 10px;
+}
+.excel-badge { 
+  background: #f0fff4; 
+  color: #2f855a; 
+}
+.db-badge { 
+  background: #ebf8ff; 
+  color: #2b6cb0; 
+}
+  
+.diff-table .excel {
+  display: block;
+  color: #2f855a; /* green */
+  font-weight: 500;
+  margin: 10px;
+}
+.diff-table .db {
+  display: block;
+  color: #2b6cb0;  /* blue */
+  font-weight: 500;
+  margin: 10px;
+}
+
+.diff-table .mismatch {
+  background: #fed7d7; /* light red */
+  border-radius: 4px;
+}
+
+.diff-table .notfound {
+  background: #feedd7; /* light orange */
+  border-radius: 4px;
+}
+
+.overflow-cell {
+  position: relative;
+  overflow: visible;
+  white-space: pre;
+  z-index: 10;
+}

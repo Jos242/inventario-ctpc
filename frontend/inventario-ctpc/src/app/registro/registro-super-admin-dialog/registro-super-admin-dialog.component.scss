@@ -1,0 +1,22 @@
+.dialog-container {
+  padding: 0px 24px 20px;
+  font-size: 16px;
+}
+
+.changes-container {
+  margin: 10px;
+  max-height: 80vw;
+  overflow: auto;
+}
+
+.changes-container > strong {
+  font-size: 18px;
+}
+
+mat-divider {
+  margin-top: 10px;
+}
+
+strong ~ div {
+  margin-left: 20px;
+}

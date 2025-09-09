@@ -1,0 +1,108 @@
+.content-container {
+  margin-bottom: 10px;
+}
+
+.excel-wrapper {
+  overflow: auto;
+  max-height: 80vh;
+  border: 1px solid #aaa;
+}
+
+.excel-table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.excel-table th,
+.excel-table td {
+  border: 1px solid #aaa;
+  padding: 0;
+  text-align: center;
+  position: relative;
+}
+
+.row-header {
+  background: #f0f0f0;
+  font-weight: bold;
+  width: 40px;
+  text-align: center;
+}
+
+.col-header {
+  background: #f8f8f8;
+  font-weight: bold;
+  text-align: center;
+}
+
+.col-content {
+  padding: 4px;
+  margin: 0px;
+}
+
+.mat-input-element {
+  padding: 10px;
+  margin: 0px;
+  text-align: center;
+  border: none;
+  min-height: 51px;
+  height: 51px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cell-abs {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0; /* or: inset: 0; */
+}
+
+.overflow-cell {
+  position: relative;
+  overflow: visible;
+  z-index: 10;
+}
+
+.overflow-input {
+  width: 86vw;
+  text-align: start;
+}
+
+.row-changed * {
+  background: #feedd7; /* light orange */
+}
+
+@media (max-width: 1300px) {
+  .overflow-input {
+    width: 86vw;
+  }
+}
+@media (max-width: 1000px) {
+  .overflow-input {
+    width: 85vw;
+  }
+}
+@media (max-width: 800px) {
+  .overflow-input {
+    width: 84vw;
+  }
+}
+@media (max-width: 650px) {
+  .overflow-input {
+    width: 83vw;
+  }
+}
+@media (max-width: 550px) {
+  .overflow-input {
+    width: 80vw;
+  }
+}
+@media (max-width: 400px) {
+  .overflow-input {
+    width: 78vw;
+  }
+}
+@media (max-width: 350px) {
+  .overflow-input {
+    width: 75vw;
+  }
+}

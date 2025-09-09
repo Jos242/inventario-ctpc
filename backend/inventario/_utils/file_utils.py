@@ -67,16 +67,16 @@ def handle_uploaded_file(files: list,
 
 def store_acta(file, file_name: str):
     # Build paths
-    absolute_dir = Path(MEDIA_ROOT) / "uploads" / "actas"
-    absolute_dir.mkdir(parents = True, exist_ok = True)  # Ensure directory exists
+    absolute_dir = os.path.join(MEDIA_ROOT, 'uploads', 'actas')
+    Path(absolute_dir).mkdir(parents=True, exist_ok=True)  # Ensure directory exists
 
-    path_to_write = absolute_dir / file_name
-    relative_path = Path("media") / "uploads" / "actas" / file_name
+    path_to_write = os.path.join(absolute_dir, file_name)
+    relative_path = os.path.join(Path("media"), 'uploads', 'actas', file_name)
 
     # Write the file
     with open(path_to_write, 'wb') as destination:
         destination.write(file.read())
-
+        
     return str(relative_path)
 
 

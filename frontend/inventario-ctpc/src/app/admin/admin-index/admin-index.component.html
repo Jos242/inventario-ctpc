@@ -82,7 +82,29 @@
       </mat-card>
     </div>
     <div class="col-sm-6">
-      
+      <mat-card class="example-card" *ngIf="userType == 'Administrador'">
+        <mat-card-header>
+          <!-- <mat-card-subtitle>Actas</mat-card-subtitle> -->
+          <mat-card-title>
+            <mat-icon>admin_panel_settings</mat-icon>
+            Registros - Super Admin
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <br>
+          <p>Mediante este modulo se puede ver un listado de todos los registros con toda su información, esto para que puedan ser editados con facilidad</p>
+          <mat-divider></mat-divider>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-flat-button color="primary"  [routerLink]="['/registros/super-admin']">
+            Entrar
+          </button>
+          <!-- <button mat-flat-button color="primary">Como Usar</button> -->
+        </mat-card-actions>
+        <mat-card-footer>
+          
+        </mat-card-footer>
+      </mat-card>
     </div>
   </div>
 </div>

@@ -1,52 +1,49 @@
 <div>
-    <div class="d-flex justify-content-center">
-        <h1>Sistema de Invetarios y Gestion de Activos</h1>
+  <div class="d-flex justify-content-center">
+      <h1>Sistema de Invetarios y Gestion de Activos</h1>
+  </div>
+  @if (isLoadingResults) {
+    <div class="loading-shade">
+      <mat-spinner></mat-spinner>
     </div>
-    @if (isLoadingResults) {
-        <div class="loading-shade">
-          @if (isLoadingResults) {
-            <mat-spinner></mat-spinner>
-          }
-        </div>
-      }   
-    
-    <div class="logo d-flex justify-content-center">
-        
-        <img src="assets/images/logocole.png" alt="Logo">
-    </div>
-    <mat-card class="divLogin">
-        <mat-card-header>
-            <mat-card-title>
-                Iniciar Sesion
-            </mat-card-title>
-        </mat-card-header>
-        <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">
-        <mat-card-content>
-            
-                <div class="container">
-                    <div class="row">
-                        <mat-form-field class="inputsForm">
-                            <mat-icon matTextPrefix class="search-icon">person</mat-icon>
-                            <mat-label>Nombre de Usuario</mat-label>
-                            <input matInput formControlName="usuario" placeholder="Admin123">
-                        </mat-form-field>
+  }   
+  
+  <div class="logo d-flex justify-content-center">
+      
+      <img src="assets/images/logocole.png" alt="Logo">
+  </div>
+  <mat-card class="divLogin">
+    <mat-card-header>
+        <mat-card-title>
+            Iniciar Sesion
+        </mat-card-title>
+    </mat-card-header>
+    <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="divForm">
+      <mat-card-content>
+        <div class="container">
+          <div class="row">
+            <mat-form-field class="inputsForm">
+              <mat-icon matTextPrefix class="search-icon">person</mat-icon>
+              <mat-label>Nombre de Usuario</mat-label>
+              <input matInput formControlName="usuario" placeholder="Admin123">
+            </mat-form-field>
 
-                        <mat-form-field class="inputsForm">
-                            <mat-icon matTextPrefix class="search-icon">lock</mat-icon>
-                            <mat-label>Contraseña</mat-label>
-                            <input matInput formControlName="password" type="password" placeholder="********">
-                        </mat-form-field>
-                    </div>
-                </div>
-        </mat-card-content>
-        <mat-card-actions style="margin-left: 15px ;">
-          <button mat-raised-button color="primary" type="submit">
-            <mat-icon>login</mat-icon>
-            Entrar
-        </button>
-          <!-- <button mat-raised-button style="background-color: red; color: white;" (click)="limpiar()">Limpiar</button> -->
-          
-        </mat-card-actions>
+            <mat-form-field class="inputsForm">
+              <mat-icon matTextPrefix class="search-icon">lock</mat-icon>
+              <mat-label>Contraseña</mat-label>
+              <input matInput formControlName="password" type="password" placeholder="********">
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-card-content>
+      <mat-card-actions style="margin-left: 15px ;">
+        <button mat-raised-button color="primary" type="submit">
+          <mat-icon>login</mat-icon>
+          Entrar
+      </button>
+        <!-- <button mat-raised-button style="background-color: red; color: white;" (click)="limpiar()">Limpiar</button> -->
+        
+      </mat-card-actions>
     </form>
-      </mat-card>
+  </mat-card>
 </div>

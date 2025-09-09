@@ -2,7 +2,7 @@
 from inventario.models                       import Docs, Activos, Observaciones, HistorialUbicacion, Ubicaciones, ActivoObservacion
 from inventario.permissions                  import IsAdminUser
 from inventario.serializers                  import ActaBajaSerializer, ReadDocSerializer, DocUpdateSerializer, WhatTheExcelNameIs, DocSerializer
-from inventario._utils.activos_utils         import get_combined_results, determine_print_type, handle_observaciones_y_activos, handle_solo_activos, handle_solo_observaciones
+from inventario._utils.activos_utils         import get_combined_results, determine_print_type, exportar_excel_todo, handle_excel_impresion, get_export_excel_results
 from inventario._utils.file_utils            import handle_uploaded_file, store_acta
 #--------------------------------------------------------
 
@@ -160,6 +160,11 @@ class DocsView(APIView):
             output.close()
 
             return response 
+                
+        if path == f"/exportar-excel/todo/":
+            regsitros: QuerySet = get_export_excel_results()
+            
+            return exportar_excel_todo(regsitros)   
 
     def post(self, request:Request):
         path = request.path
@@ -252,14 +257,15 @@ class DocsView(APIView):
                             if activo and destino:
                                 activo.ubicacion_actual = destino
 
-                        obs_actions = ObservacionesActions()
-                        success = obs_actions.create_by_activo_observacion(data_acta)
+                        Activos.objects.bulk_update(activos_to_update, ['ubicacion_actual'])
+                        HistorialUbicacion.objects.filter(activo__in = activos_to_update).update(acta = True)
+                        
+                        #obs_actions = ObservacionesActions()
+                        #success = obs_actions.create_by_activo_observacion(data_acta)
 
-                        if success > 0:
-                            Activos.objects.bulk_update(activos_to_update, ['ubicacion_actual'])
-                            HistorialUbicacion.objects.filter(activo__in = activos_to_update).update(acta = True)
-                        else:
-                            raise Exception("Failed to create observations. Rolling back.")
+                        #if success > 0:
+                        #else:
+                        #    raise Exception("Failed to create observations. Rolling back.")
                             
                     try:
                         doc = DocxTemplate(acta_template)
@@ -342,28 +348,13 @@ class DocsView(APIView):
 
             file_name: str = serializer.validated_data.get("file_name", "")
             resultados: QuerySet = get_combined_results()
+
+            path_to_save = os.path.join(MEDIA_ROOT, 'documentos_de_impresion', file_name)
             
-            if len(resultados[:40]) < 40:
-                return Response(data = {"error": ("there is not enough information "
-                                                  "to generate the excel")},
-                                status = status.HTTP_400_BAD_REQUEST)
+            last_doc = Docs.objects.filter(last_row__isnull = False).order_by('-id').first()
+            last_row = last_doc.last_row if last_doc else 0
 
-            print_type:str = determine_print_type(resultados[:40])
-            path_to_save   = os.path.join(MEDIA_ROOT, 'documentos_de_impresion',
-                                          file_name)
-
-            if print_type == "SoloActivos":
-                return handle_solo_activos(resultados, path_to_save, file_name)
-
-            elif print_type == "SoloObservaciones":
-                return handle_solo_observaciones(resultados, path_to_save,
-                                                 file_name)
-
-            return handle_observaciones_y_activos(resultados, path_to_save, file_name)            
-
-
-        if path == f"/forzar-excel/impresiones/":
-            return Response("/forzar-excel/impresiones/", status = status.HTTP_200_OK) 
+            return handle_excel_impresion(resultados, path_to_save, file_name, last_row)       
 
         return Response({"error": "not a valid post request"},
                         status = status.HTTP_400_BAD_REQUEST)

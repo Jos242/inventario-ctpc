@@ -1,0 +1,88 @@
+<div class="content-title-container">
+  <a routerLink="/admin" class="go-back back-absolute" matTooltip="Ir atras">
+    <mat-icon>arrow_back</mat-icon>
+  </a>
+  
+  @if (isLoadingResults) {
+    <div class="loading-shade">
+      <mat-spinner></mat-spinner>
+    </div>
+  }
+
+  <div class="titulo d-flex justify-content-center">
+    <h1>Super Admin</h1>
+  </div>
+
+  <div class="content-container">
+    <div class="boton-container">
+      <div></div>
+      <a  mat-raised-button color="primary" class="boton-crear" [disabled]="changes.length == 0" (click)="guardarCambios()">
+        <mat-icon>save</mat-icon>
+        Guardar cambios
+      </a> 
+    </div>
+  </div>
+
+  <!-- app.component.html -->
+  <div class="excel-wrapper">
+    <table mat-table [dataSource]="rowsDataSource" class="mat-elevation-z2 excel-table">
+
+      <!-- Row number column -->
+      <ng-container matColumnDef="rowNumber">
+        <th mat-header-cell *matHeaderCellDef class="row-header"></th>
+        <td mat-cell *matCellDef="let row; let i = index" class="row-header">
+          {{ i + 1 + (paginator.pageIndex * paginator.pageSize) }}
+        </td>
+      </ng-container>
+
+      <!-- Dynamic columns -->
+      <ng-container *ngFor="let col of columns" [matColumnDef]="col">
+        <th mat-header-cell *matHeaderCellDef class="col-header">{{ col }}</th>
+        <td mat-cell *matCellDef="let row; let rowIndex = index" class="col-content" [ngClass]="{'overflow-cell':  row.isObservacion && col == 'no_identificacion', 'row-changed': isRowChanged(row.id, col)}">
+          <div class="cell-abs">
+            <input class="mat-input-element" [ngClass]="{'overflow-input':  row.isObservacion && col == 'no_identificacion'}" *ngIf="col != 'estado' && col != 'ubicacion_original' && col != 'modo_adquisicion'"
+              matInput
+              [(ngModel)]="row[col]"
+              (keydown.enter)="blurInput($event)"
+              (change)="updateChanges(row, col, row[col], row.isObservacion)"
+              maxlength="98"
+            />
+            
+            <mat-select [(ngModel)]="row[col]" *ngIf="col == 'estado'" class="mat-input-element" (ngModelChange)="updateChanges(row, col, row[col], row.isObservacion)">
+              <mat-option value="BUENO">BUENO</mat-option>
+              <mat-option value="MALO">MALO</mat-option>
+              <mat-option value="REGULAR">REGULAR</mat-option>
+            </mat-select>
+            <input matInput [(ngModel)]="row[col]" *ngIf="col == 'ubicacion_original'" class="mat-input-element"
+            [matAutocomplete]="autoUbicacion" #autoTriggerUbicacion="matAutocompleteTrigger"
+            (keyup)="filterUbicacion(row[col])" (blur)="onUbicacionBlur(row, col)" (keydown.enter)="autoTriggerUbicacion.closePanel(); blurInput($event)"
+            (ngModelChange)="updateChanges(row, col, row[col], row.isObservacion)" maxlength="98">
+            
+            <input matInput [(ngModel)]="row[col]" *ngIf="col == 'modo_adquisicion'" class="mat-input-element"
+            [matAutocomplete]="autoModo" #autoTriggerModo="matAutocompleteTrigger"
+            (keyup)="filterModo(row[col])" (blur)="onModoBlur(row, col)" (keydown.enter)="autoTriggerModo.closePanel(); blurInput($event)"
+            (ngModelChange)="updateChanges(row, col, row[col], row.isObservacion)" (ngModelChange)="updateChanges(row, col, row[col], row.isObservacion)" maxlength="98">
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Header and rows -->
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  </div>
+
+  <mat-autocomplete #autoUbicacion="matAutocomplete" [displayWith]="displayUbicacion">
+    <mat-option *ngFor="let ubicacion of filteredUbicaciones" [value]="ubicacion.id">
+      {{ ubicacion.nombre_oficial }}
+    </mat-option>
+  </mat-autocomplete>
+  <mat-autocomplete #autoModo="matAutocomplete" [displayWith]="displayModo">
+      <mat-option *ngFor="let modo of filteredModos" [value]="modo.id">
+      {{ modo.descripcion }}
+      </mat-option>
+  </mat-autocomplete>
+
+  <!-- Pagination control -->
+  <mat-paginator [length]="rowsDataSource.data.length" [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+</div>

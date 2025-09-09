@@ -32,8 +32,8 @@ export class RevisionIndexComponent {
   isLoadingResults: boolean = false;
   hasUbicacion: boolean = true;
 
-  currentUserData: any =null;
-  currentUserId: any =null;
+  currentUserData: any = null;
+  currentUserId: any = null;
 
   constructor(private gService:GenericService,
     private router:Router,

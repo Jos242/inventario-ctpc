@@ -34,6 +34,8 @@ import { AdquisicionEditComponent } from './adquisicion/adquisicion-edit/adquisi
 import { CierreNuevoComponent } from './cierre/cierre-nuevo/cierre-nuevo.component';
 import { CierreReporteComponent } from './cierre/cierre-reporte/cierre-reporte.component';
 import { CierreDetailComponent } from './cierre/cierre-detail/cierre-detail.component';
+import { ActivoExcelComponent } from './activo/activo-excel/activo-excel.component';
+import { RegistroSuperAdminComponent } from './registro/registro-super-admin/registro-super-admin.component';
 
 
 export const routes: Routes = [
@@ -51,6 +53,8 @@ export const routes: Routes = [
     { path:'actas/excels', component: ActaExcelsComponent, canActivate: [authGuard, adminGuard]},
     { path:'actas/excel-custom', component: ActaExcelCustomComponent, canActivate: [authGuard, adminGuard]},
 
+    { path:'registros/super-admin', component: RegistroSuperAdminComponent, canActivate: [authGuard, adminGuard]},
+
     { path:'usuarios', component: UsuarioIndexComponent, canActivate: [authGuard, adminGuard]},
     { path:'usuarios/crear', component: UsuarioCreateComponent, canActivate: [authGuard, adminGuard]},
     { path:'usuarios/:id', component: UsuarioDetailComponent, canActivate: [authGuard, adminGuard]},
@@ -58,6 +62,7 @@ export const routes: Routes = [
     
     { path:'activos/crear', component: ActivoCreateComponent, canActivate: [authGuard, adminGuard]},
     { path:'activos/scan', component: ActivoScanComponent },
+    { path:'activos/excel', component: ActivoExcelComponent, canActivate: [authGuard, adminGuard]},
 
     { path:'revision', component: RevisionIndexComponent, canActivate: [authGuard]} ,
     { path:'revision/aula', component: RevisionAulaComponent, canActivate: [authGuard]} ,

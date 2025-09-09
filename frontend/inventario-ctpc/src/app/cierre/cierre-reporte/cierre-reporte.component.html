@@ -21,14 +21,19 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
-  
-  <mat-form-field class="buscar ms-3">
-      <mat-icon matTextPrefix class="search-icon">search</mat-icon>
-      <mat-label>Buscar...</mat-label>
-      <input matInput (keyup)="applyFilter($event)" placeholder="Ej. Monitor, Aula 01, 6105-1234" #input>
-    </mat-form-field>
+
+    <a routerLink="/revision/admin" mat-raised-button color="primary" class="boton-crear">
+      <mat-icon>content_paste_search</mat-icon>
+      Revision de activos
+    </a> 
   </div>
-    
+  
+  <mat-form-field class="buscar">
+    <mat-icon matTextPrefix class="search-icon">search</mat-icon>
+    <mat-label>Buscar...</mat-label>
+    <input matInput (keyup)="applyFilter($event)" placeholder="Ej. Monitor, Aula 01, 6105-1234" #input>
+  </mat-form-field>
+  
   <div class="">
     <div class="table-container">
       <table mat-table [dataSource]="dataSource" matSort>

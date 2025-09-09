@@ -1,0 +1,179 @@
+.example-container {
+  width: 90%;
+  margin: 50px auto 0;
+}
+
+.buscar {
+  font-size: 14px;
+  width: 100%;
+}
+
+.scroll-container {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 1000;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 12px 0;
+
+  div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+}
+
+.manual-button {
+  border-color: #673AB7;
+}
+
+.activos-container {
+  margin: 0;
+  padding: 12px 0;
+}
+
+.card-activo-container {
+  display: flex;
+}
+
+.card-x {
+  display: flex;
+  width: 100%;
+  margin: 12px 0;
+  border: 2px solid transparent;
+}
+
+.card-activo {
+  display: flex;
+  width: 100%;
+  padding-bottom: 12px;
+}
+
+.card-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  width: 100%;
+}
+
+.card-title div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.card-container {
+  display: flex;
+  align-items: start;
+  justify-content: start;
+  margin-top: 10px;
+}
+
+.card-footer {
+  flex: 1;
+  display: flex;
+  justify-content: end;
+  gap: 10px;
+  padding: 16px 16px 0;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.card-content h3 {
+  display: flex;
+  gap: 5px;
+  line-height: 20px;
+}
+
+.content-titles {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 3px;
+  color: rgb(0, 0, 0, 0.55);
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.content-titles mat-icon {
+  transform: scale(0.85);
+}
+
+.content-container {
+  display: flex;
+}
+
+.card-found {
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.card-found {
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.button-found {
+  background-color: #16a34a;
+  color: white;
+}
+
+.card-not-found {
+  background-color: #fef2f2;
+  border-color: #fecaca;
+}
+
+.button-not-found {
+  background-color: #dc2424;
+  color: white;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.footer-content h4 {
+  font-size: 14px;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  gap: 5px;
+}
+
+.footer-titles {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 3px;
+  color: rgb(0, 0, 0, 0.55);
+  font-weight: 500;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.footer-titles mat-icon {
+  transform: scale(0.7);
+}
+
+.green {
+  color: #16a34a;
+}
+
+.red {
+  color: #dc2424;
+}

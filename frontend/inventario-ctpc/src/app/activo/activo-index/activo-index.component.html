@@ -106,7 +106,7 @@
         <ng-container *ngIf="displayedColumns.includes('ubicacion_original')" matColumnDef="ubicacion_original">
           <th mat-header-cell *matHeaderCellDef mat-sort-header> Ubicacion Original </th>
           <td mat-cell *matCellDef="let row">
-            {{ row.ubicacion_original.nombre_oficial }} ({{ row.ubicacion_original.alias || row.ubicacion_original.nombre_oficial }})
+            {{ row.ubicacion_original?.nombre_oficial }} ({{ row.ubicacion_original?.alias || row.ubicacion_original?.nombre_oficial }})
           </td>
         </ng-container>
 
@@ -114,7 +114,7 @@
         <ng-container *ngIf="displayedColumns.includes('ubicacion_actual')" matColumnDef="ubicacion_actual">
           <th mat-header-cell *matHeaderCellDef mat-sort-header> Ubicacion Actual </th>
           <td mat-cell *matCellDef="let row">
-            {{ row.ubicacion_actual.nombre_oficial }}({{ row.ubicacion_actual.alias || row.ubicacion_actual.nombre_oficial }})
+            {{ row.ubicacion_actual?.nombre_oficial }}({{ row.ubicacion_actual?.alias || row.ubicacion_actual?.nombre_oficial }})
           </td>
         </ng-container>
 

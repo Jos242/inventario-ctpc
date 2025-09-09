@@ -5,6 +5,15 @@ import os
 from typing import Any
 import xlsxwriter
 import textwrap
+import math
+import re
+
+from datetime import datetime, timedelta
+from django.utils import timezone
+
+import pandas as pd
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 #----------------------------------------------
 
 #Django herramientas---------------------------
@@ -17,6 +26,7 @@ from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 from django.db.models.query import QuerySet
 from django.db import transaction
+from django.db.models import Model
 #----------------------------------------------
 
 #Django rest frameworks herramientas-----------
@@ -175,7 +185,7 @@ class ActivosActions():
         return Response(serializer.data,
                         status = status.HTTP_200_OK)
     
-    def get_activo_by_no_identificacion(self, no_identificacion:str) -> Response:
+    def get_activo_by_no_identificacion(self, no_identificacion: str) -> Response:
         try:
             activo:Response = Activos.objects.get(no_identificacion = no_identificacion)
             serializer = ReadActivoSerializerComplete(instance = activo) 
@@ -186,18 +196,47 @@ class ActivosActions():
             return Response({"error": "activo does not exist"},
                             status = status.HTTP_404_NOT_FOUND)
 
-    def get_activo_by_ubicacion_id(self, ubicacion_actual:int):
+    def get_activo_by_ubicacion_id(self, ubicacion_actual: int):
         try:
-            activo:Activos = Activos.objects.filter(ubicacion_actual = ubicacion_actual)
+            activo: Activos = Activos.objects.filter(ubicacion_actual = ubicacion_actual)
         except Activos.DoesNotExist:
             return Response({"error": "activo does not exist"}, 
                             status = status.HTTP_404_NOT_FOUND)
 
-        print("Llegue antes del serializer")
         serializer = ReadActivoSerializerComplete(instance = activo,
                                                   many = True)
 
         return Response(serializer.data,
+                        status = status.HTTP_200_OK)
+
+    def get_activos_aleatorio(self, cant: int):
+        try:
+            three_years_ago = timezone.now() - timedelta(days = 3 * 365)
+            recent_activos = Activos.objects.filter(
+                fecha__gte = three_years_ago
+            ).order_by('-id')[:300]
+
+            import random
+            recent_activos_list = list(recent_activos)
+            random_10 = random.sample(recent_activos_list, min(10, len(recent_activos_list)))
+
+            random_10_dicts = [
+                {
+                    'id': a.id,
+                    'no_identificacion': a.no_identificacion,
+                    'descripcion': a.descripcion,
+                    'ubicacion_actual': 
+                        {
+                            'id': a.ubicacion_actual.id,
+                            'nombre_oficial':a.ubicacion_actual.nombre_oficial
+                        }
+                } for a in random_10
+            ]
+        except Activos.DoesNotExist:
+            return Response({"error": "activo does not exist"}, 
+                            status = status.HTTP_404_NOT_FOUND)
+
+        return Response(random_10_dicts,
                         status = status.HTTP_200_OK)
 
     def get_excel_all_activos(self):
@@ -432,6 +471,22 @@ class ActivosActions():
         workbook.close()
         output.seek(0)
 
+        now = datetime.now() 
+        date_str = now.strftime("%d-%m-%Y %H-%M-%S") 
+        file_name = f"excel-personalizado_{date_str}.xlsx" 
+
+        ruta = os.path.join("media", "excels", file_name) 
+        os.makedirs(os.path.dirname(ruta), exist_ok = True) 
+        
+        with open(ruta, "wb") as f: 
+            f.write(output.read()) 
+            
+        doc: Docs = Docs(titulo = file_name, tipo = "EXCEL", ruta = ruta, impreso = False) 
+        doc.save() 
+        
+        output.close() 
+        
+        return Response(ruta, status = status.HTTP_200_OK)
         response = HttpResponse(output.read(), 
                             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         response['Content-Disposition'] = "attachment; filename=excel_activos.xlsx"
@@ -502,7 +557,228 @@ class ActivosActions():
 
        return Response({"info": f"{resultado[0]} has been deleted"},
                        status = status.HTTP_200_OK) 
+    
+    def safe_str(self, val):
+        if val is None or val == "" or val == "N/I":
+            return "N/A"
+        if isinstance(val, float) and (math.isnan(val) or math.isinf(val)):
+            return "N/A"
+        return str(val)
+    
+    def safe_number(self, val):
+        if isinstance(val, (float, int)):
+            if isinstance(val, float) and (math.isnan(val) or math.isinf(val)):
+                return "0.00"
+            return f"{float(val):.2f}"  # always 2 decimals
 
+        if val is None or val in ("", "N/I", "N/A"):
+            return "0.00"
+
+        return str(val)
+    
+    def normalize_text(self, h):
+        if h is None:
+            return ""
+        h = str(h).strip().lower()
+        h = re.sub(r"\s+", " ", h)          # collapse multiple spaces
+        h = re.sub(r"[\u200b\u200c\u200d]", "", h)  # remove zero-width chars
+        return h
+    
+    def compare_dicts(self, excel_row, db_row):
+        mismatches = []
+        if not db_row:
+            return mismatches
+
+        for key in excel_row.keys():
+            if self.normalize_text(excel_row.get(key)) != self.normalize_text(db_row.get(key)):
+                mismatches.append(key)
+        return mismatches
+    
+    def get_id_registro_range(self, value):
+        parts = value.split(",")
+
+        result = []
+
+        last_part = parts[-1]
+
+        if "-" in last_part:
+            start_str, end_str = last_part.split("-")
+            width = max(len(start_str), len(end_str))  # preserve leading zeros
+
+            start = int(start_str)
+            end = int(end_str)
+
+            for i in range(start, end + 1):
+                # format with leading zeros
+                new_val = ",".join(parts[:-1] + [str(i).zfill(width)])
+                result.append(new_val)
+        else:
+            result.append(value)
+        
+        return result
+    
+    def load_excel(self, request):
+        excel_file = request.FILES["file"]
+
+        try:
+            # Read Excel into DataFrame
+            df = pd.read_excel(excel_file)
+            df.columns = [self.normalize_text(c) for c in df.columns]
+
+            # Expected columns
+            COLUMN_MAPPING = {
+                "": "id_registro",
+                "no. identificacion": "no_identificacion",
+                "descripción": "descripcion",
+                "marca": "marca",
+                "modelo": "modelo",
+                "serie": "serie",
+                "estado": "estado",
+                "ubicación": "ubicacion_original",
+                "modo de adquisición": "modo_adquisicion",
+                "precio": "precio"
+            }
+
+            # Rename columns
+            df = df.rename(columns = COLUMN_MAPPING)
+
+            # Validate columns
+            missing = [col for col in COLUMN_MAPPING.values() if col not in df.columns]
+            if missing:
+                return Response({"error": f"Missing columns: {missing}"}, status = status.HTTP_400_BAD_REQUEST)
+
+            results = []
+
+            for _, row in df.iterrows():
+                id_registro = self.safe_str(row.get("id_registro"))
+                no_identificacion = self.safe_str(row.get("no_identificacion"))
+
+                if re.search(r'^\d+\-\d+$', no_identificacion , re.IGNORECASE):
+                    isObservacion = False
+                else:
+                    isObservacion = True
+                    
+                if (isObservacion):
+                    range_id_registro = self.get_id_registro_range(id_registro)
+                    descripciones = []
+                    descripciones.extend(textwrap.wrap(no_identificacion, width = 98))
+
+                    for index, ir in enumerate(range_id_registro):
+
+                        descripcion = descripciones[index % len(descripciones)]
+                        excel_data = {
+                            "id_registro": ir, 
+                            "no_identificacion": descripcion,
+                        }
+
+                        db_observacion = Observaciones.objects.filter(id_registro = ir).first()
+                        
+                        if db_observacion:
+                            db_data = {
+                                "id_registro": self.safe_str(db_observacion.id_registro),
+                                "no_identificacion": self.safe_str(db_observacion.descripcion)
+                            }
+                        else:
+                            db_data = None
+
+                        results.append({
+                            "excel": excel_data,
+                            "db": db_data,
+                            "nel": self.compare_dicts(excel_data, db_data),
+                            "observacion": isObservacion
+                        })
+                else:
+                    # Excel row (always exists)
+                    excel_data = {
+                        "id_registro": id_registro,
+                        "no_identificacion": self.safe_str(row.get("no_identificacion")),
+                        "descripcion": self.safe_str(row.get("descripcion")),
+                        "marca": self.safe_str(row.get("marca")),
+                        "modelo": self.safe_str(row.get("modelo")),
+                        "serie": self.safe_str(row.get("serie")),
+                        "estado": self.safe_str(row.get("estado")),
+                        "ubicacion_original": self.safe_str(row.get("ubicacion_original")),
+                        "precio": self.safe_number(row.get("precio"))
+                    }
+                    
+                    db_activo = Activos.objects.filter(id_registro = id_registro).first()
+                    if db_activo:
+                        db_data = {
+                            "id_registro": self.safe_str(db_activo.id_registro),
+                            "no_identificacion": self.safe_str(db_activo.no_identificacion),
+                            "descripcion": self.safe_str(db_activo.descripcion),
+                            "marca": self.safe_str(db_activo.marca),
+                            "modelo": self.safe_str(db_activo.modelo),
+                            "serie": self.safe_str(db_activo.serie),
+                            "estado": self.safe_str(db_activo.estado),
+                            "ubicacion_original": self.safe_str(db_activo.ubicacion_original.nombre_oficial),
+                            "precio": self.safe_number(db_activo.precio)
+                        }
+                    else:
+                        db_data = None
+
+                    results.append({
+                        "excel": excel_data,
+                        "db": db_data,
+                        "nel": self.compare_dicts(excel_data, db_data),
+                        "observacion": isObservacion
+                    })
+
+            return Response(results, status=status.HTTP_200_OK)
+
+        except Exception as e:
+                print(e)
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def apply_change(self, obj: Model, column: str, value):
+        field = obj._meta.get_field(column)
+
+        if field.is_relation:  # Si es ForeignKey o OneToOne
+            related_model = field.related_model
+            if value is None:
+                setattr(obj, column, None)
+            else:
+                related_obj = related_model.objects.get(id=value)
+                setattr(obj, column, related_obj)
+        else:
+            setattr(obj, column, value)
+            
+    def registros_guardar_cambios(self, request):
+        data = request.data
+
+        observaciones_to_update = []
+        observaciones_fields = set()
+
+        activos_to_update = []
+        activos_fields = set()
+
+        for registro in data:
+            if registro.get('isObservacion'):
+                observacion = Observaciones.objects.get(id=registro.get('id'))
+
+                for change in registro.get('changes', []):
+                    self.apply_change(observacion, change["column"], change["value"])
+                    observaciones_fields.add(change["column"])
+
+                observaciones_to_update.append(observacion)
+
+            else:
+                activo = Activos.objects.get(id=registro.get('id'))
+
+                for change in registro.get('changes', []):
+                    self.apply_change(activo, change["column"], change["value"])
+                    activos_fields.add(change["column"])
+
+                activos_to_update.append(activo)
+
+        if observaciones_to_update:
+            Observaciones.objects.bulk_update(observaciones_to_update, list(observaciones_fields))
+
+        if activos_to_update:
+            Activos.objects.bulk_update(activos_to_update, list(activos_fields))
+
+        return Response(data, status=status.HTTP_200_OK)
 #--------------------------------------------------------
 class ObservacionesActions():
     
@@ -529,23 +805,19 @@ class ObservacionesActions():
         resultado = Observaciones.objects.filter().values(
                                 'id_registro',
                                 'descripcion',
-                                'activo_id'
                             )
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output, {"in_memory": True})
         worksheet = workbook.add_worksheet()
         worksheet.write('A1', "Registro ID")
         worksheet.write('B1', "Descripcion")
-        worksheet.write('C1', "Activo")
         counter = 2
 
         for item in resultado:
             id_registro = str(item['id_registro'])
             descripcion = str(item['descripcion'])
-            activo = str(item['activo_id'])
             worksheet.write(f'A{counter}', id_registro)
             worksheet.write(f'B{counter}', descripcion)
-            worksheet.write(f'C{counter}', activo)
             counter += 1
 
         workbook.close()
@@ -580,6 +852,68 @@ class ObservacionesActions():
  
         return Response(serializer.errors, status = status.HTTP_200_OK)
     
+    def add_new_observacion_revision(self, request) -> Response:
+        descripciones = self.generate_descripcion(request.data)
+
+        try:
+            with transaction.atomic():
+                for descripcion in descripciones:
+                    remaining_fields = get_remaining_fields()
+                    remaining_fields.pop('no_identificacion', None)
+
+                    serializer = ObservacionesSerializer(data = {'descripcion': descripcion})
+                    
+                    serializer.is_valid(raise_exception = True)
+                    serializer.validated_data.update(remaining_fields)
+
+                    serializer.save(**remaining_fields)
+
+            return Response({'nice'}, status = status.HTTP_200_OK)
+        
+        except Exception as e:
+            print(f'Error: {e}')
+            return Response({"error": str(e)}, status = status.HTTP_400_BAD_REQUEST)
+        
+    
+    def generate_descripcion(self, activos):
+        encontrados = [a['no_identificacion'].split("-", 1)[1] for a in activos if a['encontrado']]
+        no_encontrados = [a['no_identificacion'].split("-", 1)[1] for a in activos if not a['encontrado']]
+
+        descripciones = []
+        dia = self.get_today_date()
+
+        if len(encontrados) > 0:
+            joined = self.format_with_and(encontrados)
+            encontrado_str = f"Los bienes con número de identificación 6105-{joined} fueron sometidos a una verificación aleatoria el día {dia}, constatando la existencia de los mismos dentro del centro educativo."
+            descripciones.extend(textwrap.wrap(encontrado_str, width = 98))
+
+        if len(no_encontrados) > 0:
+            joined = self.format_with_and(no_encontrados)
+            no_encontrado_str = f"Los bienes con número de identificación 6105-{joined} fueron sometidos a una verificación aleatoria el día {dia}, constatando la ausensia de los mismos dentro del centro educativo."
+            descripciones.extend(textwrap.wrap(no_encontrado_str, width = 98))
+
+        return descripciones
+    
+    def format_with_and(setlf, items):
+        if not items:
+            return ""
+        if len(items) == 1:
+            return items[0]
+        return ", ".join(items[:-1]) + " y " + items[-1]
+
+    def get_today_date(self):
+        months = [
+            "enero", "febrero", "marzo", "abril", "mayo", "junio",
+            "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+        ]
+
+        today = datetime.today()
+        day = today.day
+        month = months[today.month - 1]
+        year = today.year
+
+        return f"{day} de {month} de {year}"
+
     def create_all_activo_observacion(self, request):
         activos = request.data.get('activos', [])
         descripciones = request.data.get('descripciones', [])
@@ -669,7 +1003,6 @@ class ObservacionesActions():
             return 0
         
     def split_desctipcion(self, activo, data_acta):
-        print(activo)
         acta = data_acta.get('acta', '')
         if ( acta == 'baja'):
             descripcion = f"El activo con placa N°{activo.get('no_identificacion')}, el cual corresponde a un {activo.get('descripcion')}  y que consta en el Folio {self.get_folio(activo.get('id_registro'))} y asiento {self.get_asiento(activo.get('id_registro'))}, del tomo 1 del Libro de Inventario, fue dado de baja del inventario institucional a partir del {data_acta.get('fechaActa')}, por motivo de obsolescencia, según consta en el acta extraordinaria N°{data_acta.get('numActa')}-{data_acta.get('anio')}, la cual se encuentra en los archivos de esta institución."

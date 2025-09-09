@@ -17,34 +17,44 @@ urlpatterns = [
     path("activo/<int:pk>/", views.ActivosViewNoAuth.as_view()),
     path("activo/<str:no_identificacion>/", views.ActivosViewNoAuth.as_view()),
     path("activo/ubicacion-actual/<int:ubicacion_actual>/", views.ActivosViewNoAuth.as_view()),
-    path("excel/todos-los-activos/", views.ActivosView.as_view()),
+    path("activo/aleatorio/<int:cant>/", views.ActivosViewNoAuth.as_view()),
     path("agregar-activo/", views.ActivosView.as_view()),
     path("agregar-multiples-activos/", views.ActivosView.as_view()),
-    path("activos/excel/by/nos-identificacion/", views.ActivosView.as_view()),
     path("activos/select-columns/", views.ActivosViewNoAuth.as_view()),
     path("activos/no-baja/select-columns/", views.ActivosViewNoAuth.as_view()),
     path("activos/historial/select-columns/", views.ActivosViewNoAuth.as_view()),
+    path("activos/excel/", views.ActivosView.as_view()),
     path("registro/no-impreso/count/", views.ActivosViewNoAuth.as_view()),
     path("update-activo/<int:pk>/", views.ActivosView.as_view()),
     path("delete/last/id-registro/", views.ActivosView.as_view()),
+
+    path("registros/all/", views.ActivosView.as_view()),
+    path("registros/guardar-cambios/", views.ActivosView.as_view()),
 
     #Endpoints relacionados a las observaciones------------------------------
     path("todas-las-observaciones/", views.ObservacionesViewNoAuth.as_view()),
     path("observacion/activo/<str:activo>/", views.ObservacionesViewNoAuth.as_view()),
     path("nueva-observacion/", views.ObservacionesView.as_view()),
-    path("observaciones-excel/", views.ObservacionesView.as_view()),
+    path("create-observacion-revision/", views.ObservacionesView.as_view()),
 
     #Endpoints relacionados a las activoobservacion------------------------------
     path("create-activo-observacion/", views.ActivoObservacionView.as_view()),
 
     #Endpoints relacionados a los documentos--------------------------------- 
-    path("guardar-acta/", _views.DocsView.as_view()),
     path("generar-acta/", _views.DocsView.as_view()),
+    path("crear-excel/impresiones/", _views.DocsView.as_view()),
+    path("exportar-excel/todo/", _views.DocsView.as_view()),
+    
+    path("excel/todos-los-activos/", views.ActivosView.as_view()),
+    path("observaciones-excel/", views.ObservacionesView.as_view()),
+    path("excel/activos-observaciones/", _views.DocsView.as_view()),
+    path("ubicaciones-excel/", _views.UbicacionesView.as_view()),
+    path("funcionarios/as-excel-file/", _views.FuncionariosView.as_view()),
+    path("activos/excel/by/nos-identificacion/", views.ActivosView.as_view()),
+
+    path("guardar-acta/", _views.DocsView.as_view()),
     path("obtener-documentos/", _views.DocsView.as_view()),
     path("obtener-documento/<int:pk>/", _views.DocsView.as_view()),
-    path("crear-excel/impresiones/", _views.DocsView.as_view()),
-    path("forzar-excel/impresiones/", _views.DocsView.as_view()),
-    path("excel/activos-observaciones/", _views.DocsView.as_view()),
     path("update-doc-info/<int:pk>/", _views.DocsView.as_view()),
     path("delete-document/<int:pk>/", _views.DocsView.as_view()),
 
@@ -73,7 +83,6 @@ urlpatterns = [
          _views.get_ubicacion_by_funcionarios,
          name = 'get_ubicacion_by_funcionarios'),
     path("nueva-ubicacion/", _views.UbicacionesView.as_view()),
-    path("ubicaciones-excel/", _views.UbicacionesView.as_view()),
     path("update/ubicacion/<int:pk>/", _views.UbicacionesView.as_view()),
     path("delete/ubicacion/<int:pk>/", _views.UbicacionesView.as_view()),
 
@@ -87,7 +96,6 @@ urlpatterns = [
     path("all-funcionarios/",
          _views.get_all_funcionarios,
          name = 'get_all_funcionarios'),
-    path("funcionarios/as-excel-file/", _views.FuncionariosView.as_view()),
 
     #Endpoints relacionados a el modo de aquisicion---------------------------
     path("modo-adquisicion/<int:pk>/", _views.ModoAdquisicionView.as_view()),

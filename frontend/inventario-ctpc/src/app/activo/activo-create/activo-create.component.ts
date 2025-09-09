@@ -274,7 +274,7 @@ export class ActivoCreateComponent {
     this.filteredModos = this.modosAdquisiciones.filter(u => u.descripcion.toLowerCase().includes(value.toLowerCase()));
   }
   onEnterPressedModo() {
-    if (this.filteredModos.length === 1) {
+    if (this.filteredModos.length > 0) {
       this.myForm.get('modo_adquisicion')?.setValue(this.filteredModos[0]);
     }
   }

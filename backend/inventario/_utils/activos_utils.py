@@ -4,7 +4,7 @@ from inventario.models                       import Docs, Activos, Observaciones
 
 #Django modules------------------------------------------
 from django.db.models                        import QuerySet, Value
-from django.db.models                        import CharField
+from django.db.models                        import CharField, BooleanField
 #--------------------------------------------------------
 
 #Django rest frameworks modules--------------------------
@@ -14,6 +14,12 @@ from rest_framework.response                 import Response
 
 #xlsxwriter modules--------------------------------------
 import xlsxwriter
+import openpyxl
+from django.http import HttpResponse
+from django.conf import settings
+from datetime import datetime
+from copy import copy
+import os
 #--------------------------------------------------------
 
 #python/general modules----------------------------------
@@ -71,7 +77,7 @@ def update_id_registro_and_asiento(id_registro:str):
         }
 
 def next_entries_minus_one() -> str:
-    query_activos = Activos.objects.filter(impreso=0) \
+    query_activos = Activos.objects.filter(impreso = 0) \
                             .annotate(origen=Value('activos', output_field=CharField())) \
                             .values('id_registro', 'asiento', 'origen', 'descripcion')
 
@@ -133,6 +139,39 @@ def get_combined_results() -> QuerySet:
     # Combine both queries using union
     resultados:QuerySet = entries_activos.union(entries_observaciones)\
                                          .order_by('id_registro')
+    return resultados
+
+
+def get_export_excel_results() -> QuerySet:
+    entries_activos = Activos.objects.filter() \
+                           .annotate(isObservacion = Value(False, output_field = BooleanField())) \
+                           .values('id', 'id_registro', 'no_identificacion', 'descripcion', 
+                                   'marca', 'modelo', 'serie', 'estado',
+                                   'ubicacion_original', 'ubicacion_original__nombre_oficial', 
+                                   'modo_adquisicion', 'modo_adquisicion__descripcion', 'precio', 'isObservacion')
+
+    # Query for Observaciones
+    entries_observaciones:QuerySet = Observaciones.objects.filter() \
+                                            .annotate(
+                                                no_identificacion = Value(None, output_field = CharField()),
+                                                marca = Value(None, output_field = CharField()),
+                                                modelo = Value(None, output_field = CharField()),
+                                                serie = Value(None, output_field = CharField()),
+                                                estado = Value(None, output_field = CharField()),
+                                                ubicacion_original = Value(None, output_field = CharField()),
+                                                modo_adquisicion = Value(None, output_field = CharField()),
+                                                ubicacion_original__nombre_oficial = Value(None, output_field = CharField()),
+                                                modo_adquisicion__descripcion = Value(None, output_field = CharField()),
+                                                isObservacion = Value(True, output_field = BooleanField()),
+                                                precio = Value(None, output_field = CharField())) \
+                                            .values('id', 'id_registro', 'no_identificacion', 'descripcion', 
+                                                    'marca', 'modelo', 'serie', 'estado',
+                                                    'ubicacion_original', 'ubicacion_original__nombre_oficial', 
+                                                    'modo_adquisicion', 'modo_adquisicion__descripcion', 'precio', 'isObservacion')
+
+    # Combine both queries using union
+    resultados:QuerySet = entries_activos.union(entries_observaciones)\
+                                         .order_by('-id_registro')
     return resultados
 
 def determine_print_type(resultados) -> str:
@@ -418,3 +457,174 @@ def handle_observaciones_y_activos(resultados, path_to_save, file_name):
     return Response(context,
            status = status.HTTP_200_OK) 
 
+
+def handle_excel_impresion(resultados, path_to_save, file_name, last_row):
+    activos_observaciones_list: Any = resultados[:40]
+    workbook = xlsxwriter.Workbook(path_to_save)
+    worksheet = workbook.add_worksheet()
+    #Para aumentar el ancho de la columna-------------------------------------
+    outer_borders_black = {'top': 1,
+                          'left': 1,
+                          'bottom': 1,
+                          'right': 1
+                          }
+    b_column_format = workbook.add_format({'bold': True, 'align': 'center'})
+    c_column_format = workbook.add_format({'align': 'center'})
+    default_format = workbook.add_format(outer_borders_black)
+
+    max_rows = 40
+    row_index = last_row if last_row < max_rows else -1
+    impreso_list = []
+    i = 0
+    while row_index < max_rows and i < len(activos_observaciones_list):
+        row_index += 1
+            
+        if (row_index == 0):
+            #Crea un objeto 'Format' para dar formato al texto------------------------
+            bold = workbook.add_format({'bold': True} | outer_borders_black)
+            
+            worksheet.write(f'A1', "1", 
+                            workbook.add_format(bold_param | center_text_param |
+                                                outer_borders_black))
+                            
+            worksheet.write(f'B1', "No. Identificacion", 
+                            workbook.add_format(bold_param | center_text_param |
+                                                outer_borders_black))
+            worksheet.write(f'C1', "Descripción", bold)
+            worksheet.write(f'D1', "Marca", bold)
+            worksheet.write(f'E1', "Modelo", bold)
+            worksheet.write(f'F1', "Serie", bold)
+
+            continue
+        print(i)
+        print(row_index < max_rows)
+        print(i < len(activos_observaciones_list))
+        element = activos_observaciones_list[i]
+
+        row = [
+            element["asiento"],
+            element["no_identificacion"],
+            element["descripcion"],
+            element["marca"],
+            element["modelo"],
+            element["serie"]
+        ]
+
+        origen = element.get("origen")
+        
+        if origen == "observaciones":
+            # Merge from column A to F for this row
+            merge_format = workbook.add_format({
+                'valign': 'vcenter',
+                **outer_borders_black
+            })
+
+            # Write the index in column A
+            worksheet.write(row_index, 0, row_index + 1, workbook.add_format(bold_param |
+                                                center_text_param |
+                                                outer_borders_black))
+
+            # Merge columns B to F
+            merged_text = f"{element['no_identificacion']}"
+            worksheet.merge_range(row_index, 1, row_index, 5, merged_text, merge_format)
+        else:
+            worksheet.write_row(row_index, 0, row, default_format)
+
+        i += 1
+        impreso_list.append(element)
+                
+    if row_index < max_rows:
+        worksheet.write_row(max_rows, 0, " ")
+
+    worksheet.set_column("A:A", 2.29, b_column_format)
+    worksheet.set_column("B:B", 16.86, c_column_format) 
+    worksheet.set_column('C:C', 20.29) 
+    worksheet.set_column('D:D', 11.86) 
+    worksheet.set_column('E:E', 17.57)
+    worksheet.set_column('F:F', 19.71)
+     
+    worksheet.set_margins(left = 0.669, right = 0.354,
+                          top = 0.984, bottom = 0.196)
+
+    worksheet.set_header('', {'margin': 0.314})
+    worksheet.set_footer('', {'margin': 0.314})
+    worksheet.center_horizontally()
+    worksheet.center_vertically()
+    worksheet.fit_to_pages(1, 1)
+    workbook.close()
+
+    for element in impreso_list:
+        id_registro:str = element.get("id_registro")
+        origen:str = element.get("origen")
+
+        if (origen == "observaciones"): 
+            obs:Observaciones = Observaciones.objects \
+                                             .get(id_registro = id_registro)
+            obs.impreso = True
+            obs.save()
+            continue
+
+        activo:Activos = Activos.objects.get(id_registro = id_registro)
+        activo.impreso = True
+        activo.save()
+    
+    ruta = os.path.join("media", "documentos_de_impresion", file_name)
+    doc: Docs = Docs(titulo = file_name, tipo = "EXCEL", ruta = ruta, impreso = False, last_row = row_index)
+    doc.save() 
+
+    return Response(ruta, status = status.HTTP_200_OK) 
+
+
+def copy_cell_style(source_cell, target_cell):
+    target_cell._style = copy(source_cell._style)
+
+def exportar_excel_todo(registros):
+    # Load your template
+    template_path = os.path.join(settings.BASE_DIR, "assets", "registros_template.xlsx")
+    wb = openpyxl.load_workbook(template_path)
+    ws = wb.active  # or wb["Sheet1"]
+
+    column_mapping = {
+        "id_registro": 1,
+        "no_identificacion": 2,
+        "descripcion": 3,
+        "marca": 4,
+        "modelo": 5,
+        "serie": 6,
+        "estado": 7,
+        "ubicacion_original__nombre_oficial": 8,
+        "modo_adquisicion__descripcion": 9,
+        "precio": 10
+    }
+    start_row = 2
+    for row_idx, record in enumerate(registros, start = start_row):
+        for field, col_idx in column_mapping.items():
+            value = record[field]
+
+            template_cell = ws.cell(row = 2, column = col_idx)
+            cell = ws.cell(row = row_idx, column = col_idx)
+
+            cell._style = copy(template_cell._style)
+
+            cell.value = value
+            
+    now = datetime.now()
+    date_str = now.strftime("%d-%m-%Y %H-%M-%S")
+    file_name = f"inventario-completo_{date_str}.xlsx"
+
+    ruta = os.path.join("media", "excels", file_name)
+    os.makedirs(os.path.dirname(ruta), exist_ok=True)
+
+    wb.save(ruta)
+
+    doc: Docs = Docs(titulo = file_name, tipo = "EXCEL", ruta = ruta, impreso = False)
+    doc.save() 
+
+    return Response(ruta, status = status.HTTP_200_OK)
+    # Send file as download
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="report.xlsx"'
+    wb.save(response)
+    return response

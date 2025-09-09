@@ -76,7 +76,7 @@ export class ActivoIndexComponent implements AfterViewInit  {
   @ViewChild('input') input: ElementRef;
 
   datos: any;
-  destroy$: Subject<boolean>=new Subject<boolean>();
+  destroy$: Subject<boolean> = new Subject<boolean>();
   baseUrl: string = environment.apiURL;
 
   observaciones: any[] = [];
@@ -230,6 +230,7 @@ export class ActivoIndexComponent implements AfterViewInit  {
           this.dataSource.data = this.datos;
           this.totalItems = data.length;
           this.updatePageSizeOptions();
+          this.updateDisplayedColumns();
 
           this.isLoadingResults = false; // Stop loading
           clearTimeout(loadingTimeout); // Clear the timeout if loading is finished

@@ -1,0 +1,46 @@
+<h1 mat-dialog-title>Elegir Activos</h1>
+<div mat-dialog-content>
+  <div class="container">
+    <section class="example-section">
+      <div class="row">
+        <div class="col-sm">
+          <mat-form-field style="width: 100%;">
+            <mat-label>Seleccione {{ cantActivos }} activos</mat-label>
+            <input #search placeholder="Buscar..." aria-label="buscar" (keyup)="filterActivos(search.value)" (focus)="onSearchFocus(selectActivos)" matInput>
+            <mat-select #selectActivos (openedChange)="openedChange($event)" [formControl]="select_no_identificacion" multiple>
+              <mat-select-trigger>
+                <mat-chip-set>
+                  <mat-chip *ngFor="let activo of selectedActivos" (removed)="removeActivo(activo)">
+                    {{ activo.no_identificacion }}
+                    <button matChipRemove [attr.aria-label]="'remove ' + activo">
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+                  </mat-chip>
+                </mat-chip-set>
+              </mat-select-trigger>
+              <div class="select-container">
+                <mat-optgroup *ngIf="filteredActivos?.length == 0">
+                  <div>No results found!</div>
+                </mat-optgroup>
+                <mat-option (onSelectionChange)="selectionChange($event)" *ngFor="let activo of filteredActivos" [value]="activo">
+                  {{ activo.no_identificacion }}
+                </mat-option>
+              </div>
+            </mat-select>
+            <mat-hint [ngClass]="{'green': selectedActivos.length == cantActivos}">Seleccionados: {{ selectedActivos.length }}/{{ cantActivos }}</mat-hint>
+          </mat-form-field>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-stroked-button color="primary" [mat-dialog-close]="false" style="margin-right: 10px;">
+    <mat-icon>close</mat-icon>
+    Cerrar
+  </button>
+  <button mat-flat-button color="primary" [disabled]="selectedActivos.length != cantActivos" (click)="onSubmit()">
+    <mat-icon>check</mat-icon>
+    Confirmar
+  </button>
+</div>

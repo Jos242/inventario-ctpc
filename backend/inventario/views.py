@@ -8,6 +8,7 @@ from rest_framework.views       import APIView
 from rest_framework.parsers     import FormParser, MultiPartParser, JSONParser 
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from inventario._utils.activos_utils         import get_export_excel_results
 from .permissions import IsAdminOrFuncionarioUser, IsAdminUser
 from django.http import JsonResponse
 import json
@@ -50,8 +51,12 @@ class ActivosView(APIView):
         path = request.path
  
         if path == f"/excel/todos-los-activos/":
-            rp:Response = self.activos_do.get_excel_all_activos()
+            rp: Response = self.activos_do.get_excel_all_activos()
             return rp
+ 
+        if path == f"/registros/all/":
+            rp = get_export_excel_results()
+            return Response(rp, status = status.HTTP_200_OK) 
        
         return Response({"data": "did not match an endpoint for a HTTP GET Method"},
                          status= status.HTTP_404_NOT_FOUND)
@@ -67,10 +72,17 @@ class ActivosView(APIView):
         if path == "/agregar-multiples-activos/":
             res = self.activos_do.add_activos(request)  
             return res
+
+        if path == f'/activos/excel/':
+            res = self.activos_do.load_excel(request = request)
+            return res
         
-                
         if path == "/activos/excel/by/nos-identificacion/":
-            rp:Response = self.activos_do.create_excel_by_nos_identificacion(request)
+            rp: Response = self.activos_do.create_excel_by_nos_identificacion(request)
+            return rp
+                
+        if path == "/registros/guardar-cambios/":
+            rp: Response = self.activos_do.registros_guardar_cambios(request)
             return rp
   
         return Response({"data": "did not match an endpoint for a HTTP POST Method"},
@@ -80,6 +92,7 @@ class ActivosView(APIView):
         path = request.path
 
         if f'/update-activo/{pk}/' == path:
+            print('df')
             rp:Response = self.activos_do.update_activo(request = request,
                                                         pk = pk)
             return rp
@@ -105,20 +118,25 @@ class ActivosViewNoAuth(APIView):
         pk = kwargs.get("pk", None)
         no_identificacion = kwargs.get("no_identificacion", None)
         ubicacion_actual = kwargs.get("ubicacion_actual", None)
+        cant = kwargs.get("cant", None)
 
         if path == f"/activo/{pk}/":
             return self.activos_do.get_activo_by_id(pk)
 
         if path == f"/activo/{no_identificacion}/":
-            rp:Response = self.activos_do.get_activo_by_no_identificacion(no_identificacion)
+            rp: Response = self.activos_do.get_activo_by_no_identificacion(no_identificacion)
             return rp
 
         if path == f"/activo/ubicacion-actual/{ubicacion_actual}/":
-            rp:Response = self.activos_do.get_activo_by_ubicacion_id(ubicacion_actual)
+            rp: Response = self.activos_do.get_activo_by_ubicacion_id(ubicacion_actual)
+            return rp
+
+        if path == f"/activo/aleatorio/{cant}/":
+            rp: Response = self.activos_do.get_activos_aleatorio(cant)
             return rp
 
         if path == "/activos-filtrados-columna/":
-            rp:Response = self.activos_do.activos_filter_column()    
+            rp: Response = self.activos_do.activos_filter_column()    
             return rp
         
         if path == "/registro/no-impreso/count/":
@@ -165,8 +183,10 @@ class ObservacionesView(APIView):
         path = request.path
         
         if path == "/nueva-observacion/":
-            print(request.data)
             return self.observaciones_do.add_new_observacion(request)
+        
+        if path == "/create-observacion-revision/":
+            return self.observaciones_do.add_new_observacion_revision(request)
 
 class ObservacionesViewNoAuth(APIView):
     parser_classes = (FormParser, MultiPartParser, JSONParser)

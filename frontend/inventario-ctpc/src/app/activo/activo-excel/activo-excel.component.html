@@ -1,0 +1,156 @@
+
+<div class="content-title-container">
+  <a routerLink="/actas/excels" class="go-back back-absolute" matTooltip="Ir atras">
+    <mat-icon>arrow_back</mat-icon>
+  </a>
+
+  @if (isLoadingResults) {
+    <div class="loading-shade">
+        <mat-spinner></mat-spinner>
+    </div>
+  }   
+  <div class="titulo d-flex justify-content-center">
+    <h1>Comparación de Registros</h1>
+  </div>
+  <div class="formAgregar">
+    <mat-card>
+      <mat-card-content>
+        <div class="">
+          <input type="file" (change)="onFileSelected($event)" accept=".xlsx,.xls" />
+          <div>
+            <mat-form-field appearance="outline" class="inputsForm">
+              <mat-label>Buscar datos del excel...</mat-label>
+              <input matInput (keyup)="applyFilter($event)" placeholder="Ej. Monitor, Aula 01, 6105-1234" #input>
+            </mat-form-field>
+            <div>
+              <mat-checkbox [(ngModel)]="filtroIgual" (change)="filtrosActivos()">Igual</mat-checkbox>
+              <mat-checkbox [(ngModel)]="filtroDiferente"  (change)="filtrosActivos()">Diferente</mat-checkbox>
+              <mat-checkbox [(ngModel)]="filtroNoEncontrado"  (change)="filtrosActivos()">No encontrado</mat-checkbox>
+            </div>
+            <div class="row">
+              <div class="col-12">
+                <h2>Diferencias entre los registros subidos</h2>
+                <div class="mat-elevation-z8">
+                  <div class="table-container">
+                    <table mat-table [dataSource]="dataSource" matSort class="diff-table">   
+                      <ng-container *ngIf="displayedColumns.includes('id_registro')" matColumnDef="id_registro">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Id. Registro </th>
+                        <td mat-cell *matCellDef="let row"> <strong>{{row.excel.id_registro}}</strong></td>
+                      </ng-container>
+
+                      <ng-container *ngIf="displayedColumns.includes('origen')" matColumnDef="origen">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Origen </th>
+                        <td mat-cell *matCellDef="let row">
+                          <span class="badge excel-badge">Excel</span>
+                          <span class="badge db-badge">Sistema</span>
+                        </td>
+                      </ng-container>
+
+                      <ng-container *ngIf="displayedColumns.includes('no_identificacion')" matColumnDef="no_identificacion">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> No. Placa </th>
+                        <td mat-cell *matCellDef="let row" [ngClass]="{'mismatch': isMismatch(row, 'no_identificacion'), 'overflow-cell': row.observacion, 'notfound': !row.db}">
+                          <span class="excel"> {{row.excel.no_identificacion || 'N/A'}} </span>
+                          <span class="db" *ngIf="row.db"> {{row.db?.no_identificacion || 'N/A'}} </span>
+                          <span class="db" *ngIf="!row.db"> <strong>Registro no encontrado en el sistema</strong> </span>
+                        </td>
+                      </ng-container>
+                      
+                      <ng-container *ngIf="displayedColumns.includes('descripcion')" matColumnDef="descripcion">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Descripcion </th>
+                        <td mat-cell *matCellDef="let row" [ngClass]="{'mismatch': isMismatch(row, 'descripcion') ||  isMismatch(row, 'no_identificacion') && row.observacion, 'notfound': !row.db}">
+                          <div *ngIf="!row.observacion">
+                            <span class="excel"> {{row.excel.descripcion || 'N/A'}} </span>
+                            <span class="db"> {{row.db ? row.db.descripcion || 'N/A' : "-" }} </span>
+                          </div>
+                        </td>
+                      </ng-container>
+    
+                      <ng-container *ngIf="displayedColumns.includes('marca')" matColumnDef="marca">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Marca </th>
+                        <td mat-cell *matCellDef="let row" [ngClass]="{'mismatch': isMismatch(row, 'marca') ||  isMismatch(row, 'no_identificacion') && row.observacion, 'notfound': !row.db}">
+                          <div *ngIf="!row.observacion">
+                            <span class="excel"> {{row.excel.marca || 'N/A'}} </span>
+                            <span class="db"> {{row.db ? row.db.marca || 'N/A' : "-" }} </span>
+                          </div>
+                        </td>
+                      </ng-container>
+    
+                      <ng-container *ngIf="displayedColumns.includes('modelo')" matColumnDef="modelo">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Modelo </th>
+                        <td mat-cell *matCellDef="let row" [ngClass]="{'mismatch': isMismatch(row, 'modelo') ||  isMismatch(row, 'no_identificacion') && row.observacion, 'notfound': !row.db}">
+                          <div *ngIf="!row.observacion">
+                            <span class="excel"> {{row.excel.modelo || 'N/A'}} </span>
+                            <span class="db"> {{row.db ? row.db.modelo || 'N/A' : "-" }} </span>
+                          </div>
+                        </td>
+                      </ng-container>
+                  
+                      <ng-container *ngIf="displayedColumns.includes('serie')" matColumnDef="serie">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Serie </th>
+                        <td mat-cell *matCellDef="let row" [ngClass]="{'mismatch': isMismatch(row, 'serie') ||  isMismatch(row, 'no_identificacion') && row.observacion, 'notfound': !row.db}">
+                          <div *ngIf="!row.observacion">
+                            <span class="excel"> {{row.excel.serie || 'N/A'}} </span>
+                            <span class="db"> {{row.db ? row.db.serie || 'N/A' : "-" }} </span>
+                          </div>
+                        </td>
+                      </ng-container>
+    
+                      <ng-container *ngIf="displayedColumns.includes('estado')" matColumnDef="estado">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+                        <td mat-cell *matCellDef="let row" [ngClass]="{'mismatch': isMismatch(row, 'estado') ||  isMismatch(row, 'no_identificacion') && row.observacion, 'notfound': !row.db}">
+                          <div *ngIf="!row.observacion">
+                            <span class="excel"> {{row.excel.estado || 'N/A'}} </span>
+                            <span class="db"> {{row.db ? row.db.estado || 'N/A' : "-" }} </span>
+                          </div>
+                        </td>
+                      </ng-container>
+                  
+                      <ng-container *ngIf="displayedColumns.includes('ubicacion_original')" matColumnDef="ubicacion_original">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Ubicación </th>
+                        <td mat-cell *matCellDef="let row" [ngClass]="{'mismatch': isMismatch(row, 'ubicacion_original') ||  isMismatch(row, 'no_identificacion') && row.observacion, 'notfound': !row.db}">
+                          <div *ngIf="!row.observacion">
+                            <span class="excel"> {{row.excel.ubicacion_original || 'N/A'}} </span>
+                            <span class="db"> {{row.db ? row.db.ubicacion_original || 'N/A' : "-" }} </span>
+                          </div>
+                        </td>
+                      </ng-container>
+                  
+                      <ng-container *ngIf="displayedColumns.includes('precio')" matColumnDef="precio">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Precio </th>
+                        <td mat-cell *matCellDef="let row" [ngClass]="{'mismatch': isMismatch(row, 'precio') ||  isMismatch(row, 'no_identificacion') && row.observacion, 'notfound': !row.db}">
+                          <div *ngIf="!row.observacion">
+                            <span class="excel"> {{row.excel.precio || 'N/A'}} </span>
+                            <span class="db"> {{row.db ? row.db.precio || 'N/A' : "-" }} </span>
+                          </div>
+                        </td>
+                      </ng-container>
+        
+                      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                    
+                      <!-- Row shown when there is no matching data. -->
+                      <tr class="mat-row" *matNoDataRow>
+                        <td class="mat-cell" colspan="4">
+                          <div>
+                          No se han encontrado datos para "{{input.value}}"
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                  <mat-paginator [pageSizeOptions]="pageSizeOptions" showFirstLastButtons [pageSize]="5" aria-label="Seleccione pagina de activos" ></mat-paginator>
+                </div>
+              </div>
+            </div>
+          </div>
+      
+          <div class="row" style="margin-top: 10px;">
+            <div class="col">
+              <button mat-flat-button color="primary" type="submit" class="btnAgregar">Descargar excel de Comparación</button>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

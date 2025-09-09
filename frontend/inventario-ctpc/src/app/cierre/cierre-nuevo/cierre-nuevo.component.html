@@ -12,9 +12,9 @@
 
   <div class="button-container" #finalizar>
     <button mat-flat-button color="primary" routerLink="/revision">
-<mat-icon>reply</mat-icon>
-Retornar
-</button>
+      <mat-icon>reply</mat-icon>
+      Retornar
+    </button>
     <button mat-flat-button color="primary" type="submit" [disabled]="activos.length != revisiones.length" (click)="submitCierre()">Finalizar cierre de inventario</button>
   </div>
 

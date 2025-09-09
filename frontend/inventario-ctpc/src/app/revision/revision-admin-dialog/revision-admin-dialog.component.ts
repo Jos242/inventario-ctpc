@@ -5,15 +5,12 @@ import { MatSelect, MatSelectModule } from '@angular/material/select';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {FormsModule} from '@angular/forms';
-import { GenericService } from '../share/generic.service';
 import { Subject, filter, takeUntil, forkJoin, from, concatMap, Observable, startWith, map } from 'rxjs';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
-
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
 import {MatIconModule} from '@angular/material/icon';
-
 import {MatDividerModule} from '@angular/material/divider';
 import {MatSliderModule} from '@angular/material/slider';
 import {MatCheckboxModule} from '@angular/material/checkbox';
@@ -23,7 +20,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient} from '@angular/common/http';
 import { DomSanitizer } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
-import { environment } from '../../environments/environment';
 import {AfterViewInit, ViewChild} from '@angular/core';
 import {MatPaginator, MatPaginatorModule} from '@angular/material/paginator';
 import {MatSort, MatSortModule} from '@angular/material/sort';
@@ -34,9 +30,11 @@ import { DialogRef } from '@angular/cdk/dialog';
 import { HotToastService } from '@ngxpert/hot-toast';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent, MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import {MatChipInputEvent, MatChipsModule} from '@angular/material/chips';
+import { GenericService } from '../../share/generic.service';
+import { AddAnnotationDialogComponent } from '../../add-annotation-dialog/add-annotation-dialog.component';
 
 @Component({
-  selector: 'app-add-annotation-dialog',
+  selector: 'app-revision-admin-dialog',
   standalone: true,
   imports: [MatSelectModule, MatInputModule, MatFormFieldModule,FormsModule, ReactiveFormsModule,
     MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule, FormsModule, MatButtonModule, MatIconModule,MatDividerModule,
@@ -47,12 +45,11 @@ import {MatChipInputEvent, MatChipsModule} from '@angular/material/chips';
     CommonModule,ReactiveFormsModule,
     MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule, MatAutocompleteModule, MatChipsModule
   ],
-  templateUrl: './add-annotation-dialog.component.html',
-  styleUrl: './add-annotation-dialog.component.scss'
+  templateUrl: './revision-admin-dialog.component.html',
+  styleUrl: './revision-admin-dialog.component.scss'
 })
-export class AddAnnotationDialogComponent {
+export class RevisionAdminDialogComponent {
   destroy$: Subject<boolean> = new Subject<boolean>();
-  myForm: FormGroup;
   filtros: FormGroup;
 
   select_no_identificacion = new FormControl();
@@ -63,30 +60,25 @@ export class AddAnnotationDialogComponent {
   filteredActivos: any[] = [];
   selectedActivos: any[] = [];
 
-  activoIdRegistro: any;
-  activoId: any;
+  cantActivos: number;
 
   public isLoadingResults = false;
 
   @ViewChild(MatAutocompleteTrigger) autoTrigger!: MatAutocompleteTrigger;
 
   constructor(
-    private router:Router,
-    private route:ActivatedRoute,
-    private httpClient:HttpClient,
+    private router: Router,
+    private route: ActivatedRoute,
+    private httpClient: HttpClient,
     private sanitizer: DomSanitizer,
     private fb: FormBuilder,
-    private gService:GenericService,
+    private gService: GenericService,
     public dialogRef: MatDialogRef<AddAnnotationDialogComponent>,
     private toast: HotToastService,
     private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
-    this.myForm = this.fb.group({
-      descripcion: [null, Validators.required]
-    });
-    this.activoIdRegistro = data.activoIdRegistro;
-    this.activoId = data.activoId;
+    this.cantActivos = data.cantActivos;
     
     this.filtros = this.fb.group({
       id_registro: true,
@@ -97,7 +89,7 @@ export class AddAnnotationDialogComponent {
       serie: false,
       estado: false,
       ubicacion_original: false,
-      ubicacion_actual: false,
+      ubicacion_actual: true,
       modo_adquisicion: false,
       precio: false,
       conectividad: false,
@@ -118,6 +110,23 @@ export class AddAnnotationDialogComponent {
   }
   selectionChange(event) {
     if (event.isUserInput) {
+      if (this.selectedActivos.length == this.cantActivos) {
+        setTimeout(() => {
+          this.select_no_identificacion.setValue(this.selectedActivos);
+          this.toast.warning(`Solo se pueden seleccionar ${this.cantActivos} activos.`, {
+            duration: 4000,
+            position: 'top-right',
+            style: {
+              border: '1px solid #ffc107',
+              color: '#856404',
+              background: '#fff3cd'
+            },
+            dismissible: true,
+          });
+        }, 100);
+        return;
+      }
+
       if (event.source.selected == true) {
         this.selectedActivos.push(event.source.value);
       } else if (event.source.selected == false) {
@@ -172,9 +181,6 @@ export class AddAnnotationDialogComponent {
         this.activos = data;
         this.filteredActivos = data;
         
-        this.selectedActivos.push(data.find(d => d.no_identificacion == this.activoId));
-        this.select_no_identificacion.setValue(this.selectedActivos);
-        
         this.isLoadingResults = false; // Stop loading
         clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
       },
@@ -189,64 +195,10 @@ export class AddAnnotationDialogComponent {
       }
     });
   }
-
-  async onSubmit() {
-    if (this.myForm.valid && this.selectedActivos.length > 0) {
-      let descripcion = this.myForm.value.descripcion.trim();
-
-      if (descripcion.charAt(descripcion.length - 1) !== '.') {
-          descripcion += '.';
-      }
-
-      const splitDescripcion = (text: string, chunkSize: number) => {
-        const chunks = [];
-        let start = 0;
-
-        while (start < text.length) { 
-            let end = start + chunkSize;
-            if (end >= text.length) {
-                chunks.push(text.slice(start));
-                break;
-            }
-            if (text.charAt(end) !== ' ' && text.charAt(end) !== '.') {
-                let spaceIndex = text.lastIndexOf(' ', end);
-                if (spaceIndex > start) {
-                    end = spaceIndex;
-                }
-            }
-            chunks.push(text.slice(start, end));
-            start = end + 1;
-        }
-        return chunks;
-      };
-
-      const chunks = splitDescripcion(descripcion, 98);
-
-      const datos = {
-        descripciones: chunks,
-        activos: this.selectedActivos
-      }
-      
-      this.gService.create('create-activo-observacion/', datos)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data: any) => {
-          Swal.fire({
-              icon: 'success',
-              title: 'Éxito',
-              text: 'Se han agregado las anotaciones correctamente.',
-          });
-
-          this.dialogRef.close();
-        },
-        error: (error) => {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. ${error}`,
-          });
-        }
-      });
+  
+  onSubmit() {
+    if (this.selectedActivos.length > 0) {
+      this.dialogRef.close(this.selectedActivos);
     }
   }
 }

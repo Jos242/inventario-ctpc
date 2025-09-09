@@ -172,6 +172,7 @@ class Docs(models.Model):
     ruta = models.CharField(max_length = 250)
     impreso  = models.BooleanField(default = False)
     creado_el = models.DateTimeField(db_default = Now())
+    last_row = models.IntegerField(null = True)
     objects = models.Manager()
 
     class Meta:
@@ -237,7 +238,7 @@ class HistorialDeAcceso(models.Model):
     ]
 
     id = models.AutoField(primary_key=True)
-    usuario = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='accesos')
+    usuario = models.ForeignKey(User, on_delete = models.CASCADE, related_name='accesos')
     tipo_usuario = models.CharField(max_length=20, choices=TIPOS_USUARIO)
     fecha_hora_acceso = models.DateTimeField(auto_now_add=True)
 

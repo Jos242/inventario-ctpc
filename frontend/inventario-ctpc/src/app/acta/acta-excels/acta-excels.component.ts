@@ -40,81 +40,101 @@ export class ActaExcelsComponent {
     private httpClient:HttpClient,
     private sanitizer: DomSanitizer,
     private toast: HotToastService
-    ){
-      this.loadRegistros();
-    }
+  ){
+    this.loadRegistros();
+  }
 
-    getFormattedDate(): string {
-      const date = new Date();
-      
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0'); // January is 0
-      const year = date.getFullYear();
+  getFormattedDate(): string {
+    const date = new Date();
+    
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // January is 0
+    const year = date.getFullYear();
 
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      const seconds = String(date.getSeconds()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
 
-      return `${day}-${month}-${year} ${hours}-${minutes}-${seconds}`;
-    }
+    return `${day}-${month}-${year} ${hours}-${minutes}-${seconds}`;
+  }
 
-    getFileName(date: string): string {
-      return `Formato de Impresion - ${date}.xlsx`;
-    }
+  getFileName(date: string): string {
+    return `Formato de Impresion - ${date}.xlsx`;
+  }
 
-    createFormData(): FormData {
-      const formData = new FormData();
-      const date = this.getFormattedDate();
-      this.fileName = this.getFileName(date);
-  
-      formData.append('file_name', this.fileName);
-  
-      return formData;
-    }
+  createFormData(): FormData {
+    const formData = new FormData();
+    const date = this.getFormattedDate();
+    this.fileName = this.getFileName(date);
+
+    formData.append('file_name', this.fileName);
+
+    return formData;
+  }
 
 
   excelImpresion(){
+    if (this.excels < 41) {
+      Swal.fire({
+        title: 'Atención',
+        text: 'Está apunto de forzar una impresión con menos de 41 registros, está seguro? La siguiente impresión que se realice será automaticamente ajustada con la impresión que va a realizar, recuerde utilizar la misma hoja.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, continuar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.crearExcelImpresion();
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          console.log('Cancelado');
+        }
+      });
+    } else {
+      this.crearExcelImpresion();
+    }
+  }
+
+  crearExcelImpresion() {
     const formData = this.createFormData();
     
     this.gService.create('crear-excel/impresiones/', formData)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data: any) => {
-          console.log(data);
-          this.datos = data;
-          // Count the number of items where datos.placa is false
-          const url = `${environment.apiURL}media/documentos_de_impresion/${this.fileName}/`;
-          window.open(url, '_blank');
-          this.isLoadingResults = false; // Stop loading
-          // clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
-          this.toast.success(`Excel generado correctamente`, {
-            dismissible: true,
-            duration: 4000,  // 3 seconds
-            position: 'top-right',  // position of the toast
-            style: {
-              border: '1px solid #28a745', // Add a green border
-              // padding: '16px',
-              color: '#28a745',
-              background: '#f0fdf4' // Light green background
-            },
-            iconTheme: {
-              primary: '#28a745',
-              secondary: '#FFFAEE',
-            },
-          });
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data: any) => {
+        const url = `${environment.apiURL}${data}`;
+        window.open(url, '_blank');
 
-          this.loadRegistros()
-        },
-        error: (error) => {
-          this.isLoadingResults = false; // Stop loading on error
-          // clearTimeout(loadingTimeout); // Clear the timeout if there's an error
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. Descripcion del error: ${error.message}`,
-          });
-        }
-      });
+        this.isLoadingResults = false;
+
+        this.toast.success(`Excel generado correctamente`, {
+          dismissible: true,
+          duration: 4000,  // 3 seconds
+          position: 'top-right',  // position of the toast
+          style: {
+            border: '1px solid #28a745', // Add a green border
+            // padding: '16px',
+            color: '#28a745',
+            background: '#f0fdf4' // Light green background
+          },
+          iconTheme: {
+            primary: '#28a745',
+            secondary: '#FFFAEE',
+          },
+        });
+
+        this.loadRegistros()
+      },
+      error: (error) => {
+        this.isLoadingResults = false; // Stop loading on error
+        // clearTimeout(loadingTimeout); // Clear the timeout if there's an error
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. Descripcion del error: ${error.message}`,
+        });
+      }
+    });
   }
 
   loadRegistros(){
@@ -155,70 +175,68 @@ export class ActaExcelsComponent {
     });
   }
 
-    downloadExcel(endpoint: string, fileName: string): void {
-      this.isLoadingResults = true;
+  downloadExcel(endpoint: string, fileName: string): void {
+    this.isLoadingResults = true;
 
-      const loadingTimeout = setTimeout(() => {
-          if (this.isLoadingResults) {
-              Swal.fire({
-                  icon: 'error',
-                  title: 'Hay problemas...',
-                  text: 'La carga de datos esta durando más de lo esperado... Por favor intente nuevamente',
-              });
-          }
-      }, 15000);
+    const loadingTimeout = setTimeout(() => {
+      if (this.isLoadingResults) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Hay problemas...',
+          text: 'La carga de datos esta durando más de lo esperado... Por favor intente nuevamente',
+        });
+      }
+    }, 15000);
 
-      this.gService.excelGet(endpoint)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-              next: (blob: Blob) => {
+    this.gService.excelGet(endpoint)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (blob: Blob) => {
+        // Create a link element
+        const link = document.createElement('a');
+        const url = window.URL.createObjectURL(blob);
 
-                  // Create a link element
-                  const link = document.createElement('a');
-                  const url = window.URL.createObjectURL(blob);
+        // Set the file name and attributes
+        link.href = url;
+        link.download = fileName;  // Set the file name for download
 
-                  // Set the file name and attributes
-                  link.href = url;
-                  link.download = fileName;  // Set the file name for download
+        // Append to the DOM and click
+        document.body.appendChild(link);
+        link.click();
 
-                  // Append to the DOM and click
-                  document.body.appendChild(link);
-                  link.click();
+        // Clean up
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(link);
 
-                  // Clean up
-                  window.URL.revokeObjectURL(url);
-                  document.body.removeChild(link);
+        this.isLoadingResults = false;
+        clearTimeout(loadingTimeout);
 
-                  this.isLoadingResults = false;
-                  clearTimeout(loadingTimeout);
-
-                  this.toast.success(`Excel generado correctamente`, {
-                    dismissible: true,
-                    duration: 4000,  // 3 seconds
-                    position: 'top-right',  // position of the toast
-                    style: {
-                      border: '1px solid #28a745', // Add a green border
-                      // padding: '16px',
-                      color: '#28a745',
-                      background: '#f0fdf4' // Light green background
-                    },
-                    iconTheme: {
-                      primary: '#28a745',
-                      secondary: '#FFFAEE',
-                    },
-                  });
-                  
-              },
-              error: (error) => {
-                  this.isLoadingResults = false;
-                  clearTimeout(loadingTimeout);
-                  Swal.fire({
-                      icon: 'error',
-                      title: 'Error',
-                      text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. Descripción del error: ${error.message}`,
-                  });
-              }
-          });
+        this.toast.success(`Excel generado correctamente`, {
+          dismissible: true,
+          duration: 4000,  // 3 seconds
+          position: 'top-right',  // position of the toast
+          style: {
+            border: '1px solid #28a745', // Add a green border
+            // padding: '16px',
+            color: '#28a745',
+            background: '#f0fdf4' // Light green background
+          },
+          iconTheme: {
+            primary: '#28a745',
+            secondary: '#FFFAEE',
+          },
+        });
+      },
+      error: (error) => {
+        this.isLoadingResults = false;
+        clearTimeout(loadingTimeout);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. Descripción del error: ${error.message}`,
+        });
+      }
+    });
   }
 
     printFuncs() {
@@ -238,6 +256,23 @@ export class ActaExcelsComponent {
   }
 
   printObsYAct() {
-      this.downloadExcel('excel/activos-observaciones/', 'registro_completo.xlsx');
+    this.gService.list('exportar-excel/todo/',)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data: any) => {
+        const url = `${environment.apiURL}${data}`;
+        window.open(url, '_blank');
+      },
+      error: (error) => {
+        console.log(error)
+        this.isLoadingResults = false; // Stop loading on error
+        // clearTimeout(loadingTimeout); // Clear the timeout if there's an error
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. Descripcion del error: ${error.message}`,
+        });
+      }
+    });
   }
 }
