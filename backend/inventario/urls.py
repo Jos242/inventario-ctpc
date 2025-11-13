@@ -127,4 +127,12 @@ urlpatterns = [
 
     #Mover observaciones a la tabla intermedia----------------------------
     path("mover-observaciones/", views.ObservacionesViewNoAuth.as_view()),
+
+    #Endpoints relaciondaos a pendiente-----------------------------------
+    path("all-pendientes/", _views.PendienteView.as_view()),
+    path("pendiente/<int:pk>/", _views.PendienteView.as_view()),
+    path("create-pendiente/", _views.PendienteView.as_view()),
+    path("aprovar-pendiente/<int:pk>/", _views.PendienteView.as_view()),
+    path("update-plantilla/<int:pk>/", _views.PendienteView.as_view()),
+    path("delete-plantilla/<int:pk>/", _views.PendienteView.as_view()),
 ]

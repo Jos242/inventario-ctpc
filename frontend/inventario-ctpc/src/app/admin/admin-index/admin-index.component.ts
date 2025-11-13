@@ -19,6 +19,7 @@ import { CommonModule } from '@angular/common';
 export class AdminIndexComponent {
 
   userType: any;
+  adminType: any;
 
   constructor(
     private authService: AuthService,
@@ -29,6 +30,9 @@ export class AdminIndexComponent {
   ngOnInit(): void {
     this.authService.getUserType$().subscribe(userType => {
       this.userType = userType;
+    });
+    this.authService.getAdminType$().subscribe(adminType => {
+      this.adminType = adminType;
     });
   }
 }

@@ -19,13 +19,25 @@ export class GenericService {
   }
 
   //GET lista 
-  list(endopoint: string): Observable<any> {
+  list(endopoint: string, semiAdminData: any = null): Observable<any> {
     return this.http.get<any>(this.urlAPI + endopoint);
     // return this.http.get<any>(this.urlAPI + endopoint, { withCredentials: true });
   }
 
   //POST crear objeto
-   create(endopoint: string, objCreate: any | any): Observable<any | any[]> {    
+   create(endopoint: string, objCreate: any | any, semiAdminData: any = null): Observable<any | any[]> {    
+    
+    if (semiAdminData?.adminType && semiAdminData?.currentUserId) {
+      const data = {
+        http: 'POST',
+        user: semiAdminData.currentUserId,
+        url: this.urlAPI + endopoint,
+        data: objCreate,
+        descripcion: semiAdminData.descripcion
+      }
+
+      return this.http.post<any | any[]>(this.urlAPI + 'create-pendiente/', data);
+    }
     
     return this.http.post<any | any[]>(this.urlAPI + endopoint, objCreate);
     // return this.http.post<any | any[]>(this.urlAPI + endopoint, objCreate, { withCredentials: true });
@@ -43,17 +55,61 @@ export class GenericService {
   
 
   //patch crear objeto
-  patch(endopoint: string, objCreate: any | any): Observable<any | any[]> {    
+  patch(endopoint: string, objCreate: any | any, semiAdminData: any = null): Observable<any | any[]> {
+    
+    if (semiAdminData?.adminType && semiAdminData?.currentUserId) {
+      const data = {
+        http: 'PATCH',
+        user: semiAdminData.currentUserId,
+        url: this.urlAPI + endopoint,
+        data: objCreate,
+        descripcion: semiAdminData.descripcion
+      }
+
+      return this.http.post<any | any[]>(this.urlAPI + 'create-pendiente/', data);
+    }
     
     return this.http.patch<any | any[]>(this.urlAPI + endopoint, objCreate);
     // return this.http.post<any | any[]>(this.urlAPI + endopoint, objCreate, { withCredentials: true });
   } 
 
   //patch crear objeto
-  delete(endopoint: string): Observable<any | any[]> {    
+  delete(endopoint: string, semiAdminData: any = null): Observable<any | any[]> {  
+    
+    if (semiAdminData?.adminType && semiAdminData?.currentUserId) {
+      const data = {
+        http: 'DELETE',
+        user: semiAdminData.currentUserId,
+        url: this.urlAPI + endopoint,
+        data: {},
+        descripcion: semiAdminData.descripcion
+      }
+
+      return this.http.post<any | any[]>(this.urlAPI + 'create-pendiente/', data);
+    }  
     
     return this.http.delete<any | any[]>(this.urlAPI + endopoint);
     // return this.http.post<any | any[]>(this.urlAPI + endopoint, objCreate, { withCredentials: true });
   } 
+
+
+  postRequest(data: any): Observable<any>  {
+    switch(data.http) {
+      case 'GET':
+        return this.http.get<any>(data.url);
+
+      case 'POST':
+        return this.http.post<any | any[]>(data.url, data.data);
+
+      case 'PATCH':
+        return this.http.patch<any | any[]>(data.url, data.data);
+
+      case 'DELETE':
+        return this.http.delete<any>(data.url);
+
+      default: 
+        return this.http.get<any>(data.urlurl);
+    }
+  }
 
 }

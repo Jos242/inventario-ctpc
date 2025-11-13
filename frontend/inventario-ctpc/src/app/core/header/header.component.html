@@ -16,7 +16,7 @@
           </a>
         </li>
         <li class="nav-item" *ngIf="logged && userType" > 
-          <a mat-button [routerLink]="'/activos'" *ngIf="userType == 'Administrador'" >
+          <a mat-button [routerLink]="'/activos'" *ngIf="userType == 'Administrador' || adminType == 'semiadmin'" >
             <mat-icon>list</mat-icon>
             <span>Listado de Activos</span>
           </a>
@@ -28,7 +28,7 @@
           </a>
         </li>
         <li class="nav-item" *ngIf="logged && userType"> 
-          <a mat-button [routerLink]="'/activos/crear'" *ngIf="userType == 'Administrador'" >
+          <a mat-button [routerLink]="'/activos/crear'" *ngIf="userType == 'Administrador' || adminType == 'semiadmin'" >
             <mat-icon>add_box</mat-icon>
             <span>Crear Activos</span>
           </a>
@@ -46,7 +46,7 @@
           </a>
         </li>
         <li class="nav-item" *ngIf="logged && userType"> 
-          <a mat-button [routerLink]="'/cierre/reporte'">
+          <a mat-button [routerLink]="'/cierre/reporte'" *ngIf="userType == 'Administrador'">
             <mat-icon>plagiarism</mat-icon>
             <span>Revision admin</span>
           </a>

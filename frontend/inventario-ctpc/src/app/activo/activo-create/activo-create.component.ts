@@ -45,6 +45,9 @@ export class ActivoCreateComponent {
   filteredModos: any[] = [];
   isLoadingResults: boolean = false;
 
+ currentUserId: any;
+ adminType: any = '';
+
   estados: { id: string, descripcion: string }[] = [
     { id: 'BUENO', descripcion: 'Bueno' },
     { id: 'MALO', descripcion: 'Malo' },
@@ -66,6 +69,13 @@ export class ActivoCreateComponent {
 
   ngOnInit(){
     this.initForm();
+
+    this.authService.getCurrentUser$().subscribe(userId => {
+      this.currentUserId = userId;
+    });
+    this.authService.getAdminType$().subscribe(adminType => {
+      this.adminType = adminType;
+    });
   }
 
   initForm(){
@@ -200,6 +210,7 @@ export class ActivoCreateComponent {
           const result = await firstValueFrom(dialogRef.afterClosed());
           if (result) {
             dataList[i].serie = result.serie;
+            dataList[i].serie_modificado = result.serie;
           } else {
             Swal.fire({
               icon: 'info',
@@ -214,7 +225,27 @@ export class ActivoCreateComponent {
       
       try {
         if ( dataList != null && dataList.length > 0) {
-          const data = await firstValueFrom(this.gService.create('agregar-multiples-activos/', dataList));
+          const semiAdminData = {
+            adminType: this.adminType,
+            currentUserId: this.currentUserId,
+            descripcion: "Crear Activo"
+          }
+          const data = await firstValueFrom(this.gService.create('agregar-multiples-activos/', dataList, semiAdminData));
+          
+          if (this.adminType == 'semiadmin') {
+            Swal.fire({
+              icon: 'success',
+              title: 'Éxito',
+              html: `Se han enviado los cambios a aprobación por un admin.`,
+            });
+            
+            if (!this.myForm.value.mantener) {
+              this.myForm.reset();
+              this.initForm();
+            }
+            return;
+          }
+          
           let text = `
             <div>
               Los siguientes activos se han creado correctamente:<br>

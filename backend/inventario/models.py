@@ -115,6 +115,7 @@ class Activos(models.Model):
     marca = models.CharField(max_length=150, default = "N/A")
     modelo = models.CharField(max_length=150, default = "N/A")
     serie = models.CharField(max_length=150, default = "N/A")
+    serie_modificado = models.CharField(max_length=150, default = "N/A")
     estado = models.CharField(max_length=7, blank = True, choices= ESTADO_ACTIVO) 
     ubicacion_original = models.ForeignKey(Ubicaciones, on_delete = models.SET_NULL, db_column='ubicacion_original',
                                            null=True, related_name = 'ubicacion_original')
@@ -259,3 +260,31 @@ class ActivoObservacion(models.Model):
         db_table = 'activoobservacion'
 
 
+HTTP_CHOICES = [
+    ('GET','GET'), ('POST','POST'),
+    ('PATCH','PATCH'), ('DELETE','DELETE'),
+]
+class Pendiente(models.Model):
+    id = models.AutoField(primary_key=True)
+    http = models.CharField(max_length=6, choices=HTTP_CHOICES, default='GET')
+    usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='pendientes_creados')
+    url = models.TextField()    # absolute or relative URL to call later
+    data = models.TextField(blank=True)   # JSON body as string (can be empty)
+    descripcion = models.TextField()    # absolute or relative URL to call later
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    aprovado = models.BooleanField(null=True, default=None)
+    aprovado_por = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='pendientes_aprobados'  )
+    aprovado_en = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'pendiente'
+
+    #headers = models.TextField(blank=True)   # optional JSON headers if you want
+    # Decision / result fields
+    #approved = models.BooleanField(null=True, blank=True)   # None = pending, True approved, False rejected
+    #approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_actions')
+    #approved_at = models.DateTimeField(null=True, blank=True)
+    #executed = models.BooleanField(default=False)
+    #executed_at = models.DateTimeField(null=True, blank=True)
+    #last_result = models.TextField(blank=True)  # optional: store response or error JSON/text

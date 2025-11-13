@@ -16,11 +16,13 @@ export class AuthService {
   private currentUserKey = 'currentUser';
   private currentUserName = 'userName';
   private currentUserType = 'userType';
+  private currentAdminType = 'adminType';
 
   private loggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
   private currentUserSubject = new BehaviorSubject<any>(this.getCurrentUser());
   private userNameSubject = new BehaviorSubject<string | null>(this.getUserName());
   private userTypeSubject = new BehaviorSubject<string | null>(this.getUserType());
+  private adminTypeSubject = new BehaviorSubject<string | null>(this.getAdminType());
 
   constructor(private http: HttpClient, private router: Router) { 
 
@@ -35,6 +37,7 @@ export class AuthService {
 
           this.setUserName(response.user)
           this.setUserType(response.user_type)
+          this.setAdminType(response.admin_type)
 
           this.setCurrentUser(response.user_id);
           this.loggedInSubject.next(true);
@@ -67,10 +70,12 @@ export class AuthService {
     localStorage.removeItem('currentUser');
     localStorage.removeItem('userName');
     localStorage.removeItem('userType');
+    localStorage.removeItem('adminType');
     this.loggedInSubject.next(false);
     this.currentUserSubject.next(null);
     this.userNameSubject.next(null);
     this.userTypeSubject.next(null);
+    this.adminTypeSubject.next(null);
     this.router.navigate(['/login']);
   }
   
@@ -118,6 +123,21 @@ export class AuthService {
   // Observable for user type
   getUserType$(): Observable<string | null> {
     return this.userTypeSubject.asObservable();
+  }
+
+  setAdminType(adminType: string): void {
+    localStorage.setItem(this.currentAdminType, adminType);
+    this.adminTypeSubject.next(adminType);  // Notify subscribers about user type update
+  }
+
+   // Manage user type
+   getAdminType(): string | null {
+    return localStorage.getItem(this.currentAdminType);
+  }
+
+  // Observable for user type
+  getAdminType$(): Observable<string | null> {
+    return this.adminTypeSubject.asObservable();
   }
 
 

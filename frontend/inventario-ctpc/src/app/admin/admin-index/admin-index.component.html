@@ -81,8 +81,8 @@
         </mat-card-footer>
       </mat-card>
     </div>
-    <div class="col-sm-6">
-      <mat-card class="example-card" *ngIf="userType == 'Administrador'">
+    <div class="col-sm-6" *ngIf="adminType == 'superadmin'">
+      <mat-card class="example-card">
         <mat-card-header>
           <!-- <mat-card-subtitle>Actas</mat-card-subtitle> -->
           <mat-card-title>
@@ -97,6 +97,31 @@
         </mat-card-content>
         <mat-card-actions>
           <button mat-flat-button color="primary"  [routerLink]="['/registros/super-admin']">
+            Entrar
+          </button>
+          <!-- <button mat-flat-button color="primary">Como Usar</button> -->
+        </mat-card-actions>
+        <mat-card-footer>
+          
+        </mat-card-footer>
+      </mat-card>
+    </div>
+    <div class="col-sm-6" *ngIf="userType == 'Administrador'">
+      <mat-card class="example-card">
+        <mat-card-header>
+          <!-- <mat-card-subtitle>Actas</mat-card-subtitle> -->
+          <mat-card-title>
+            <mat-icon>assignment</mat-icon>
+            Solicitudes pendientes
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <br>
+          <p>Mediante este modulo se puede ver un listado de todas las solicitudes pendientes, esto para que puedan ser aceptados o rechazados por un administrador</p>
+          <mat-divider></mat-divider>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-flat-button color="primary"  [routerLink]="['/admin/pendiente']">
             Entrar
           </button>
           <!-- <button mat-flat-button color="primary">Como Usar</button> -->

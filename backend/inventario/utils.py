@@ -165,7 +165,7 @@ class ActivosActions():
 
     def activos_filter_column(self) -> Response: 
         filter_all_activos = Activos.objects.only('id', 'id_registro', 'no_identificacion',
-                                                  'descripcion','ubicacion_original')\
+                                                  'descripcion','ubicacion_original','serie_modificado')\
                                                    .order_by('-id')
 
         serializer = ReadActivoSerializerIncomplete(instance = filter_all_activos,
@@ -349,7 +349,7 @@ class ActivosActions():
     
     def select_columns_to_filter(self, request, exclude_de_baja = False, include_historial = False) -> Response:
         FIELDS = request.data.get('fields', [])
-        ALWAYS_INCLUDED_FIELDS = ['id', 'id_registro', 'baja']
+        ALWAYS_INCLUDED_FIELDS = ['id', 'id_registro', 'baja', 'serie_modificado']
         missing_fields = [f for f in ALWAYS_INCLUDED_FIELDS if f not in FIELDS]
         QUERY_FIELDS = FIELDS + missing_fields
 

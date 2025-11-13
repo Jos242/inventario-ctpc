@@ -13,6 +13,7 @@ import { GenericService } from '../../share/generic.service';
 import Swal from 'sweetalert2';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatIconModule } from '@angular/material/icon';
+import { AuthService } from '../../share/auth.service';
 
 @Component({
   selector: 'app-activo-update',
@@ -56,8 +57,12 @@ export class ActivoUpdateComponent {
   selectedUbicacion: any; 
   selectedModoAdquisicion: any; 
 
+  currentUserId: any;
+  adminType: any = '';
+
   constructor(
     private gService: GenericService,
+    private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
     private formBuilder: FormBuilder
@@ -79,13 +84,20 @@ export class ActivoUpdateComponent {
       modo_adquisicion: [Validators.required],
       marca: ["N/A"],
       modelo: ["N/A"],
-      serie: ["N/A"],
+      serie_modificado: ["N/A"],
       baja: ['DADO DE BAJA'],
       placa: [''],
       estado: ['', Validators.required],
       precio: [''],
       conectividad: [false],
       seguridad: [false]
+    });
+
+    this.authService.getCurrentUser$().subscribe(userId => {
+      this.currentUserId = userId;
+    });
+    this.authService.getAdminType$().subscribe(adminType => {
+      this.adminType = adminType;
     });
   }
 
@@ -176,14 +188,61 @@ export class ActivoUpdateComponent {
   onSubmit() {
     if (this.myForm.valid) {
       const datas = this.myForm.value;
-      datas.ubicacion_actual = this.myForm.value.ubicacion_actual.id;
-      datas.modo_adquisicion = this.myForm.value.modo_adquisicion.id;
-      datas.ubicacion_anterior_id = this.ubicacion_anterior_id;
 
-      this.gService.patch(`update-activo/${this.activoId}/`, datas)
+      const original = this.datos;
+      const changes: any = {};
+
+      for (const key in datas) {
+        if (Object.hasOwn(datas, key)) {
+          const newValue = datas[key];
+          const oldValue = original[key];
+          
+          if (JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
+            changes[key] = newValue;
+          }
+        }
+      }
+
+      const changeCount = Object.keys(changes).length;
+
+      if (!changeCount) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No ha hecho cambios.',
+        });
+        return;
+      }
+      
+      if ('ubicacion_actual' in changes && this.myForm.value.ubicacion_actual?.id) {
+        changes.ubicacion_actual = this.myForm.value.ubicacion_actual.id;
+        changes.ubicacion_anterior_id = this.ubicacion_anterior_id;
+      }
+      if ('modo_adquisicion' in changes && this.myForm.value.modo_adquisicion?.id) {
+        changes.modo_adquisicion = this.myForm.value.modo_adquisicion.id;
+      }
+
+      changes.no_identificacion = this.datos.no_identificacion;
+
+      const semiAdminData = {
+        adminType: this.adminType,
+        currentUserId: this.currentUserId,
+        descripcion: "Actualizar Activo"
+      }
+
+      this.gService.patch(`update-activo/${this.activoId}/`, changes, semiAdminData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
+            if (this.adminType == 'semiadmin') {
+              Swal.fire({
+                icon: 'success',
+                title: 'Éxito',
+                html: `Se han enviado los cambios a aprobación por un admin.`,
+              });
+              this.router.navigate([`/activos/${this.activoNo}`]);
+              return;
+            }
             Swal.fire({
               icon: 'success',
               title: 'Éxito',

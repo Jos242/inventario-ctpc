@@ -36,6 +36,7 @@ import { CierreReporteComponent } from './cierre/cierre-reporte/cierre-reporte.c
 import { CierreDetailComponent } from './cierre/cierre-detail/cierre-detail.component';
 import { ActivoExcelComponent } from './activo/activo-excel/activo-excel.component';
 import { RegistroSuperAdminComponent } from './registro/registro-super-admin/registro-super-admin.component';
+import { AdminPendienteComponent } from './admin/admin-pendiente/admin-pendiente.component';
 
 
 export const routes: Routes = [
@@ -45,6 +46,7 @@ export const routes: Routes = [
     { path: 'login', component: LoginIndexComponent },
 
     { path:'admin', component: AdminIndexComponent, canActivate: [authGuard, adminGuard] },
+    { path:'admin/pendiente', component: AdminPendienteComponent, canActivate: [authGuard, adminGuard]},
 
     { path:'actas', component: ActaIndexComponent, canActivate: [authGuard, adminGuard]},
     { path:'actas/baja', component: ActaBajaCreateComponent, canActivate: [authGuard, adminGuard]},

@@ -66,6 +66,8 @@ export class AddAnnotationDialogComponent {
   activoIdRegistro: any;
   activoId: any;
 
+  semiAdminData: any;
+
   public isLoadingResults = false;
 
   @ViewChild(MatAutocompleteTrigger) autoTrigger!: MatAutocompleteTrigger;
@@ -87,6 +89,7 @@ export class AddAnnotationDialogComponent {
     });
     this.activoIdRegistro = data.activoIdRegistro;
     this.activoId = data.activoId;
+    this.semiAdminData = data.semiAdminData;
     
     this.filtros = this.fb.group({
       id_registro: true,
@@ -227,10 +230,19 @@ export class AddAnnotationDialogComponent {
         activos: this.selectedActivos
       }
       
-      this.gService.create('create-activo-observacion/', datos)
+      this.gService.create('create-activo-observacion/', datos, this.semiAdminData)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data: any) => {
+          if (this.semiAdminData.adminType == 'semiadmin') {
+            Swal.fire({
+              icon: 'success',
+              title: 'Éxito',
+              html: `Se han enviado los cambios a aprobación por un admin.`,
+            });
+            this.dialogRef.close();
+            return;
+          }
           Swal.fire({
               icon: 'success',
               title: 'Éxito',

@@ -15,7 +15,7 @@ from rest_framework.parsers                  import FormParser, MultiPartParser,
 class ModoAdquisicionView(APIView):
     parser_classes   = (MultiPartParser, FormParser, JSONParser)
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminUser]  
+    permission_classes = [IsAuthenticated]  
 
     def get(self, request:Request, pk:int | None = None) -> Response:
         path:str = request.path

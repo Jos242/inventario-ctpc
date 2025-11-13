@@ -36,6 +36,7 @@ export interface ActivoData {
   marca: string;
   modelo: string;
   serie: string;
+  serie_modificado: string;
   estado: string;
   ubicacion_original: any;
   ubicacion_actual: any;
@@ -221,7 +222,7 @@ export class ActivoIndexComponent implements AfterViewInit  {
       .subscribe({
         next: (data: any) => {
           this.datos = data;
-
+          
           for (let element of this.datos) {
             element.class = this.getRowClass(element);
           }

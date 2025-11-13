@@ -37,6 +37,7 @@ class AuthUser(TokenViewBase):
             serializer.is_valid(raise_exception=True)
             user = User.objects.get(username = request.data['username']) 
             tipo_usuario = None
+            
             if user.is_staff == 0 and user.is_superuser == 0:
                 tipo_usuario = 'Observador'
             
@@ -56,6 +57,7 @@ class AuthUser(TokenViewBase):
         serializer.validated_data["user_type"] = tipo_usuario
         serializer.validated_data["user_id"] = user.id
         serializer.validated_data["user"] = user.username
+        serializer.validated_data["admin_type"] = user.email
 
         return Response(serializer.validated_data,
                         status=status.HTTP_200_OK)

@@ -69,7 +69,7 @@
                             <div class="col-lg-4">
                                 <div class="col-lg">  
                                     <mat-form-field appearance="outline" class="inputsForm custom-dropdown">
-                                        <mat-label>Puesto de Adquisicion</mat-label>
+                                        <mat-label>Puesto</mat-label>
                                         <input #puestoInput matInput type="text" placeholder="Puesto" formControlName="puesto" 
                                         [matAutocomplete]="autoPuesto" #autoTriggerPuesto="matAutocompleteTrigger"
                                         (keyup)="filterPuesto(puestoInput.value)" (blur)="onPuestoBlur()" (keydown.enter)="onEnterPressedPuesto(); puestoInput.blur(); autoTriggerPuesto.closePanel()">

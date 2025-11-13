@@ -6,6 +6,7 @@ from inventario._utils              import handle_uploaded_file
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import os
 from sgica.settings                 import MEDIA_ROOT
+import json
 
 class ActivoSerializer(serializers.ModelSerializer):
     id_registro = serializers.CharField(required = False)
@@ -22,7 +23,7 @@ class UpdateActivoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Activos
         fields = ['descripcion', 'marca', 'modelo',
-                  'serie', 'estado', 'modo_adquisicion',
+                  'serie', 'serie_modificado', 'estado', 'modo_adquisicion',
                   'ubicacion_actual', 'precio', 'baja', 'placa'] 
     
 class ReadActivoSerializerComplete(serializers.ModelSerializer):
@@ -34,7 +35,7 @@ class ReadActivoSerializerComplete(serializers.ModelSerializer):
         model = Activos
         fields = [
             'id', 'id_registro', 'asiento', 'no_identificacion',
-            'descripcion', 'marca', 'modelo', 'serie', 'estado',
+            'descripcion', 'marca', 'modelo', 'serie', 'serie_modificado', 'estado',
             'ubicacion_original', 'ubicacion_actual', 'modo_adquisicion',
             'precio', 'conectividad', 'seguridad', 'placa','baja', 'fecha'
         ]
@@ -69,7 +70,7 @@ class ReadActivoSerializerIncomplete(serializers.ModelSerializer):
     class Meta: 
         model = Activos
         fields = ['id', 'id_registro', 'no_identificacion',
-                  'descripcion', 'ubicacion_original']
+                  'descripcion', 'ubicacion_original', 'serie_modificado']
  
 class ObservacionesSerializer(serializers.Serializer):
     id = serializers.IntegerField(required = False)
@@ -397,7 +398,7 @@ class DynamicReadActivosSerializer(serializers.ModelSerializer):
        model = Activos
        fields = [
             'id', 'id_registro', 'asiento', 'no_identificacion', 'descripcion',
-            'marca', 'modelo', 'serie', 'estado',
+            'marca', 'modelo', 'serie', 'serie_modificado', 'estado',
             'ubicacion_original', 'modo_adquisicion', 'precio',
             'fecha', 'observacion', 'impreso',
             'ubicacion_actual', 'conectividad', 'seguridad',
@@ -476,3 +477,80 @@ class PuestosSerializer(serializers.ModelSerializer):
     class Meta:
         model = Puestos
         fields = '__all__'
+
+
+class PendienteSerializer(serializers.ModelSerializer):
+    data = serializers.JSONField(required=False, allow_null=True)
+    usuario_nombre = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Pendiente
+        fields = ['id', 'usuario', 'usuario_nombre', 'url', 'data', 'descripcion', 'creado_en', 'aprovado', 'aprovado_por', 'aprovado_en', 'http']
+        read_only_fields = ['usuario', 'creado_en', 'aprovado', 'aprovado_por', 'aprovado_en']
+
+
+    def get_usuario_nombre(self, obj):
+        """
+        Intenta obtener el nombre del funcionario asociado al usuario relacionado
+        con este Pendiente. Maneja:
+         - user.funcionario (OneToOne or related_name='funcionario')
+         - user.funcionario_set (FK reverse manager) -> toma el primero si hay varios
+         - user.get_full_name() / user.username como fallback
+        """
+        user = getattr(obj, 'usuario', None)
+        if not user:
+            return None
+
+        # 1) Try OneToOne / related_name 'funcionario'
+        funcionario = getattr(user, 'funcionario', None)
+        if funcionario:
+            # Ajusta 'nombre_completo' si tu campo se llama distinto
+            return getattr(funcionario, 'nombre_completo', None) or getattr(funcionario, 'nombre', None)
+
+        # 2) Try FK reverse manager: 'funcionario_set'
+        related_qs = getattr(user, 'funcionario_set', None)
+        if related_qs is not None:
+            try:
+                first = related_qs.all().first()
+                if first:
+                    return getattr(first, 'nombre_completo', None) or getattr(first, 'nombre', None)
+            except Exception:
+                pass
+
+        # 3) Fallbacks to User fields
+        if hasattr(user, 'get_full_name'):
+            full = user.get_full_name()
+            if full:
+                return full
+        return getattr(user, 'username', None)
+    
+    def _dump_data_for_storage(self, value):
+        if value is None:
+            return ''
+        if isinstance(value, str):
+            return value
+        return json.dumps(value, ensure_ascii=False)
+
+    def create(self, validated_data):
+        data_value = validated_data.pop('data', None)
+        validated_data['data'] = self._dump_data_for_storage(data_value)
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        data_value = validated_data.pop('data', None)
+        if 'data' in self.initial_data:
+            instance.data = self._dump_data_for_storage(data_value)
+            instance.save(update_fields=['data'])
+        return super().update(instance, validated_data)
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        raw = instance.data
+        if raw in (None, ''):
+            rep['data'] = None
+        else:
+            try:
+                rep['data'] = json.loads(raw)
+            except Exception:
+                rep['data'] = raw
+        return rep

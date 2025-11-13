@@ -34,6 +34,7 @@ import { HotToastService } from '@ngxpert/hot-toast';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatDialog } from '@angular/material/dialog';
 import { AddAnnotationDialogComponent } from '../../add-annotation-dialog/add-annotation-dialog.component';
+import { AuthService } from '../../share/auth.service';
 
 
 
@@ -64,10 +65,11 @@ export class ActivoDetailComponent implements OnInit{
   filtros: FormGroup;
   public isLoadingResults = false;
 
-
-
+  currentUserId: any;
+  adminType: any = '';
 
   constructor(private gService:GenericService,
+    private authService: AuthService,
     private toast: HotToastService,
     private router:Router,
     private route:ActivatedRoute,
@@ -93,7 +95,13 @@ export class ActivoDetailComponent implements OnInit{
         no_identificacion: [this.activoId, Validators.required],
       });
       
-    
+
+      this.authService.getCurrentUser$().subscribe(userId => {
+        this.currentUserId = userId;
+      });
+      this.authService.getAdminType$().subscribe(adminType => {
+        this.adminType = adminType;
+      });
     }
 
 
@@ -111,9 +119,15 @@ export class ActivoDetailComponent implements OnInit{
     }
 
     openDialog(): void {
+      const semiAdminData = {
+        adminType: this.adminType,
+        currentUserId: this.currentUserId,
+        descripcion: "Agregar anotaciones Activo"
+      }
+
       const dialogRef = this.dialog.open(AddAnnotationDialogComponent, {
         width: '600px', // Adjust the width as needed
-        data: { activoIdRegistro: this.activoIdRegistro, activoId: this.activoId }
+        data: { activoIdRegistro: this.activoIdRegistro, activoId: this.activoId, semiAdminData }
       });
     
       dialogRef.afterClosed().subscribe(result => {
@@ -138,27 +152,40 @@ export class ActivoDetailComponent implements OnInit{
     }
 
     darBaja() {
-      this.toast.warning(`Activo se ha marcado para dar de baja, por favor cree el acta de baja`, {
-        duration: 4000,
-        position: 'top-right',
-        style: {
-          border: '1px solid #ffc107',
-          color: '#856404',
-          background: '#fff3cd'
-        },
-        dismissible: true,
-      });
-    
       const updatedData = {
         baja: 'A DAR DE BAJA'
       };
+
+      const semiAdminData = {
+        adminType: this.adminType,
+        currentUserId: this.currentUserId,
+        descripcion: "Dar de baja Activo"
+      }
     
-      this.gService.patch(`update-activo/${this.datos.id}/`, updatedData)
+      this.gService.patch(`update-activo/${this.datos.id}/`, updatedData, semiAdminData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (updatedActivo: any) => {
+            if (this.adminType == 'semiadmin') {
+              Swal.fire({
+                icon: 'success',
+                title: 'Éxito',
+                html: `Se han enviado los cambios a aprobación por un admin.`,
+              });
+              return;
+            }
             console.log(`Activo ${this.datos.id} updated successfully`);
             
+            this.toast.warning(`Activo se ha marcado para dar de baja, por favor cree el acta de baja`, {
+              duration: 4000,
+              position: 'top-right',
+              style: {
+                border: '1px solid #ffc107',
+                color: '#856404',
+                background: '#fff3cd'
+              },
+              dismissible: true,
+            });
             // Update the local datos variable to reflect changes in the HTML
             this.datos = { ...this.datos, ...updatedActivo }; // Merge updated values
           },
@@ -169,27 +196,40 @@ export class ActivoDetailComponent implements OnInit{
     }
 
     marcarPlaca(){
-      this.toast.warning(`Activo se ha marcado con placa impresa`, {
-        duration: 4000,
-        position: 'top-right',
-        style: {
-          border: '1px solid #ffc107',
-          color: '#856404',
-          background: '#fff3cd'
-        },
-        dismissible: true,
-      });
-    
       const updatedData = {
         placa: true
       };
+
+      const semiAdminData = {
+        adminType: this.adminType,
+        currentUserId: this.currentUserId,
+        descripcion: "Marcado con placa impresa Activo"
+      }
     
-      this.gService.patch(`update-activo/${this.datos.id}/`, updatedData)
+      this.gService.patch(`update-activo/${this.datos.id}/`, updatedData, semiAdminData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (updatedActivo: any) => {
+            if (this.adminType == 'semiadmin') {
+              Swal.fire({
+                icon: 'success',
+                title: 'Éxito',
+                html: `Se han enviado los cambios a aprobación por un admin.`,
+              });
+              return;
+            }
             console.log(`Activo ${this.datos.id} updated successfully`);
             
+            this.toast.warning(`Activo se ha marcado con placa impresa`, {
+              duration: 4000,
+              position: 'top-right',
+              style: {
+                border: '1px solid #ffc107',
+                color: '#856404',
+                background: '#fff3cd'
+              },
+              dismissible: true,
+            });
             // Update the local datos variable to reflect changes in the HTML
             this.datos = { ...this.datos, ...updatedActivo }; // Merge updated values
           },

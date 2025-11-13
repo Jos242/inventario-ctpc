@@ -13,3 +13,4 @@ from inventario._views.cierre_inventario          import CierreInventarioView, n
 from inventario._views.docs                       import DocsView
 from inventario._views.departamentos              import DepartamentosView
 from inventario._views.puestos                    import PuestosView
+from inventario._views.pendiente                  import PendienteView 
