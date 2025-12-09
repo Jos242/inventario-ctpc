@@ -125,7 +125,7 @@ export class ActaBajaCreateComponent {
       impreso: false,
       ubicacion_original: false,
       ubicacion_actual: true,
-      modo_adquisicion: false,
+      modo_adquisicion: true,
       precio: false,
       conectividad: false,
       seguridad: false,
@@ -365,15 +365,8 @@ export class ActaBajaCreateComponent {
       console.log('no valid');
       return;
     }
-
-    let dataActa = {
-      numActa: this.numActa,
-      anio: this.actaAnio,
-      fechaActa: this.fechaActa,
-      nombreColegio: "CARRIZAL",
-      descActa: this.myForm.value.descripcion,
-      items: this.selectedActivos
-    }
+    const normalActivos = this.selectedActivos.filter(sa => sa.modo_adquisicion.id != 2 && sa.modo_adquisicion.id != 25 );
+    const adquisicionActivos = this.selectedActivos.filter(sa => sa.modo_adquisicion.id == 2 || sa.modo_adquisicion.id == 25 );
           
     this.confirmationService.confirm(4)
     .subscribe(documento => {
@@ -401,48 +394,62 @@ export class ActaBajaCreateComponent {
                   });
                 }
               }, 60000); // 60 seconds
-              
-              dataActa['formato'] = documento ? 'pdf' : 'docx';
-              dataActa['acta'] = 'baja';
 
-              this.gService.excel('generar-acta/', dataActa)
-              .pipe(takeUntil(this.destroy$))
-              .subscribe({
-                next: (data: any) => {
-                  const link = document.createElement('a');
-                  link.href = window.URL.createObjectURL(data);
-                  link.download = `ACTA DE BAJA DE BIENES N ${this.numActa}-${this.actaAnio}`;
-                  link.click();
-                  
-                  Swal.fire({
-                    icon: 'success',
-                    title: 'Éxito',
-                    text: `Activos dados de baja correctamente`,
-                  });
-                  this.resetActa();
+              const groups = [];
+              if (normalActivos.length > 0) groups.push(normalActivos);
+              if (adquisicionActivos.length > 0) groups.push(adquisicionActivos);
 
-                  this.isLoadingResults = false; // Stop loading
-                  clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
-                  this.cdr.detectChanges();
+              let actaCounter = this.numActa;
+              for (const group of groups) {
+                await this.generateActa(group, actaCounter, documento);
+                actaCounter++;
+              }
 
-                },
-                error: (error) => {
-                  this.isLoadingResults = false; // Stop loading on error
-                  clearTimeout(loadingTimeout); // Clear the timeout if there's an error
-                  this.cdr.detectChanges();
-
-                  Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. ${error}`,
-                  });
-                }
-              });
+              this.isLoadingResults = false; // Stop loading
+              clearTimeout(loadingTimeout); // Clear the timeout if loading is finished
+              this.cdr.detectChanges();
             }
           }
         });
       }
     });
+  }
+
+  async generateActa(items: any[], numActa: number, documento: string) {
+    let dataActa = {
+      numActa: numActa,
+      anio: this.actaAnio,
+      fechaActa: this.fechaActa,
+      nombreColegio: "CARRIZAL",
+      descActa: this.myForm.value.descripcion,
+      items: items,
+      formato: documento ? 'pdf' : 'docx',
+      acta: 'baja'
+    }
+
+    try {
+      const response = await firstValueFrom(
+        this.gService.excel('generar-acta/', dataActa)
+      );
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(response);
+      link.download = `ACTA DE BAJA DE BIENES N ${this.numActa}-${this.actaAnio}`;
+      link.click();
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Éxito',
+        text: `Activos dados de baja correctamente`,
+      });
+      this.resetActa();
+
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: `Hubo un error al cargar los datos, por favor recargue la página para intentar otra vez o contacte a su administrador. ${error}`,
+      });
+    }
   }
 
   resetActa(): void {

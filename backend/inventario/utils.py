@@ -10,6 +10,7 @@ import re
 
 from datetime import datetime, timedelta
 from django.utils import timezone
+from collections import defaultdict
 
 import pandas as pd
 from django.http import JsonResponse
@@ -965,29 +966,32 @@ class ObservacionesActions():
 
         try:
             with transaction.atomic():
+                descripciones = self.split_desctipcion_new(activos_data, data_acta)
+
+                if not descripciones:
+                    return 0
+
                 observaciones = []
+                for descripcion in descripciones:
+                    remaining_fields = get_remaining_fields()
+                    remaining_fields.pop('no_identificacion', None)
+
+                    serializer = ObservacionesSerializer(data = {'descripcion': descripcion})
+                    
+                    if serializer.is_valid():
+                        serializer.validated_data.update(remaining_fields)
+                        serializer.is_valid(raise_exception = True)
+
+                        observacion = serializer.save(**remaining_fields)
+                        observaciones.append(observacion)
+                    else:
+                        return 0
+                    
                 for activo_data in activos_data:
                     activo_id = activo_data.get('id')
-                    descripciones = self.split_desctipcion(activo_data, data_acta)
 
-                    if not activo_id or not descripciones:
+                    if not activo_id or not observaciones:
                         return 0
-
-                    observaciones = []
-                    for descripcion in descripciones:
-                        remaining_fields = get_remaining_fields()
-                        remaining_fields.pop('no_identificacion', None)
-
-                        serializer = ObservacionesSerializer(data = {'descripcion': descripcion})
-                        
-                        if serializer.is_valid():
-                            serializer.validated_data.update(remaining_fields)
-                            serializer.is_valid(raise_exception = True)
-
-                            observacion = serializer.save(**remaining_fields)
-                            observaciones.append(observacion)
-                        else:
-                            return 0
 
                     for observacion in observaciones:
                         activo_observacion.append(
@@ -996,11 +1000,11 @@ class ObservacionesActions():
                                 observacion_id = observacion.id
                             )
                         )
-
+            
             return len(activo_observacion)
         except Exception as e:
             print(f'Error: {e}')
-            return 0
+            return e
         
     def split_desctipcion(self, activo, data_acta):
         acta = data_acta.get('acta', '')
@@ -1011,13 +1015,164 @@ class ObservacionesActions():
 
         return textwrap.wrap(descripcion, width = 98)
         
-    def get_folio(self, id_registro):
-        partes = id_registro.split(',')
-        return partes[1]
+    def split_desctipcion_new(self, activos, data_acta):
+        acta = data_acta.get('acta', '')
+        if ( acta == 'baja'):
+            groups = self.group_by_descripcion(activos)
+            observacion = ""
+            
+            for descripcion, items in groups.items():
+                no_descripciones = ""
+                folio_descripciones = ""
+                asiento_descripciones = ""
+                prural1 = ""
+                prural2 = ""
+                prural3 = ""
+                prural4 = ""
+
+                no_descripciones = ", ".join(
+                    item.get('no_identificacion') for item in items
+                )
+                folio_descripciones = ", ".join(
+                    str(self.get_folio(item.get('id_registro'))) for item in items
+                )
+                asiento_descripciones = ", ".join(
+                    str(self.get_asiento(item.get('id_registro'))) for item in items
+                )
+
+                print(no_descripciones)
+                
+                if len(items) > 1:
+                    prural1 = "Los activos"
+                    prural2 = "los cuales corresponden"
+                    prural3 = "los Folios"
+                    prural4 = "asientos"
+                if len(items) == 1:
+                    prural1 = "El activo"
+                    prural2 = "el cual corresponde"
+                    prural3 = "el Folio"
+                    prural4 = "asiento"
+
+                observacion += (
+                    f"{prural1} con placa N°{no_descripciones}, "
+                    f"{prural2} a un {descripcion} y que consta en "
+                    f"{prural3} {folio_descripciones} y "
+                    f"{prural4} {asiento_descripciones}, "
+                )
+        observacion += (
+            f"del tomo 1 del Libro de Inventario, fue dado de baja del inventario institucional "
+            f"a partir del {data_acta.get('fechaActa')}, por motivo de obsolescencia, "
+            f"según consta en el acta extraordinaria N°{data_acta.get('numActa')}-{data_acta.get('anio')}, "
+            f"la cual se encuentra en los archivos de esta institución."
+        )
+        return textwrap.wrap(observacion, width = 98)
+     
     
-    def get_asiento(self, id_registro):
-        partes = id_registro.split(',')
-        return partes[2]
+    def merge_consecutives(self, grupos):
+        resultado = {}
+
+        for desc, lista in grupos.items():
+            # Build list of tuples: (number_as_int, original_object)
+            datos = [
+                (int(a.get('no_identificacion').replace('-', '')), a)
+                for a in lista
+            ]
+
+            rangos = []
+            inicio_num, inicio_obj = datos[0]
+            previo_num, previo_obj = datos[0]
+
+            for actual_num, actual_obj in datos[1:]:
+                if actual_num == previo_num + 1:
+                    # Still consecutive
+                    previo_num = actual_num
+                    previo_obj = actual_obj
+                else:
+                    # Format values
+                    inicio_f = str(inicio_num)[:4] + '-' + str(inicio_num)[4:]
+                    previo_f = str(previo_num)[:4] + '-' + str(previo_num)[4:]
+
+                    # Close current range
+                    if inicio_num == previo_num:
+                        rangos.append({
+                            'no_identificacion': inicio_f,
+                            'id_registro': inicio_obj.get('id_registro')
+                        })
+                    else:
+                        rangos.append({
+                            'no_identificacion': f"{inicio_f} al {previo_f}",
+                            'id_registro': f"{inicio_obj.get('id_registro')} al {previo_obj.get('id_registro')}",
+                        })
+
+                    # Start new range
+                    inicio_num = actual_num
+                    inicio_obj = actual_obj
+                    previo_num = actual_num
+                    previo_obj = actual_obj
+
+            # Close the last range
+            inicio_f = str(inicio_num)[:4] + '-' + str(inicio_num)[4:]
+            previo_f = str(previo_num)[:4] + '-' + str(previo_num)[4:]
+
+            if inicio_num == previo_num:
+                rangos.append({
+                    'no_identificacion': inicio_f,
+                    'id_registro': inicio_obj.get('id_registro')
+                })
+            else:
+                rangos.append({
+                    'no_identificacion': f"{inicio_f} al {previo_f}",
+                    'id_registro': f"{inicio_obj.get('id_registro')} al {previo_obj.get('id_registro')}",
+                })
+
+            resultado[desc] = rangos
+
+        return resultado
+        
+    def group_by_descripcion(self, activos):
+        grupos = defaultdict(list)
+
+        for activo in activos:
+            desc = activo.get('descripcion')
+            grupos[desc].append(activo)
+
+        for desc, lista in grupos.items():
+            lista.sort(key=lambda x: int(x.get('no_identificacion').replace('-', '')))
+            
+        return self.merge_consecutives(grupos)
+
+        
+    def get_folio(self, id_registros):
+        partes = [p.strip() for p in id_registros.split('al')]
+        folio = ""
+
+        # Helper to get value after comma safely
+        def extraer_valor(texto):
+            partes = texto.split(",")
+            return partes[1].strip() if len(partes) > 1 else ""
+
+        if len(partes) == 2:
+            folio1 = extraer_valor(partes[0])
+            folio2 = extraer_valor(partes[1])
+
+            if folio1 and folio2 and folio1 != folio2:
+                folio = f"{folio1} al {folio2}"
+            else:
+                folio = folio1
+        elif len(partes) == 1:
+            folio = extraer_valor(partes[0])
+
+        return folio
+    
+    def get_asiento(self, id_registros):
+        id_registro = id_registros.split('al')
+        folio = ''
+
+        if (len(id_registro) == 2):
+            folio = f"{id_registro[0].split(',')[2]} al {id_registro[1].split(',')[2]}"
+        if (len(id_registro) == 1):
+            folio = id_registro[0].split(',')[2]
+        return folio
     
     def mover_observaciones(self):
         activo_observaciones = []

@@ -18,6 +18,7 @@ from datetime import datetime
 from docxtpl import DocxTemplate
 from io import BytesIO
 from pathlib import Path
+from collections import defaultdict
 
 from ..utils import ObservacionesActions
 
@@ -164,7 +165,7 @@ class DocsView(APIView):
         if path == f"/exportar-excel/todo/":
             regsitros: QuerySet = get_export_excel_results()
             
-            return exportar_excel_todo(regsitros)   
+            return exportar_excel_todo(regsitros)
 
     def post(self, request:Request):
         path = request.path
