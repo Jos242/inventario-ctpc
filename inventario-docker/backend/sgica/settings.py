@@ -17,35 +17,16 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-def env_bool(name: str, default: bool) -> bool:
-    value = os.getenv(name)
-    if value is None:
-        return default
-
-    return value.strip().lower() in {"1", "true", "yes", "on"}
-
-
-def env_list(name: str, default: list[str]) -> list[str]:
-    value = os.getenv(name)
-    if not value:
-        return default
-
-    return [item.strip() for item in value.split(",") if item.strip()]
-
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv(
-    "DJANGO_SECRET_KEY",
-    'django-insecure-0vvt2)ivpj(!xh_=q49o^phhf92sw#u!^q(_u&uwm!=ok311$r'
-)
+SECRET_KEY = 'django-insecure-0vvt2)ivpj(!xh_=q49o^phhf92sw#u!^q(_u&uwm!=ok311$r'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env_bool("DJANGO_DEBUG", True)
+DEBUG = True 
 
-ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", ["*"] if DEBUG else [])
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -85,13 +66,11 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=120),
 }
-CORS_ALLOW_ALL_ORIGINS = env_bool("CORS_ALLOW_ALL_ORIGINS", DEBUG)
+CORS_ALLOW_ALL_ORIGINS = True
 
-CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", [
+CORS_ALLOWED_ORIGINS = [
     'http://localhost:4200'
-])
-
-CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", [])
+]
 
 
 ROOT_URLCONF = 'sgica.urls'
@@ -119,13 +98,13 @@ WSGI_APPLICATION = 'sgica.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'default': {      
         'ENGINE': 'django.db.backends.mysql',
-        "NAME": os.getenv("MYSQL_DATABASE", "SGICA"),
-        "USER": os.getenv("MYSQL_USER", "ctpc"),
-        "PASSWORD": os.getenv("MYSQL_PASSWORD", "YFqut12#"),
-        "HOST": os.getenv("MYSQL_HOST", "localhost"),
-        "PORT": os.getenv("MYSQL_PORT", "3306")
+        "NAME": "SGICA",
+        "USER": "ctpc",
+        "PASSWORD": "YFqut12#",
+        "HOST": "localhost",
+        "PORT": "3306"
     }
 }
 
@@ -166,10 +145,7 @@ USE_TZ = True
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+STATIC_URL = 'static/'
 
 
 

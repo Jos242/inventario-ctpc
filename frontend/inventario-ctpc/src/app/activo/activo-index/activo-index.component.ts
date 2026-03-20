@@ -282,7 +282,8 @@ export class ActivoIndexComponent implements AfterViewInit  {
   onMiddleClick(event: MouseEvent, id: Number): void {
     if (event.button === 1) {  // Middle-click detection
       event.preventDefault();  // Prevent default behavior (scrolling)
-      window.open(`/activos/${id}`, '_blank');
+      const url = new URL(`activos/${id}`, document.baseURI).toString();
+      window.open(url, '_blank');
     }
   }
 

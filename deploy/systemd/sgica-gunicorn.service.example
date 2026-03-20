@@ -1,0 +1,15 @@
+[Unit]
+Description=SGICA Django Gunicorn
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/inventario-ctpc/backend
+EnvironmentFile=/opt/inventario-ctpc/backend/.env
+ExecStart=/opt/inventario-ctpc/venv/bin/gunicorn sgica.wsgi:application --bind 127.0.0.1:8000 --workers 3 --timeout 180 --access-logfile - --error-logfile -
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

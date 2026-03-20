@@ -1,0 +1,28 @@
+<VirtualHost *:80>
+    ServerName inventario.example.com
+
+    DocumentRoot /var/www/inventario-ctpc/frontend
+    DirectoryIndex index.html
+
+    <Directory /var/www/inventario-ctpc/frontend>
+        Options FollowSymLinks
+        AllowOverride None
+        Require all granted
+
+        RewriteEngine On
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteRule . /index.html [L]
+    </Directory>
+
+    Alias /static/ /opt/inventario-ctpc/backend/staticfiles/
+    <Directory /opt/inventario-ctpc/backend/staticfiles>
+        Require all granted
+    </Directory>
+
+    ProxyPreserveHost On
+    RequestHeader set X-Forwarded-Proto "https"
+
+    ProxyPass /backend/ http://127.0.0.1:8000/
+    ProxyPassReverse /backend/ http://127.0.0.1:8000/
+</VirtualHost>

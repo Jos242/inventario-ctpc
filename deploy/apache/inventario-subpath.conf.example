@@ -1,0 +1,25 @@
+Alias /inventario/ /var/www/inventario-ctpc/frontend/
+
+<Directory /var/www/inventario-ctpc/frontend>
+    Options FollowSymLinks
+    AllowOverride None
+    Require all granted
+    DirectoryIndex index.html
+
+    RewriteEngine On
+    RewriteBase /inventario/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . /inventario/index.html [L]
+</Directory>
+
+Alias /inventario-static/ /opt/inventario-ctpc/backend/staticfiles/
+<Directory /opt/inventario-ctpc/backend/staticfiles>
+    Require all granted
+</Directory>
+
+ProxyPreserveHost On
+RequestHeader set X-Forwarded-Proto "https"
+
+ProxyPass /inventario-backend/ http://127.0.0.1:8000/
+ProxyPassReverse /inventario-backend/ http://127.0.0.1:8000/

@@ -1,0 +1,51 @@
+#version: '3.8'
+services:
+#  angular:
+#    build:
+#      context: ./frontend
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8080:80" # Map Angular app to port 8000 on host
+#    restart: unless-stopped
+#    networks:
+#      - inventario_net
+   # expose:
+    #  - "8000"
+
+  django:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000" # Map Django app to port 8001 on host
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: mysql://ctpc:YFqut12%23@db/SGICA  # MySQL credentials
+    volumes:
+      - /home/ctpcserver:/home/ctpcserver # Ensure the error.log directory exists
+    restart: unless-stopped
+#    networks:
+#      - inventario_net
+
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: SGICA
+      MYSQL_USER: ctpc
+      MYSQL_PASSWORD: YFqut12#
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    restart: unless-stopped
+#    networks:
+#      - inventario_net
+
+volumes:
+  db_data:
+  
+#networks:
+#  inventario_net:
+#    driver: bridge 

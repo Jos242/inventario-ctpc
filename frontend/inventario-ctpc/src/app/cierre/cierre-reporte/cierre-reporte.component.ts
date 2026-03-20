@@ -154,7 +154,8 @@ export class CierreReporteComponent {
   onMiddleClick(event: MouseEvent, id: string): void {
     if (event.button === 1) {  // Middle-click detection
       event.preventDefault();  // Prevent default behavior (scrolling)
-      window.open(`/cierre/reporte/${id}`, '_blank'); // Open the page in a new tab
+      const url = new URL(`cierre/reporte/${id}`, document.baseURI).toString();
+      window.open(url, '_blank'); // Open the page in a new tab
     }
   }
 
