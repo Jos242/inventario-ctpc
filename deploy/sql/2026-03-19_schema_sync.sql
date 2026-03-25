@@ -1,7 +1,23 @@
 USE sgica;
 
-ALTER TABLE activos
-    ADD COLUMN IF NOT EXISTS serie_modificado varchar(150) NOT NULL DEFAULT 'N/A' AFTER serie;
+SET @db := DATABASE();
+
+SET @sql := (
+    SELECT IF(
+        EXISTS(
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_schema = @db
+              AND table_name = 'activos'
+              AND column_name = 'serie_modificado'
+        ),
+        'SELECT 1',
+        "ALTER TABLE activos ADD COLUMN serie_modificado varchar(150) NOT NULL DEFAULT 'N/A' AFTER serie"
+    )
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 UPDATE activos
 SET serie_modificado = serie
@@ -9,8 +25,22 @@ WHERE serie_modificado IS NULL
    OR serie_modificado = ''
    OR serie_modificado = 'N/A';
 
-ALTER TABLE docs
-    ADD COLUMN IF NOT EXISTS last_row int DEFAULT NULL AFTER creado_el;
+SET @sql := (
+    SELECT IF(
+        EXISTS(
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_schema = @db
+              AND table_name = 'docs'
+              AND column_name = 'last_row'
+        ),
+        'SELECT 1',
+        'ALTER TABLE docs ADD COLUMN last_row int DEFAULT NULL AFTER creado_el'
+    )
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 CREATE TABLE IF NOT EXISTS pendiente (
     id int NOT NULL AUTO_INCREMENT,
