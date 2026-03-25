@@ -27,7 +27,8 @@ export class GenericService {
   //POST crear objeto
    create(endopoint: string, objCreate: any | any, semiAdminData: any = null): Observable<any | any[]> {    
     
-    if (semiAdminData?.adminType && semiAdminData?.currentUserId) {
+    console.log(semiAdminData)
+    if (semiAdminData?.adminType && semiAdminData?.currentUserId && semiAdminData.adminType == 'semiadmin') {
       const data = {
         http: 'POST',
         user: semiAdminData.currentUserId,
@@ -57,7 +58,7 @@ export class GenericService {
   //patch crear objeto
   patch(endopoint: string, objCreate: any | any, semiAdminData: any = null): Observable<any | any[]> {
     
-    if (semiAdminData?.adminType && semiAdminData?.currentUserId) {
+    if (semiAdminData?.adminType && semiAdminData?.currentUserId && semiAdminData.adminType == 'semiadmin') {
       const data = {
         http: 'PATCH',
         user: semiAdminData.currentUserId,
@@ -76,7 +77,7 @@ export class GenericService {
   //patch crear objeto
   delete(endopoint: string, semiAdminData: any = null): Observable<any | any[]> {  
     
-    if (semiAdminData?.adminType && semiAdminData?.currentUserId) {
+    if (semiAdminData?.adminType && semiAdminData?.currentUserId && semiAdminData.adminType == 'semiadmin') {
       const data = {
         http: 'DELETE',
         user: semiAdminData.currentUserId,
